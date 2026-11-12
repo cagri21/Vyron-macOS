@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>appInspectorFilesCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d файли</string>
+			<key>many</key>
+			<string>%d файлів</string>
+			<key>one</key>
+			<string>%d файл</string>
+			<key>other</key>
+			<string>%d файлів</string>
+		</dict>
+	</dict>
+	<key>appSettingsAvailableVariantCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d доступні варіанти</string>
+			<key>many</key>
+			<string>%d доступних варіантів</string>
+			<key>one</key>
+			<string>%d доступний варіант</string>
+			<key>other</key>
+			<string>%d доступних варіантів</string>
+		</dict>
+	</dict>
+	<key>headerWorkingCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d працюють</string>
+			<key>many</key>
+			<string>%d працюють</string>
+			<key>one</key>
+			<string>%d працює</string>
+			<key>other</key>
+			<string>%d працюють</string>
+		</dict>
+	</dict>
+	<key>notificationUnreadCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d непрочитані сповіщення</string>
+			<key>many</key>
+			<string>%d непрочитаних сповіщень</string>
+			<key>one</key>
+			<string>%d непрочитане сповіщення</string>
+			<key>other</key>
+			<string>%d непрочитаного сповіщення</string>
+		</dict>
+	</dict>
+	<key>sidebarProjectActiveCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d активні</string>
+			<key>many</key>
+			<string>%d активних</string>
+			<key>one</key>
+			<string>%d активний</string>
+			<key>other</key>
+			<string>%d активного</string>
+		</dict>
+	</dict>
+	<key>sidebarProjectChatCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d чати</string>
+			<key>many</key>
+			<string>%d чатів</string>
+			<key>one</key>
+			<string>%d чат</string>
+			<key>other</key>
+			<string>%d чату</string>
+		</dict>
+	</dict>
+	<key>trackingHelpersStarted</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d помічники почали роботу</string>
+			<key>many</key>
+			<string>%d помічників почали роботу</string>
+			<key>one</key>
+			<string>%d помічник почав роботу</string>
+			<key>other</key>
+			<string>%d помічників почали роботу</string>
+		</dict>
+	</dict>
+	<key>trackingToolsUsed</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d кроки інструментів</string>
+			<key>many</key>
+			<string>%d кроків інструментів</string>
+			<key>one</key>
+			<string>%d крок інструмента</string>
+			<key>other</key>
+			<string>%d кроку інструмента</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

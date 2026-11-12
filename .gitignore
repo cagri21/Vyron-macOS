@@ -1,0 +1,53 @@
+# macOS and editor state
+.DS_Store
+xcuserdata/
+*.xcuserstate
+/AGENTS.override.md
+
+# Local project instructions and plans
+/AGENTS.md
+/PLANS.md
+
+# Build products, downloaded dependencies, and local verification output
+.build/
+.swiftpm/
+DerivedData/
+*.app/
+*.dSYM/
+*.xcarchive/
+*.xcresult/
+output/
+.local-tools/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local secrets, signing material, and model weights
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+*.gguf
+*.safetensors
+
+# Local Vyron settings, execution logs, reports, and conversation output
+.vyron/
+conversation-outputs/
+/design-qa.md
+
+# Vyron local state
+.vyron/runs/
+.vyron/reports/
+.vyron/memory/
+.vyron/.env*
+*.pyc

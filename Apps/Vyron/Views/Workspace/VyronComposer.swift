@@ -1,0 +1,244 @@
+import SwiftUI
+import VyronCore
+
+struct VyronComposer: View {
+    @Environment(\.locale) private var localizationLocale
+    @EnvironmentObject private var model: AppModel
+
+    private var isBusy: Bool { model.foregroundRun.isGenerating || model.computerWork.isComputerWorkActive }
+
+    var body: some View {
+        let _ = localizationLocale
+        VStack(spacing: VyronWorkspaceStyle.compactSpacing) {
+            if let error = model.workspaceError {
+                errorNotice(error)
+            }
+            VyronVoiceStatusView(voice: model.voice)
+            VyronQueuedMessagesView()
+            VyronComposerSkillPicker(
+                skills: model.composerSkills,
+                draft: Binding(get: { model.composer.draft }, set: { model.composer.draft = $0 }),
+                projectDirectory: model.workspaceState.workspaceURL
+            )
+            if let request = model.selectedUserInputRequest {
+                VyronUserInputRequestView(request: request)
+                    .id(request.id)
+            }
+            VStack(spacing: 0) {
+                input
+                if !model.isChatWorkspace { contextStrip }
+            }
+        }
+        .frame(maxWidth: VyronWorkspaceStyle.contentWidth)
+        .sheet(isPresented: Binding(
+            get: { model.composerAttachments.showScreenshotPicker },
+            set: { model.composerAttachments.showScreenshotPicker = $0 }
+        )) {
+            let generation = model.composerAttachments.screenshotCaptureGeneration
+            VyronScreenshotPicker { data, name in
+                model.completeScreenshotCapture(data, name: name, generation: generation)
+            }
+        }
+    }
+
+    private var input: some View {
+        let draft = model.conversationDraftPrompt
+        return VStack(alignment: .leading, spacing: VyronWorkspaceStyle.composerSpacing) {
+            if let filename = model.developmentTaskFilename(for: draft) {
+                VyronDevelopmentTaskAttachmentView(filename: filename, content: draft)
+            }
+            if !model.composerAttachments.folderAttachmentDraft.folders.isEmpty {
+                VyronFolderAttachmentsView(
+                    folders: model.composerAttachments.folderAttachmentDraft.folders,
+                    remove: model.removeFolderAttachment
+                )
+                Text(VyronFolderAttachmentText.privacyHint(model.modelSelection.activeConnectionName))
+                    .font(VyronWorkspaceStyle.captionFont)
+                    .foregroundStyle(Palette.muted)
+            }
+            if model.composerAttachments.folderAttachmentDraft.isLoading {
+                ProgressView(VyronFolderAttachmentText.importing)
+                    .font(VyronWorkspaceStyle.captionFont)
+            }
+            if !model.composerAttachments.screenshotDraft.images.isEmpty {
+                VyronScreenshotAttachmentsView(
+                    images: model.composerAttachments.screenshotDraft.images,
+                    remove: model.removeScreenshot
+                )
+                Text(model.screenshotAnalysisHint)
+                    .font(VyronWorkspaceStyle.captionFont)
+                    .foregroundStyle(Palette.muted)
+                Text(VyronScreenshotText.privacyHint(model.modelSelection.activeConnectionName))
+                    .font(VyronWorkspaceStyle.captionFont)
+                    .foregroundStyle(Palette.muted)
+            }
+            if model.composerAttachments.screenshotDraft.isLoading {
+                ProgressView(VyronScreenshotText.importing)
+                    .font(VyronWorkspaceStyle.captionFont)
+            }
+            if model.composer.isEditingQueuedMessage {
+                Text(VyronQueueText.editTitle)
+                    .font(VyronFollowUpStyle.caption)
+                    .foregroundStyle(Palette.muted)
+            }
+            if model.isChatWorkspace {
+                HStack(spacing: VyronWorkspaceStyle.controlSpacing) {
+                    addMenu
+                    VyronVoiceComposerInput(model: model, voice: model.voice, placeholder: placeholder)
+                        .layoutPriority(1)
+                    VyronEffortControl()
+                    voiceControls
+                    if !showsLiveVoiceAction { VyronFollowUpActionsView() }
+                }
+            } else {
+                VyronVoiceComposerInput(model: model, voice: model.voice, placeholder: placeholder)
+                HStack(spacing: VyronWorkspaceStyle.controlSpacing) {
+                    addMenu
+                    VyronProjectAccessMenu()
+                    Spacer(minLength: 0)
+                    VyronEffortControl()
+                    voiceControls
+                    if !showsLiveVoiceAction { VyronFollowUpActionsView() }
+                }
+            }
+        }
+        .padding(.horizontal, VyronWorkspaceStyle.composerPadding)
+        .padding(.vertical, model.isChatWorkspace
+            ? VyronWorkspaceStyle.chatComposerVerticalPadding : VyronWorkspaceStyle.composerPadding)
+        .background(Palette.raised, in: RoundedRectangle(
+            cornerRadius: model.isChatWorkspace
+                ? VyronWorkspaceStyle.chatComposerRadius : VyronWorkspaceStyle.composerRadius
+        ))
+    }
+
+    private var voiceControls: some View {
+        VyronVoiceControls(
+            voice: model.voice,
+            canStart: !isBusy && !model.isRunningScheduledTask && !model.isShuttingDown
+                && !model.foregroundRun.isStoppingDevelopment && !model.composer.isEditingQueuedMessage,
+            showsLiveConversation: showsLiveVoiceAction
+        )
+    }
+
+    private var showsLiveVoiceAction: Bool {
+        !isBusy && !model.composer.isEditingQueuedMessage
+            && model.composer.trimmedDraft.isEmpty
+            && !model.composerAttachments.hasDrafts && !model.composerAttachments.isImporting
+            && model.isConversationModeCompatible(.chat)
+    }
+
+    private var addMenu: some View {
+        Menu {
+            Button(VyronFolderAttachmentText.chooseFolder) { model.chooseFolderAttachment() }
+                .disabled(!model.canAttachFolders)
+            Button(VyronScreenshotText.pickerTitle) { model.openScreenshotPicker() }
+                .disabled(!model.canAttachScreenshots)
+            Button(VyronScreenshotText.importImages) { model.chooseScreenshotImages() }
+                .disabled(!model.canAttachScreenshots)
+            Button(VyronScreenshotText.pasteImage) { model.pasteScreenshotImage() }
+                .keyboardShortcut("v", modifiers: [.command, .shift])
+                .disabled(!model.canAttachScreenshots)
+            Divider()
+            Button(VyronWorkspaceText.newTask) { model.requestNewTask() }
+            if !model.isChatWorkspace {
+                Button(VyronWorkspaceText.openProject) { model.chooseWorkspace() }
+            }
+            Divider()
+            Button(VyronWorkspaceText.manageModels) { model.appNavigation.showSetup = true }
+            Button(VyronWorkspaceText.advancedTools) { model.appNavigation.showAutomation = true }
+        } label: {
+            Image(systemName: VyronSymbols.plus)
+                .font(VyronWorkspaceStyle.inputFont)
+                .foregroundStyle(Palette.text)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .tint(Palette.text)
+        .help(VyronWorkspaceText.addActions)
+        .accessibilityLabel(VyronWorkspaceText.addActions)
+    }
+
+    private var contextStrip: some View {
+        HStack(spacing: VyronWorkspaceStyle.controlSpacing) {
+            VyronComposerProjectMenu()
+            Button {
+                if model.appNavigation.showWorkspace && model.inspector.inspectorTab == .files {
+                    model.appNavigation.showWorkspace = false
+                } else {
+                    model.inspector.inspectorTab = .files
+                    model.appNavigation.showWorkspace = true
+                }
+            } label: {
+                Label(VyronWorkspaceText.files, systemImage: VyronSymbols.files)
+            }
+            .foregroundStyle(model.appNavigation.showWorkspace ? Palette.text : Palette.muted)
+            Button {
+                model.openPlugins()
+            } label: {
+                Label(VyronWorkspaceText.plugins, systemImage: VyronSymbols.plugins)
+            }
+            Spacer(minLength: 0)
+            Button {
+                model.inspector.showTerminal.toggle()
+            } label: {
+                Image(systemName: VyronSymbols.terminal)
+                    .foregroundStyle(model.inspector.showTerminal ? Palette.text : Palette.muted)
+            }
+            .help(VyronWorkspaceText.toggleTerminal)
+            .accessibilityLabel(VyronWorkspaceText.toggleTerminal)
+        }
+        .font(VyronWorkspaceStyle.controlFont)
+        .foregroundStyle(Palette.text)
+        .buttonStyle(.plain)
+        .padding(.horizontal, VyronWorkspaceStyle.composerPadding)
+        .frame(height: VyronWorkspaceStyle.contextHeight)
+        .background(Palette.surface, in: UnevenRoundedRectangle(
+            bottomLeadingRadius: VyronWorkspaceStyle.contextRadius,
+            bottomTrailingRadius: VyronWorkspaceStyle.contextRadius
+        ))
+        .padding(.horizontal, VyronWorkspaceStyle.contextInset)
+    }
+
+    private func errorNotice(_ error: VyronWorkspaceError) -> some View {
+        HStack(alignment: .top, spacing: VyronWorkspaceStyle.compactSpacing) {
+            Image(systemName: VyronSymbols.warning).foregroundStyle(Palette.warning)
+            VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
+                Text(verbatim: error.message).textSelection(.enabled)
+                if error.showsLocalContextBudgetHelp, model.modelSelection.isBuiltinConnection {
+                    Text(VyronWorkspaceText.localContextBudgetHint(
+                        VyronAppText.settingsContextBudget,
+                        VyronAppText.settingsLocalModelSettings
+                    ))
+                    .foregroundStyle(Palette.muted)
+                    Button(VyronWorkspaceText.manageModels) {
+                        model.appNavigation.showSetup = true
+                    }
+                    .buttonStyle(QuietButtonStyle(foreground: Palette.controlAccent))
+                }
+            }
+            Spacer(minLength: 0)
+            Button {
+                model.errorMessage = nil
+            } label: {
+                Image(systemName: VyronSymbols.close)
+            }
+            .buttonStyle(.plain)
+            .help(VyronWorkspaceText.dismissError)
+            .accessibilityLabel(VyronWorkspaceText.dismissError)
+        }
+        .font(VyronWorkspaceStyle.captionFont)
+        .padding(VyronWorkspaceStyle.composerPadding)
+        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
+    }
+
+    private var placeholder: String {
+        switch model.composer.mode {
+        case .agent:
+            model.workspaceState.workspaceURL == nil
+                ? VyronWorkspaceText.placeholderNoProject : VyronWorkspaceText.placeholderWork
+        case .plan: VyronWorkspaceText.placeholderPlan
+        case .chat: VyronWorkspaceText.placeholderChat
+        }
+    }
+}

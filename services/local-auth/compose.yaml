@@ -1,0 +1,90 @@
+name: vyron-local-auth
+
+services:
+  auth:
+    image: vyron-local-auth:local
+    build:
+      context: .
+      args:
+        LOCAL_UID: ${VYRON_LOCAL_UID:?Set through scripts/local-auth.py}
+        LOCAL_GID: ${VYRON_LOCAL_GID:?Set through scripts/local-auth.py}
+    networks:
+      - backend
+    volumes:
+      - local-auth-data:/data
+      - type: bind
+        source: ${VYRON_LOCAL_AUTH_TOKEN_FILE:?Set through scripts/local-auth.py}
+        target: /run/secrets/vyron-auth
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.50
+    init: true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: local
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  gateway:
+    image: vyron-local-auth:local
+    pull_policy: never
+    command: ["-m", "local_auth.relay"]
+    depends_on:
+      auth:
+        condition: service_healthy
+        restart: true
+    ports:
+      - "127.0.0.1:8327:8000"
+    networks:
+      - frontend
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=8m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    pids_limit: 64
+    mem_limit: 64m
+    cpus: 0.50
+    init: true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: local
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  local-auth-data:
+    name: vyron-local-auth-data
+
+networks:
+  backend:
+    internal: true
+  frontend:
+    driver: bridge

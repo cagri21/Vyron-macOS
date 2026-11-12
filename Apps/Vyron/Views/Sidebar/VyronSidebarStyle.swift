@@ -1,0 +1,53 @@
+import SwiftUI
+
+enum VyronSidebarStyle {
+    static let width: CGFloat = 300
+    static let railWidth: CGFloat = 52
+    static let headerHeight = VyronWorkspaceStyle.headerHeight
+    static let headerInset: CGFloat = 16
+    static let listInset: CGFloat = 8
+    static let rowInset: CGFloat = 8
+    static let rowHeight: CGFloat = 32
+    static let rowIconWidth: CGFloat = 16
+    static let rowContentSpacing: CGFloat = 8
+    static let rowSpacing: CGFloat = 2
+    static let rowRadius: CGFloat = 8
+    static let controlSpacing: CGFloat = 6
+    static let sectionSpacing: CGFloat = 18
+    static let sectionBottomSpacing: CGFloat = 8
+    static let indentation: CGFloat = 20
+    static let maximumIndent: CGFloat = 120
+    static let disclosureWidth: CGFloat = 28
+    static let footerInset: CGFloat = 16
+    static let statusSize: CGFloat = 5
+    static let railButtonSize: CGFloat = 36
+    static let railTopInset = (headerHeight - railButtonSize) / 2
+    static let railSpacing: CGFloat = 8
+    static let railBottomInset: CGFloat = 12
+    static let background = Palette.surface
+    static let railBackground = Palette.raised
+    static let selection = Palette.raised
+    static let hover = Palette.selection
+    static let rowFont = Font.system(size: 13)
+    static let brandFont = Font.system(size: 16, weight: .bold)
+    static let headerActionFont = Font.system(size: 13, weight: .bold)
+    static let headerDisclosureFont = Font.system(size: 9, weight: .bold)
+    static let sectionFont = Font.system(size: 12)
+    static let detailFont = Font.system(size: 12)
+    static let captionFont = Font.system(size: 10)
+    static let iconFont = Font.system(size: 13)
+    static let railIconFont = Font.system(size: 17)
+    static let railMenuFont = Font.system(size: 17, weight: .bold)
+    static let disclosureFont = Font.system(size: 9, weight: .medium)
+    static let pinFont = Font.system(size: 9)
+    static let editorTitleFont = Font.system(size: 17, weight: .semibold)
+    static let editorWidth: CGFloat = 365
+    static let editorPadding: CGFloat = 25
+    static let projectActionWidth: CGFloat = 24
+    static let projectInfoWidth: CGFloat = 300
+    static let projectInfoPadding: CGFloat = 12
+    static let projectHoverDelay = Duration.milliseconds(650)
+    static let projectHoverDismissDelay = Duration.milliseconds(180)
+    static let projectSourceInfoRowHeight: CGFloat = 22
+    static let projectSourcesInfoMaximumHeight: CGFloat = 176
+}

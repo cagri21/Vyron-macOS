@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "identifier": "vyron-pdf",
+      "aliases": ["pdf", "pdf:pdf", "vyron-pdf"],
+      "terms": ["pdf"],
+      "actions": ["create", "make", "generate", "build", "read", "review", "summarize", "summarise", "analyze", "analyse", "edit", "update", "fill", "extract", "merge", "split", "render", "convert", "rotate", "oluştur", "hazırla", "oku", "incele", "düzenle", "güncelle", "birleştir", "створи", "створити", "прочитай", "читати", "онови", "оновити", "редагуй"]
+    },
+    {
+      "identifier": "vyron-documents",
+      "aliases": ["documents", "docx", "word", "vyron-documents"],
+      "terms": ["docx", "word document", "word file", "word belgesi", "word dosyası", "документ word"],
+      "actions": ["create", "make", "generate", "build", "read", "review", "edit", "update", "format", "convert", "redline", "oluştur", "hazırla", "oku", "incele", "düzenle", "güncelle", "створи", "створити", "прочитай", "читати", "онови", "оновити", "редагуй"]
+    },
+    {
+      "identifier": "vyron-spreadsheets",
+      "aliases": ["spreadsheets", "spreadsheet", "xlsx", "excel", "vyron-spreadsheets"],
+      "terms": ["spreadsheet", "xlsx", "csv", "tsv", "excel workbook", "excel file", "excel sheet", "excel dosyası", "elektronik tablo", "таблиця excel"],
+      "actions": ["create", "make", "generate", "build", "read", "review", "analyze", "analyse", "edit", "update", "format", "calculate", "chart", "convert", "oluştur", "hazırla", "oku", "incele", "düzenle", "güncelle", "hesapla", "створи", "створити", "прочитай", "читати", "онови", "оновити", "редагуй"]
+    },
+    {
+      "identifier": "vyron-presentations",
+      "aliases": ["presentations", "presentation", "slides", "pptx", "vyron-presentations"],
+      "terms": ["presentation", "slide deck", "powerpoint", "pptx", "sunum", "презентація", "презентацію"],
+      "actions": ["create", "make", "generate", "build", "read", "review", "edit", "update", "format", "convert", "oluştur", "hazırla", "oku", "incele", "düzenle", "güncelle", "створи", "створити", "прочитай", "читати", "онови", "оновити", "редагуй"]
+    }
+  ]
+}

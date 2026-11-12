@@ -1,0 +1,29 @@
+// Generated using SwiftGen by Resources/generate_resources.py. Do not edit.
+import Foundation
+
+enum VyronScheduledTaskText {
+{% for string in tables.first.levels.strings %}
+{% set translation string.translation|replace:'"','\"'|replace:'	','\t' %}
+{% set accessor string.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords %}
+{% if string.types %}
+    static func {{accessor}}({% for type in string.types %}_ p{{forloop.counter}}: {{type|replace:"Float","Double"}}{{ ", " if not forloop.last }}{% endfor %}{% if param.shared and string.types.count < 4 %}, language: VyronResourceLanguage? = nil{% endif %}) -> String {
+        VyronResourceBundle.format(
+            "{{string.key}}",
+            fallback: "{{translation}}",
+            arguments: [{% for type in string.types %}p{{forloop.counter}}{{ ", " if not forloop.last }}{% endfor %}]{% if param.shared and string.types.count < 4 %},
+            language: language{% endif %}
+        )
+    }
+{% else %}
+    static var {{accessor}}: String {
+        VyronResourceBundle.string("{{string.key}}", fallback: "{{translation|replace:'%%','%'}}")
+    }
+{% if param.shared %}
+
+    static func {{accessor}}(language: VyronResourceLanguage) -> String {
+        VyronResourceBundle.string("{{string.key}}", fallback: "{{translation|replace:'%%','%'}}", language: language)
+    }
+{% endif %}
+{% endif %}
+{% endfor %}
+}
