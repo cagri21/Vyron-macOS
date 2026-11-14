@@ -51,7 +51,7 @@ struct VyronNotificationsView: View {
         VStack(alignment: .leading, spacing: VyronNotificationStyle.headerSpacing) {
             Label { Text(verbatim: error) } icon: { Image(systemName: VyronSymbols.warning) }
                 .font(VyronNotificationStyle.preview)
-                .foregroundStyle(palette.warning)
+                .foregroundStyle(palette.danger)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityElement(children: .combine)
             Button { model.reloadNotificationReadState() } label: {

@@ -110,7 +110,7 @@ struct VyronResponseActivityView: View {
                 }
             }
         }
-        .foregroundStyle(activity.state == .failed ? palette.warning : palette.muted)
+        .foregroundStyle(activity.state == .failed ? palette.danger : palette.muted)
         .padding(.vertical, VyronConversationStyle.statusVerticalPadding)
         .accessibilityElement(children: .combine)
     }

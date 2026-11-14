@@ -66,7 +66,7 @@ struct VyronOfficeSettingsView: View {
             if let failure {
                 Text(verbatim: failure)
                     .font(VyronSettingsStyle.detail)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
                     .textSelection(.enabled)
             }
         }

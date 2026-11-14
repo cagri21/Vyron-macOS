@@ -37,6 +37,7 @@ struct VyronAppearanceSettingsView: View {
             footer
             if showsAdvanced {
                 alternateColors
+                VyronAppearanceStatusColorsView()
             }
         }
     }

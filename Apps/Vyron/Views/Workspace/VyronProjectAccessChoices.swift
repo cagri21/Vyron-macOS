@@ -52,7 +52,7 @@ struct VyronProjectAccessChoices: View {
 
     private func approvalRow(_ mode: VyronProjectApprovalMode) -> some View {
         let selected = model.interactions.projectApprovalMode == mode
-        let foreground = selected && mode == .fullAccess ? palette.warning : palette.text
+        let isActiveFullAccess = selected && mode == .fullAccess
         return Button {
             model.selectProjectApprovalMode(mode)
             dismiss()
@@ -65,14 +65,14 @@ struct VyronProjectAccessChoices: View {
                         .font(VyronWorkspaceStyle.controlFont)
                     Text(VyronProjectApprovalPresentation.description(mode))
                         .font(VyronWorkspaceStyle.captionFont)
-                        .foregroundStyle(selected && mode == .fullAccess ? palette.warning : palette.muted)
+                        .foregroundStyle(isActiveFullAccess ? palette.fullAccess : palette.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: VyronWorkspaceStyle.compactSpacing)
                 Image(systemName: VyronSymbols.check)
                     .opacity(selected ? 1 : 0)
             }
-            .foregroundStyle(foreground)
+            .foregroundStyle(isActiveFullAccess ? palette.fullAccess : palette.text)
             .padding(VyronWorkspaceStyle.approvalRowPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())

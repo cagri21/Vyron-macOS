@@ -118,7 +118,7 @@ extension ProjectSidebar {
                 } else if chat.hasFailedResponse {
                     Image(systemName: VyronSymbols.warning)
                         .font(VyronSidebarStyle.iconFont)
-                        .foregroundStyle(palette.warning)
+                        .foregroundStyle(palette.danger)
                         .help(VyronStatusText.responseFailed)
                         .accessibilityLabel(VyronStatusText.responseFailed)
                 } else if chat.isPinned {

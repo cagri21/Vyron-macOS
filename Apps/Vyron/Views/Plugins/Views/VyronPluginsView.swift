@@ -176,7 +176,7 @@ struct VyronPluginsView: View {
             } icon: {
                 Image(systemName: VyronSymbols.warning)
             }
-            .font(VyronPluginsStyle.body).foregroundStyle(palette.warning)
+            .font(VyronPluginsStyle.body).foregroundStyle(palette.danger)
         }
     }
 

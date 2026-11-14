@@ -16,7 +16,7 @@ struct VyronSkillsView: View {
                 if presentation.hasLoadError {
                     HStack(spacing: VyronPluginsStyle.rowSpacing) {
                         Label(VyronSkillText.loadFailed, systemImage: VyronSymbols.warning)
-                            .foregroundStyle(palette.warning)
+                            .foregroundStyle(palette.danger)
                         Button(VyronSkillText.retry) { presentation.refresh() }
                             .buttonStyle(.plain)
                     }

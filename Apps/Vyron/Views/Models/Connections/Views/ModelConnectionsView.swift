@@ -78,7 +78,7 @@ struct ModelConnectionsView: View {
             }
             if let message = selection.connectionError {
                 Label(message, systemImage: VyronSymbols.warning)
-                    .font(.system(size: 11)).foregroundStyle(palette.warning).textSelection(.enabled)
+                    .font(.system(size: 11)).foregroundStyle(palette.danger).textSelection(.enabled)
             } else if let message = selection.connectionStatus {
                 Text(message).font(.system(size: 10)).foregroundStyle(palette.muted).textSelection(.enabled)
             }
@@ -208,7 +208,7 @@ private struct ModelSourceSection: View {
             if !variants.isEmpty { variantControls }
             if let discoveryError {
                 Label(discoveryError, systemImage: VyronSymbols.warning)
-                    .font(.system(size: 10)).foregroundStyle(palette.warning).textSelection(.enabled)
+                    .font(.system(size: 10)).foregroundStyle(palette.danger).textSelection(.enabled)
             }
             if !selection.isBuiltinConnection {
                 Text(VyronAppText.settingsChooseLocalHint)

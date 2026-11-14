@@ -20,6 +20,13 @@ enum VyronAppearanceText {
     static var codexThemes: String {
         VyronResourceBundle.string("appearanceCodexThemes", fallback: "Codex themes")
     }
+    static func colorForScheme(_ p1: String, _ p2: String) -> String {
+        VyronResourceBundle.format(
+            "appearanceColorForScheme",
+            fallback: "%@, %@",
+            arguments: [p1, p2]
+        )
+    }
     static var copiedTheme: String {
         VyronResourceBundle.string("appearanceCopiedTheme", fallback: "Theme copied")
     }
@@ -37,6 +44,9 @@ enum VyronAppearanceText {
     }
     static var defaultAccent: String {
         VyronResourceBundle.string("appearanceDefaultAccent", fallback: "Default")
+    }
+    static var error: String {
+        VyronResourceBundle.string("appearanceError", fallback: "Error")
     }
     static var font: String {
         VyronResourceBundle.string("appearanceFont", fallback: "Font")
@@ -100,11 +110,5 @@ enum VyronAppearanceText {
     }
     static var presetGruvbox: String {
         VyronResourceBundle.string("appearancePresetGruvbox", fallback: "Gruvbox")
-    }
-    static var presetLinear: String {
-        VyronResourceBundle.string("appearancePresetLinear", fallback: "Linear")
-    }
-    static var presetLobster: String {
-        VyronResourceBundle.string("appearancePresetLobster", fallback: "Lobster")
     }
 }

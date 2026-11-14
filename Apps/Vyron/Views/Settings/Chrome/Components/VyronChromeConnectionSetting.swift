@@ -39,7 +39,7 @@ struct VyronChromeConnectionSetting: View {
                 if let message = model.error ?? model.status {
                     Text(message)
                         .font(VyronSettingsStyle.detail)
-                        .foregroundStyle(model.error == nil ? palette.muted : palette.warning)
+                        .foregroundStyle(model.error == nil ? palette.muted : palette.danger)
                         .textSelection(.enabled)
                 }
             }

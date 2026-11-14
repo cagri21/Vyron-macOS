@@ -65,7 +65,8 @@ enum VyronWebHostValidator {
                               &name, socklen_t(name.count), nil, 0, NI_NUMERICHOST) == 0 else {
                 throw VyronWebError.unavailable
             }
-            addresses.append(String(cString: name))
+            let addressBytes = name.prefix(while: { $0 != 0 }).map { UInt8(bitPattern: $0) }
+            addresses.append(String(decoding: addressBytes, as: UTF8.self))
             cursor = entry.pointee.ai_next
         }
         return addresses

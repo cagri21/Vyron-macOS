@@ -53,7 +53,7 @@ struct VyronDevelopmentTaskAttachmentView: View {
             if let exportError {
                 Text(verbatim: exportError)
                     .font(VyronWorkspaceStyle.captionFont)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
                     .textSelection(.enabled)
             }
         }

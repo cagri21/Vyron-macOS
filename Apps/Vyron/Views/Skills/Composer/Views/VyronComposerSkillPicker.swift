@@ -67,7 +67,7 @@ struct VyronComposerSkillPicker: View {
                     .buttonStyle(.plain)
             }
             .font(VyronComposerSkillStyle.caption)
-            .foregroundStyle(palette.warning)
+            .foregroundStyle(palette.danger)
         }
         if skills.visibleCommands.isEmpty {
             if skills.isLoading {

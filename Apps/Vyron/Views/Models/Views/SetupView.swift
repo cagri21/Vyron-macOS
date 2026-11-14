@@ -82,7 +82,7 @@ struct SetupView: View {
                         HStack(alignment: .top, spacing: 7) {
                             Image(systemName: VyronSymbols.warning)
                             Text(error).textSelection(.enabled)
-                        }.font(.system(size: 11)).foregroundStyle(palette.warning)
+                        }.font(.system(size: 11)).foregroundStyle(palette.danger)
                     }
                     Text(
                         VyronAppText.settingsMemoryExplanation

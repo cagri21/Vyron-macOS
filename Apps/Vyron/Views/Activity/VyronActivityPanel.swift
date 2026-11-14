@@ -182,7 +182,7 @@ struct VyronActivityPanel: View {
             Text(presentation.phase).font(VyronTrackingStyle.caption)
             Rectangle().fill(palette.border).frame(height: VyronTrackingStyle.dividerWidth)
         }
-        .foregroundStyle(activity.state == .failed ? palette.warning : palette.muted)
+        .foregroundStyle(activity.state == .failed ? palette.danger : palette.muted)
     }
 
     private func subagentList(_ subagents: [VyronSubagentActivity]) -> some View {
@@ -200,17 +200,18 @@ struct VyronActivityPanel: View {
                                 subagentID: subagent.id
                             )
                         } label: {
+                            let statusColor = subagent.activity.state == .failed ? palette.danger : palette.muted
                             HStack(alignment: .top, spacing: VyronTrackingStyle.rowSpacing) {
                                 Image(systemName: VyronTrackingPresentation.stateSymbol(subagent.activity.state))
                                     .font(VyronTrackingStyle.icon)
-                                    .foregroundStyle(palette.muted)
+                                    .foregroundStyle(statusColor)
                                 VStack(alignment: .leading, spacing: VyronTrackingStyle.compactSpacing) {
                                     Text(verbatim: subagent.identity.name)
                                         .font(VyronTrackingStyle.title)
                                         .foregroundStyle(palette.text)
                                     Text(VyronTrackingPresentation.status(subagent.activity.state))
                                         .font(VyronTrackingStyle.caption)
-                                        .foregroundStyle(palette.muted)
+                                        .foregroundStyle(statusColor)
                                     Text(verbatim: subagent.identity.prompt)
                                         .font(VyronTrackingStyle.caption)
                                         .foregroundStyle(palette.muted)

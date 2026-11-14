@@ -58,11 +58,12 @@ struct VyronScheduledTaskCard: View {
             if let run = task.progress.lastRun {
                 LabeledContent(VyronScheduledTaskText.lastRun) {
                     Text(VyronScheduledTaskLabels.state(run.state))
+                        .foregroundStyle(run.state == .failed ? palette.danger : palette.muted)
                     Text(verbatim: formatted(run.output.startedAt))
                 }.font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                 if let detail = run.output.detail, !detail.isEmpty {
                     Text(verbatim: detail).font(VyronScheduledTaskStyle.caption)
-                        .foregroundStyle(run.state == .failed ? palette.warning : palette.muted)
+                        .foregroundStyle(run.state == .failed ? palette.danger : palette.muted)
                         .lineLimit(3).textSelection(.enabled)
                 }
             }

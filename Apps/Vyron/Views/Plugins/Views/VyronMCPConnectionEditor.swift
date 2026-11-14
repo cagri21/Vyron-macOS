@@ -122,7 +122,7 @@ struct VyronMCPConnectionEditor: View {
                         .font(VyronMCPStyle.helper).foregroundStyle(palette.muted)
                         .lineSpacing(VyronMCPStyle.permissionsHintLineSpacing)
                     if let error {
-                        Text(error).foregroundStyle(palette.warning).font(VyronMCPStyle.field).textSelection(.enabled)
+                        Text(error).foregroundStyle(palette.danger).font(VyronMCPStyle.field).textSelection(.enabled)
                     }
                 }.font(VyronMCPStyle.field).padding(VyronMCPStyle.editorPadding)
             }

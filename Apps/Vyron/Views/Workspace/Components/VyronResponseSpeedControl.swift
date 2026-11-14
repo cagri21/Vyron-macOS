@@ -25,7 +25,7 @@ struct VyronResponseSpeedControl: View {
             }
             Text(selectionFailed ? VyronWorkspaceText.speedChangeFailed : description)
                 .font(VyronEffortStyle.speedCaption)
-                .foregroundStyle(selectionFailed ? palette.warning : palette.muted)
+                .foregroundStyle(selectionFailed ? palette.danger : palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
                 .help(
                     selectionFailed

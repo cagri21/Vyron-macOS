@@ -22,7 +22,7 @@ struct VyronScreenshotPicker: View {
                 } icon: {
                     Image(systemName: VyronSymbols.warning)
                 }
-                .foregroundStyle(palette.warning)
+                .foregroundStyle(state.needsPermission ? palette.warning : palette.danger)
             }
             if state.needsPermission {
                 HStack(spacing: VyronScreenshotPickerStyle.rowSpacing) {

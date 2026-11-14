@@ -51,7 +51,7 @@ struct VyronChatHandoffSheet: View {
             if let error = state.error {
                 Text(verbatim: error)
                     .font(VyronChatHandoffStyle.detailFont)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if !model.canPrepareChatHandoff(presentation), !state.isSaving {
@@ -146,7 +146,7 @@ struct VyronChatHandoffSheet: View {
             if let failure = VyronChatHandoffContext.requestError(state.request) {
                 Text(verbatim: failure)
                     .font(VyronChatHandoffStyle.detailFont)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
             }
         }
     }

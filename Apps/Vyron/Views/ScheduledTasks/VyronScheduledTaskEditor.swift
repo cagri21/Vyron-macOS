@@ -82,7 +82,7 @@ struct VyronScheduledTaskEditor: View {
                     Text(VyronScheduledTaskText.executionNote)
                         .font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                     if let error {
-                        Text(verbatim: error).foregroundStyle(palette.warning).textSelection(.enabled)
+                        Text(verbatim: error).foregroundStyle(palette.danger).textSelection(.enabled)
                     }
                 }.font(VyronScheduledTaskStyle.body).padding(VyronScheduledTaskStyle.contentPadding)
             }

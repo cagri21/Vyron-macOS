@@ -89,6 +89,69 @@ final class VyronAppearanceStateTests: XCTestCase {
         }
     }
 
+    func testStatusColorsPersistAndShareWithoutChangingOtherPresetsOrSchemes() throws {
+        try withDefaults { defaults in
+            let state = VyronAppearanceState(defaults: defaults)
+            state.selectPreset(.catppuccin)
+            let dark = state.palette(for: .dark)
+            let light = state.palette(for: .light)
+            state.setColor(VyronAppearanceColor(hex: "#FDBD6C"), for: .warning, scheme: .dark)
+            state.setColor(VyronAppearanceColor(hex: "#F37982"), for: .danger, scheme: .dark)
+            state.setColor(VyronAppearanceColor(hex: "#9FDBF4"), for: .fullAccess, scheme: .dark)
+            state.setColor(VyronAppearanceColor(hex: "#117650"), for: .success, scheme: .light)
+            let share = try XCTUnwrap(state.exportTheme())
+
+            let restored = VyronAppearanceState(defaults: defaults)
+            XCTAssertEqual(hex(restored.palette(for: .dark).warning), "#FDBD6C")
+            XCTAssertEqual(hex(restored.palette(for: .dark).danger), "#F37982")
+            XCTAssertEqual(hex(restored.palette(for: .dark).fullAccess), "#9FDBF4")
+            XCTAssertEqual(hex(restored.palette(for: .light).success), "#117650")
+            XCTAssertEqual(restored.palette(for: .dark).success, dark.success)
+            XCTAssertEqual(restored.palette(for: .light).warning, light.warning)
+            restored.selectPreset(.vyron)
+            XCTAssertFalse(restored.hasColorOverride(for: .warning, scheme: .dark))
+
+            restored.reset()
+            XCTAssertTrue(restored.importTheme(share))
+            XCTAssertEqual(restored.exportTheme(), share)
+            restored.setColor(nil, for: .warning, scheme: .dark)
+            XCTAssertFalse(restored.hasColorOverride(for: .warning, scheme: .dark))
+            XCTAssertEqual(restored.palette(for: .dark).warning, dark.warning)
+            XCTAssertEqual(hex(restored.palette(for: .dark).danger), "#F37982")
+            restored.reset()
+            XCTAssertTrue(VyronAppearanceState(defaults: defaults).isDefault)
+        }
+    }
+
+    func testPreferencesAndSharesWithoutStatusOverridesStillLoad() throws {
+        try withDefaults { defaults in
+            let legacyPreferences = """
+                {
+                    "mode": "system",
+                    "preset": "catppuccin",
+                    "fontFamily": "Menlo",
+                    "customColors": ["catppuccin", {"light": {}, "dark": {"background": "#101820"}}]
+                }
+                """
+            defaults.set(Data(legacyPreferences.utf8), forKey: VyronUserDefaultsKey.appearancePreferences.rawValue)
+            let state = VyronAppearanceState(defaults: defaults)
+            XCTAssertEqual(state.mode, .system)
+            XCTAssertEqual(state.preset, .catppuccin)
+            XCTAssertEqual(state.fontFamily, "Menlo")
+            XCTAssertEqual(hex(state.palette(for: .dark).background), "#101820")
+            XCTAssertFalse(state.hasColorOverride(for: .fullAccess, scheme: .dark))
+
+            let legacyShare = """
+                {"version": 1, "preset": "codex", "colors": {"light": {"foreground": "#142335"}, "dark": {}}}
+                """
+            XCTAssertTrue(state.importTheme(legacyShare))
+            XCTAssertEqual(state.mode, .system)
+            XCTAssertEqual(state.preset, .codex)
+            XCTAssertEqual(hex(state.palette(for: .light).foreground), "#142335")
+            XCTAssertFalse(state.hasColorOverride(for: .danger, scheme: .light))
+        }
+    }
+
     func testHexValidationRejectsNonRGBInput() {
         XCTAssertNil(VyronAppearanceColor(hex: "#FFF"))
         XCTAssertNil(VyronAppearanceColor(hex: "#FFFFFFFF"))

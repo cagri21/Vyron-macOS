@@ -39,7 +39,7 @@ struct VyronOpenAIBillingPage: View {
             if browser.state.phase == .failed || browser.state.phase == .browserSignInRequired {
                 Text(browser.state.phase == .failed ? VyronBillingText.loadFailed : VyronBillingText.browserSignIn)
                     .font(VyronSettingsStyle.body)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(browser.state.phase == .failed ? palette.danger : palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
             VyronBillingWebView(browser: browser)

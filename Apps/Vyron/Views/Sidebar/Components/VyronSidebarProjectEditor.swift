@@ -50,7 +50,7 @@ struct VyronSidebarProjectEditor: View {
             if let error {
                 Text(verbatim: error)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Divider()

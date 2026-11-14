@@ -58,7 +58,8 @@ struct VyronActivityTrailView: View {
     }
 
     private func activityRow(_ entry: ResponseActivity.Entry) -> some View {
-        HStack(alignment: .top, spacing: VyronTrackingStyle.rowSpacing) {
+        let isFailureStatus = activity.state == .failed && entry.kind == .status && entry.id == activity.entries.last?.id
+        return HStack(alignment: .top, spacing: VyronTrackingStyle.rowSpacing) {
             Image(systemName: VyronTrackingPresentation.symbol(entry))
                 .font(VyronTrackingStyle.icon)
                 .frame(width: VyronTrackingStyle.iconWidth)
@@ -91,7 +92,7 @@ struct VyronActivityTrailView: View {
                 }
             }
         }
-        .foregroundStyle(palette.muted)
+        .foregroundStyle(isFailureStatus ? palette.danger : palette.muted)
         .padding(.vertical, VyronTrackingStyle.rowVerticalPadding)
     }
 }

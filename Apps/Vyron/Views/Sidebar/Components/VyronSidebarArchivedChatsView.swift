@@ -47,7 +47,7 @@ struct VyronSidebarArchivedChatsView: View {
             if let error {
                 Text(verbatim: error)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if matchingConversations.isEmpty {

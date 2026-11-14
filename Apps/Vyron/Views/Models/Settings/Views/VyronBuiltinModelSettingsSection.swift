@@ -17,7 +17,7 @@ struct VyronBuiltinModelSettingsSection: View {
                     draft: $draft,
                     thinkingSupport: model.modelThinkingSupport
                 )
-                if let error { Text(error).font(.system(size: 10)).foregroundStyle(palette.warning) }
+                if let error { Text(error).font(.system(size: 10)).foregroundStyle(palette.danger) }
                 HStack {
                     Button(VyronAppText.settingsUseDefaults) {
                         draft = VyronModelSettingsDraft(ModelSettings()); save()

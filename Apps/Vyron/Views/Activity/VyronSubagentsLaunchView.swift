@@ -34,7 +34,7 @@ struct VyronSubagentsLaunchView: View {
                         }
                     }
                     .font(VyronTrackingStyle.activity)
-                    .foregroundStyle(subagent.activity.state == .failed ? palette.warning : palette.muted)
+                    .foregroundStyle(subagent.activity.state == .failed ? palette.danger : palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .contentShape(Rectangle())
                 }

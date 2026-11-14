@@ -29,7 +29,7 @@ struct VyronSidebarNameEditor: View {
                 .font(VyronSidebarStyle.captionFont)
                 .foregroundStyle(palette.muted)
             if let error {
-                Text(error).font(VyronSidebarStyle.detailFont).foregroundStyle(palette.warning)
+                Text(error).font(VyronSidebarStyle.detailFont).foregroundStyle(palette.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }
             HStack {

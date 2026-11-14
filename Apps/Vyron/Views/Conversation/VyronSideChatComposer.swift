@@ -12,7 +12,7 @@ struct VyronSideChatComposer: View {
             if let error = session.errorMessage {
                 Text(verbatim: error)
                     .font(VyronConversationWindowStyle.detail)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
                     .textSelection(.enabled)
                 if let answer = session.unsavedAnswer {
                     Button(VyronGeneralText.copyResponse) {

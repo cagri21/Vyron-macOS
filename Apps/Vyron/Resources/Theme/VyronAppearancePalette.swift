@@ -4,8 +4,8 @@ struct VyronAppearancePalette: Equatable, Sendable {
     static let `default` = VyronAppearancePreset.vyron.palette(for: .dark)
 
     let scheme: ColorScheme
-    private let preset: VyronAppearancePreset
-    private let overrides: VyronAppearanceColorOverrides
+    let preset: VyronAppearancePreset
+    let overrides: VyronAppearanceColorOverrides
     private let seeds: VyronAppearanceSeedColors
 
     init(preset: VyronAppearancePreset, scheme: ColorScheme, overrides: VyronAppearanceColorOverrides) {
@@ -91,6 +91,10 @@ struct VyronAppearancePalette: Equatable, Sendable {
         case .accent: controlAccent
         case .background: background
         case .foreground: foreground
+        case .success: success
+        case .warning: warning
+        case .danger: danger
+        case .fullAccess: fullAccess
         }
     }
 

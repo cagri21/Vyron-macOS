@@ -584,10 +584,11 @@ works with any theme. The default **Vyron** theme preserves the original look.
 
 Use **Accent**, **Background**, and **Foreground** to pick colors or enter a
 six-digit hex code. Choose an installed font for the interface and conversation
-text. **Advanced** lets you edit the other mode’s colors. Changes apply
-immediately and are saved locally. Use **Copy theme** or **Paste theme** to
-move a Vyron theme between Macs. **Reset to default** restores the original
-appearance.
+text. **Advanced** lets you edit the other mode’s colors and adjust **Success**,
+**Warning**, **Error**, and **Full access** for either mode. Failed response
+details and their sidebar icons use the Error color. Changes apply immediately
+and are saved locally. Use **Copy theme** or **Paste theme** to move a Vyron theme
+between Macs. **Reset to default** restores the original appearance.
 
 ## Interface language
 

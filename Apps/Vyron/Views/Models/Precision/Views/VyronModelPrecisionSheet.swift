@@ -87,7 +87,7 @@ struct VyronModelPrecisionSheet: View {
 
     private func failureNotice(_ message: String) -> some View {
         Label(message, systemImage: VyronSymbols.warning)
-            .foregroundStyle(palette.warning)
+            .foregroundStyle(palette.danger)
             .textSelection(.enabled)
             .fixedSize(horizontal: false, vertical: true)
     }

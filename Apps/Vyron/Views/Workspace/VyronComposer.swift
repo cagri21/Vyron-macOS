@@ -226,9 +226,11 @@ struct VyronComposer: View {
 
     private func errorNotice(_ error: VyronWorkspaceError) -> some View {
         HStack(alignment: .top, spacing: VyronWorkspaceStyle.compactSpacing) {
-            Image(systemName: VyronSymbols.warning).foregroundStyle(palette.warning)
+            Image(systemName: VyronSymbols.warning).foregroundStyle(palette.danger)
             VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
-                Text(verbatim: error.message).textSelection(.enabled)
+                Text(verbatim: error.message)
+                    .foregroundStyle(palette.danger)
+                    .textSelection(.enabled)
                 if error.showsLocalContextBudgetHelp, model.modelSelection.isBuiltinConnection {
                     Text(VyronWorkspaceText.localContextBudgetHint(
                         VyronAppText.settingsContextBudget,

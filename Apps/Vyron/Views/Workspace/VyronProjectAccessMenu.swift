@@ -17,7 +17,9 @@ struct VyronProjectAccessMenu: View {
                 Text(VyronProjectApprovalPresentation.title(model.interactions.projectApprovalMode))
             }
             .font(VyronWorkspaceStyle.controlFont)
-            .foregroundStyle(model.interactions.projectApprovalMode == .fullAccess ? palette.warning : palette.muted)
+            .foregroundStyle(
+                model.interactions.projectApprovalMode == .fullAccess ? palette.fullAccess : palette.muted
+            )
             .padding(.horizontal, VyronWorkspaceStyle.approvalControlHorizontalPadding)
             .padding(.vertical, VyronWorkspaceStyle.approvalControlVerticalPadding)
             .background(showsApprovalChoices ? palette.field : Color.clear, in: Capsule())

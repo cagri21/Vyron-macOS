@@ -21,6 +21,7 @@ final class VyronAppearanceSettingsRenderTests: XCTestCase {
 
         try capture(.dark, width: VyronSettingsStyle.minimumContentWidth, appearance: appearance, directory: directory)
         try capture(.light, width: VyronSettingsStyle.contentWidth, appearance: appearance, directory: directory)
+        try captureStatusColors(appearance: appearance, directory: directory)
     }
 
     private func capture(
@@ -44,6 +45,29 @@ final class VyronAppearanceSettingsRenderTests: XCTestCase {
         .environment(appearance)
         .environment(\.vyronPalette, palette)
         .environment(\.colorScheme, scheme))
+        try writeSnapshot(renderer, width: width, to: directory.appendingPathComponent(mode.rawValue + ".png"))
+    }
+
+    private func captureStatusColors(appearance: VyronAppearanceState, directory: URL) throws {
+        appearance.selectPreset(.catppuccin)
+        appearance.setMode(.dark)
+        let palette = appearance.palette(for: .dark)
+        let width = VyronSettingsStyle.minimumContentWidth
+        let renderer = ImageRenderer(content: VyronAppearanceStatusColorsView()
+            .padding(VyronSettingsStyle.contentPadding)
+            .frame(width: width, alignment: .leading)
+            .background(palette.canvas)
+            .environment(appearance)
+            .environment(\.vyronPalette, palette)
+            .environment(\.colorScheme, .dark))
+        try writeSnapshot(renderer, width: width, to: directory.appendingPathComponent("status-colors.png"))
+    }
+
+    private func writeSnapshot<Content: View>(
+        _ renderer: ImageRenderer<Content>,
+        width: CGFloat,
+        to url: URL
+    ) throws {
         renderer.scale = 2
         guard let image = renderer.cgImage else {
             throw XCTSkip("BLOCKED: Offscreen Appearance settings rendering is unavailable.")
@@ -51,6 +75,6 @@ final class VyronAppearanceSettingsRenderTests: XCTestCase {
         XCTAssertEqual(image.width, Int(width * renderer.scale))
         XCTAssertLessThan(image.height, Int(VyronSettingsStyle.minimumHeight * renderer.scale))
         let data = try XCTUnwrap(NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]))
-        try data.write(to: directory.appendingPathComponent(mode.rawValue + ".png"), options: .atomic)
+        try data.write(to: url, options: .atomic)
     }
 }

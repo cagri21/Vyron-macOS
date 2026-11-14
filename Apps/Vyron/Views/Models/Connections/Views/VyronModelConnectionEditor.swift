@@ -58,7 +58,7 @@ struct VyronModelConnectionEditor: View {
                         .font(.system(size: 10)).foregroundStyle(palette.muted)
                     if let error {
                         Label(error, systemImage: VyronSymbols.warning)
-                            .font(.system(size: 11)).foregroundStyle(palette.warning).textSelection(.enabled)
+                            .font(.system(size: 11)).foregroundStyle(palette.danger).textSelection(.enabled)
                     }
                     if let testResult {
                         Label(testResult, systemImage: VyronSymbols.checkCircle)

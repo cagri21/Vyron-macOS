@@ -30,7 +30,7 @@ struct VyronScreenshotPreview: View {
             if let error = model.error {
                 Text(verbatim: error)
                     .font(VyronWorkspaceStyle.captionFont)
-                    .foregroundStyle(palette.warning)
+                    .foregroundStyle(palette.danger)
                     .textSelection(.enabled)
             }
         }

@@ -5,6 +5,7 @@ struct VyronAppearanceColor: Codable, Equatable, Sendable {
     private static let hexLength = 6
     private static let channelMask: UInt32 = 0xFF
     private static let channelMaximum = Double(channelMask)
+    private static let minimumStatusContrast = 4.5
     private let packed: UInt32
 
     init?(hex: String) {
@@ -34,10 +35,28 @@ struct VyronAppearanceColor: Codable, Equatable, Sendable {
     }
 
     var contrastingText: Color {
-        let lightness = 0.2126 * linear(channel(16)) + 0.7152 * linear(channel(8)) + 0.0722 * linear(channel(0))
-        let blackContrast = (lightness + 0.05) / 0.05
-        let whiteContrast = 1.05 / (lightness + 0.05)
+        let blackContrast = (luminance + 0.05) / 0.05
+        let whiteContrast = 1.05 / (luminance + 0.05)
         return blackContrast >= whiteContrast ? .black : .white
+    }
+
+    func contrastRatio(over surface: Self) -> Double {
+        let ink = luminance
+        let background = surface.luminance
+        return (max(ink, background) + 0.05) / (min(ink, background) + 0.05)
+    }
+
+    func legible(over surface: Self) -> Color {
+        guard contrastRatio(over: surface) < Self.minimumStatusContrast else { return color }
+        let highContrast = surface.contrastingText
+        guard let target = Self(color: highContrast) else { return highContrast }
+        for adjustment in [0.125, 0.25, 0.5, 0.75] {
+            let candidate = mixed(with: target, amount: adjustment)
+            if let adjusted = Self(color: candidate), adjusted.contrastRatio(over: surface) >= Self.minimumStatusContrast {
+                return candidate
+            }
+        }
+        return highContrast
     }
 
     func mixed(with other: Self, amount: Double) -> Color {
@@ -67,6 +86,10 @@ struct VyronAppearanceColor: Codable, Equatable, Sendable {
 
     private func channel(_ shift: UInt32) -> Double {
         Double((packed >> shift) & Self.channelMask) / Self.channelMaximum
+    }
+
+    private var luminance: Double {
+        0.2126 * linear(channel(16)) + 0.7152 * linear(channel(8)) + 0.0722 * linear(channel(0))
     }
 
     private func linear(_ channel: Double) -> Double {

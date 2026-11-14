@@ -52,7 +52,10 @@ struct VyronAppearanceColorControl: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(slot.title)
+        .accessibilityLabel(VyronAppearanceText.colorForScheme(
+            slot.title,
+            scheme == .dark ? VyronAppearanceText.dark : VyronAppearanceText.light
+        ))
         .accessibilityValue(hex)
         .accessibilityIdentifier("vyron.appearance.\(scheme == .dark ? "dark" : "light").\(slot)")
         .popover(isPresented: $isOpen, arrowEdge: .bottom) {

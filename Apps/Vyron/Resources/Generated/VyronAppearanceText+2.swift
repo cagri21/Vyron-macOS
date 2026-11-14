@@ -2,6 +2,12 @@
 import Foundation
 
 extension VyronAppearanceText {
+    static var presetLinear: String {
+        VyronResourceBundle.string("appearancePresetLinear", fallback: "Linear")
+    }
+    static var presetLobster: String {
+        VyronResourceBundle.string("appearancePresetLobster", fallback: "Lobster")
+    }
     static var presetMaterial: String {
         VyronResourceBundle.string("appearancePresetMaterial", fallback: "Material")
     }
@@ -10,6 +16,12 @@ extension VyronAppearanceText {
     }
     static var reset: String {
         VyronResourceBundle.string("appearanceReset", fallback: "Reset to default")
+    }
+    static var statusColors: String {
+        VyronResourceBundle.string("appearanceStatusColors", fallback: "Status colors")
+    }
+    static var success: String {
+        VyronResourceBundle.string("appearanceSuccess", fallback: "Success")
     }
     static var system: String {
         VyronResourceBundle.string("appearanceSystem", fallback: "System")
@@ -25,5 +37,8 @@ extension VyronAppearanceText {
     }
     static var visualStyle: String {
         VyronResourceBundle.string("appearanceVisualStyle", fallback: "Visual style")
+    }
+    static var warning: String {
+        VyronResourceBundle.string("appearanceWarning", fallback: "Warning")
     }
 }

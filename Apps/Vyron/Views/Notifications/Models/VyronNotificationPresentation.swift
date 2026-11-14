@@ -31,7 +31,8 @@ enum VyronNotificationPresentation {
     static func color(_ kind: VyronNotificationKind, palette: VyronAppearancePalette) -> Color {
         switch kind {
         case .working, .completed: palette.muted
-        case .failed, .attention: palette.warning
+        case .failed: palette.danger
+        case .attention: palette.warning
         }
     }
 }

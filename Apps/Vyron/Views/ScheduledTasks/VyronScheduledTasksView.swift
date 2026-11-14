@@ -43,7 +43,7 @@ struct VyronScheduledTasksView: View {
                         .font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                     if let error = model.errorMessage {
                         Label(error, systemImage: VyronSymbols.warning)
-                            .font(VyronScheduledTaskStyle.body).foregroundStyle(palette.warning)
+                            .font(VyronScheduledTaskStyle.body).foregroundStyle(palette.danger)
                             .textSelection(.enabled)
                     }
                     if model.tasks.isEmpty { emptyState }
