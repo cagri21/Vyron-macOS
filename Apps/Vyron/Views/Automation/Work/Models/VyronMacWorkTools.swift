@@ -3,6 +3,7 @@ import VyronCore
 
 enum VyronMacWorkTools {
     static let apps = "vyron_mac_apps"
+    static let applicationQueryField = "query"
     static let openApp = "vyron_mac_open_app"
     static let inspect = "vyron_mac_inspect"
     static let click = "vyron_mac_click"
@@ -12,9 +13,13 @@ enum VyronMacWorkTools {
 
     static let definitions: [DevelopmentExternalTool] = [
         tool(apps, description: "List available native Mac apps, attached apps, and current Mac-control permissions. "
+            + "For a named app, pass its name or bundle ID as query to search before results are limited. "
             + "Use only returned application_id values. These native tools work separately "
             + "from protected project commands.",
-            properties: [:], required: []),
+            properties: [applicationQueryField: .object([
+                "type": .string("string"),
+                "description": .string("Full or partial app name or bundle ID. Omit for a general app list.")
+            ])], required: []),
         tool(openApp, description: "Open or focus one returned native Mac application. "
             + "Known installed apps can open automatically. Attached and unfamiliar apps require native review to launch. "
             + "For Simulator requests use com.apple.iphonesimulator when listed, "

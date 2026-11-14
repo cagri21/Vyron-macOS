@@ -50,8 +50,12 @@ extension VyronMacWorkSession {
                 "application": .string(application.name), "application_id": .string(application.id),
                 "reason": .string(reason), "request": .object(call.function.arguments)
             ]
-            if call.function.name == VyronMacWorkTools.openApp, let url = attachedApplicationURLs[application.id] {
-                verified["attached_application_path"] = .string(url.path)
+            if call.function.name == VyronMacWorkTools.openApp {
+                if let url = attachedApplicationURLs[application.id] {
+                    verified["attached_application_path"] = .string(url.path)
+                } else if let url = application.installationURL {
+                    verified["application_path"] = .string(url.path)
+                }
             }
             if let element {
                 verified["native_target"] = .object([

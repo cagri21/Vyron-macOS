@@ -1210,10 +1210,12 @@ the same task to list available apps, open or focus one, inspect its accessible
 windows and menu bar, and use real controls. The desktop pointer marks verified
 click and text targets in Work too. For example, ask “Open my project in
 Xcode, run it on an iPhone simulator, check the screen, and take a screenshot.”
-The app catalog includes running regular apps, supported installed apps, and apps
-you explicitly attach to the Work conversation. You can ask Vyron to open an
-attached app even when it is stopped. The native review shows the selected
-bundle's path before launch.
+The app catalog includes running regular apps, installed apps from macOS system,
+shared, and user Applications folders, and apps you explicitly attach to the
+Work conversation. Ask “Open QuickTime Player” to launch an installed app by
+name, even if it is closed. If an app is stored elsewhere, you can attach it to
+the conversation. Launches that require review show the selected bundle's path
+before asking for approval.
 The native project opener accepts an existing relative `.xcodeproj` or
 `.xcworkspace` inside the active project. The agent can then inspect Xcode's real
 run-destination controls and **Product → Run**, and inspect the visible result.

@@ -1,8 +1,8 @@
 import Foundation
 import XCTest
-import VyronAutomation
 import VyronCore
 @testable import Vyron
+@testable import VyronAutomation
 
 @MainActor
 final class VyronMacWorkSessionTests: XCTestCase {
@@ -26,6 +26,62 @@ final class VyronMacWorkSessionTests: XCTestCase {
         XCTAssertEqual(reviews, 0)
     }
 
+    func testAppSearchFindsAClosedAppBeyondTheListLimitByNameAndBundleID() async throws {
+        let controller = VyronMacWorkTestController()
+        let quickTimeID = "com.apple.QuickTimePlayerX"
+        controller.catalog = (1...128).map { number in
+            let id = "com.example.App\(number)"
+            return DesktopApplication(id: id, name: "App \(number)", bundleIdentifier: id, processIdentifier: 0)
+        } + [DesktopApplication(
+            id: quickTimeID, name: "QuickTime Player", bundleIdentifier: quickTimeID, processIdentifier: 0
+        )]
+        let session = makeSession(controller)
+
+        let unfiltered = try await session.execute(DevelopmentToolCall(name: VyronMacWorkTools.apps, arguments: [:]))
+        XCTAssertFalse(unfiltered.isError, unfiltered.text)
+        XCTAssertFalse(unfiltered.text.contains(quickTimeID))
+
+        for query in [" quick time ", quickTimeID.uppercased()] {
+            let filtered = try await session.execute(DevelopmentToolCall(
+                name: VyronMacWorkTools.apps, arguments: ["query": .string(query)]
+            ))
+            XCTAssertFalse(filtered.isError, filtered.text)
+            let response = try JSONDecoder().decode([String: DevelopmentJSONValue].self, from: Data(filtered.text.utf8))
+            XCTAssertEqual(response["applications"], .array([.object([
+                "application_id": .string(quickTimeID), "name": .string("QuickTime Player"), "is_running": .bool(false)
+            ])]))
+        }
+        XCTAssertTrue(controller.launchedIDs.isEmpty)
+    }
+
+    func testReviewedInstalledLaunchStopsWhenTheCatalogPathChanges() async throws {
+        let controller = VyronMacWorkTestController()
+        let id = "com.example.Player"
+        let installedURL = URL(fileURLWithPath: "/Applications/Player.app")
+        let replacementURL = URL(fileURLWithPath: "/Users/example/Applications/Player.app")
+        controller.catalog = [DesktopApplication(installedAt: installedURL, name: "Player", bundleIdentifier: id)]
+        var reviews: [MCPActionReview] = []
+        let session = makeSession(controller, review: { review in
+            reviews.append(review)
+            controller.catalog = [DesktopApplication(installedAt: replacementURL, name: "Player", bundleIdentifier: id)]
+            return true
+        })
+
+        let list = try await session.execute(DevelopmentToolCall(name: VyronMacWorkTools.apps, arguments: [:]))
+        let applications = try XCTUnwrap(json(list)["applications"] as? [[String: Any]])
+        let app = try XCTUnwrap(applications.first)
+        XCTAssertEqual(Set(app.keys), ["application_id", "name", "is_running"])
+        let result = try await session.execute(DevelopmentToolCall(
+            name: VyronMacWorkTools.openApp, arguments: ["application_id": .string(id)]
+        ))
+        XCTAssertTrue(result.isError)
+        XCTAssertTrue(controller.launchedIDs.isEmpty)
+
+        let review = try XCTUnwrap(reviews.first)
+        let details = try JSONDecoder().decode([String: DevelopmentJSONValue].self, from: Data(review.arguments.utf8))
+        XCTAssertEqual(details["application_path"], .string(installedURL.path))
+    }
+
     func testPlanRejectsMutationsAndUnexpectedArgumentsBeforeNativeCalls() async throws {
         let controller = VyronMacWorkTestController()
         let context = VyronMacWorkContext(goal: "Inspect Calculator", projectRoot: nil, allowsActions: false)
@@ -41,6 +97,10 @@ final class VyronMacWorkSessionTests: XCTestCase {
             name: VyronMacWorkTools.apps, arguments: ["code": .string("open anything")]
         ))
         XCTAssertTrue(extra.isError)
+        let invalidSearch = try await session.execute(DevelopmentToolCall(
+            name: VyronMacWorkTools.apps, arguments: ["query": .number(1)]
+        ))
+        XCTAssertTrue(invalidSearch.isError)
         XCTAssertTrue(controller.launchedIDs.isEmpty)
         _ = try await inspect(session)
         XCTAssertEqual(controller.inspections, 1)

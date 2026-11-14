@@ -3,20 +3,6 @@ import ApplicationServices
 import CoreGraphics
 import Foundation
 
-public struct DesktopApplication: Identifiable, Hashable, Sendable {
-    public let id: String
-    public let name: String
-    public let bundleIdentifier: String?
-    public let processIdentifier: Int32
-
-    public init(id: String, name: String, bundleIdentifier: String?, processIdentifier: Int32) {
-        self.id = id
-        self.name = name
-        self.bundleIdentifier = bundleIdentifier
-        self.processIdentifier = processIdentifier
-    }
-}
-
 public struct MacPermissionState: Sendable {
     public let accessibilityGranted: Bool
     public let screenCaptureGranted: Bool
@@ -124,6 +110,7 @@ public final class MacController {
     private let maximumSnapshotAge: TimeInterval = 30
     private let maximumNodes = 400
     private let maximumSnapshotCharacters = 32_000
+    let applicationDirectories: [URL]
 
     // Navigation shortcuts are enabled only for these known browsers.
     private static let browserIdentifiers: Set<String> = [
@@ -140,7 +127,13 @@ public final class MacController {
         "dev.warp.Warp-Stable", "net.kovidgoyal.kitty", "org.alacritty", "co.zeit.hyper"
     ]
 
-    public init() {}
+    public convenience init() {
+        self.init(applicationDirectories: VyronInstalledApplicationCatalog.standardApplicationDirectories)
+    }
+
+    init(applicationDirectories: [URL]) {
+        self.applicationDirectories = applicationDirectories
+    }
 
     public nonisolated static var permissionSettingsPath: String {
         if #available(macOS 27.0, *) {
@@ -175,43 +168,6 @@ public final class MacController {
             .filter { $0.activationPolicy == .regular && !$0.isTerminated }
             .map(Self.descriptor)
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-    }
-
-    /// A small installed-app catalog plus running regular apps; no home-folder indexing.
-    public func availableApplications() -> [DesktopApplication] {
-        var byID = Dictionary(applications().map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        for identifier in AutomationPolicy.knownApplicationIDs where byID[identifier] == nil {
-            guard let url = installedApplicationURL(for: identifier),
-                url.isFileURL, let bundle = Bundle(url: url)
-            else { continue }
-            let name =
-                (bundle.localizedInfoDictionary?["CFBundleDisplayName"] as? String)
-                ?? (bundle.infoDictionary?["CFBundleName"] as? String)
-                ?? url.deletingPathExtension().lastPathComponent
-            byID[identifier] = DesktopApplication(
-                id: identifier,
-                name: name,
-                bundleIdentifier: identifier,
-                processIdentifier: 0
-            )
-        }
-        return byID.values.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-    }
-
-    public func launch(applicationID: String) async throws -> DesktopApplication {
-        guard availableApplications().contains(where: { $0.id == applicationID }),
-            let appURL = installedApplicationURL(for: applicationID),
-            appURL.isFileURL, appURL.pathExtension == "app"
-        else { throw MacControlError.applicationUnavailable }
-        try Task.checkCancellation()
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.activates = true
-        let running = try await NSWorkspace.shared.openApplication(at: appURL, configuration: configuration)
-        try Task.checkCancellation()
-        guard !running.isTerminated, running.bundleIdentifier == applicationID else {
-            throw MacControlError.applicationUnavailable
-        }
-        return Self.descriptor(running)
     }
 
     public func browsers() -> [DesktopApplication] {

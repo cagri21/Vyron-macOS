@@ -25,6 +25,11 @@ struct VyronEffortSlider: View {
                 Circle()
                     .fill(Palette.effortSparkle)
                     .frame(width: track.thumbDiameter, height: track.thumbDiameter)
+                    .background {
+                        if canAnimateUltra {
+                            VyronEffortUltraBurst(isUltra: isUltra)
+                        }
+                    }
                     .offset(x: track.thumbLeading)
             }
             .frame(width: track.width, height: VyronEffortStyle.thumbDiameter, alignment: .leading)
@@ -87,7 +92,13 @@ struct VyronEffortSlider: View {
                 startPoint: .leading,
                 endPoint: .trailing
             ))
-            .overlay { sparkles }
+            .overlay {
+                if canAnimateUltra {
+                    VyronEffortUltraDrift()
+                } else {
+                    sparkles
+                }
+            }
             .clipShape(Capsule())
     }
 
@@ -113,6 +124,10 @@ struct VyronEffortSlider: View {
     }
 
     private var canAdjust: Bool { isEnabled && model.canSelectDevelopmentEffort }
+    private var isUltra: Bool { model.composer.effort == .ultra }
+    private var canAnimateUltra: Bool {
+        isUltra && isEnabled && model.responseSpeed != .fast && !reduceMotion
+    }
 
     private func step(by offset: Int) {
         guard canAdjust else { return }

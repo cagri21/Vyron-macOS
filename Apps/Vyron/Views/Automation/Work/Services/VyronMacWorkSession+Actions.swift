@@ -27,7 +27,7 @@ extension VyronMacWorkSession {
                 throw VyronMacWorkError(message: VyronToolsText.openFailed)
             }
         } else {
-            running = try await dependencies.controller.launch(applicationID: app.id)
+            running = try await dependencies.controller.launch(application: app)
         }
         try validateCurrent()
         guard running.id == app.id else { throw argumentError() }

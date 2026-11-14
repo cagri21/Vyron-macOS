@@ -363,7 +363,7 @@ final class AutomationModel: ObservableObject {
                 switch action.action {
                 case .launch(let app):
                     try validatePolicyBeforeMutation(action, automatic: automatic)
-                    let running = try await controller.launch(applicationID: app.id)
+                    let running = try await controller.launch(application: app)
                     try Task.checkCancellation()
                     guard executionID == id else { return }
                     routeAgent(to: running)

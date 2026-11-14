@@ -58,7 +58,7 @@ public enum AutomationPolicy {
         "company.thebrowser.dia", "com.operasoftware.Opera", "com.vivaldi.Vivaldi",
         "com.kagi.kagimacOS", "com.duckduckgo.macos.browser"
     ]
-    static let knownApplicationIDs: Set<String> = browserIDs.union([
+    static let automaticLaunchApplicationIDs: Set<String> = browserIDs.union([
         "com.apple.calculator", "com.apple.TextEdit", "com.apple.Notes", "com.apple.dt.Xcode",
         "com.figma.Desktop", "com.microsoft.Outlook", "com.apple.mail", "com.apple.systempreferences"
     ]).union(VyronXcodeApplicationCatalog.applicationIDs)
@@ -104,7 +104,7 @@ public enum AutomationPolicy {
         case "inspect", "focus", "activate", "wait", "complete":
             return .automatic("Read-only inspection or routine application focus.")
         case "launch":
-            return knownApplicationIDs.contains(applicationID)
+            return automaticLaunchApplicationIDs.contains(applicationID)
                 ? .automatic("Open a known installed application.")
                 : .review("Review opening this application before the agent continues.")
         case "openurl":

@@ -24,6 +24,11 @@ final class VyronMacWorkAttachedApplicationTests: XCTestCase {
         XCTAssertTrue(list.text.contains("Selected app"))
         XCTAssertFalse(list.text.contains("Calculator"))
         XCTAssertFalse(list.text.contains(attachment.path))
+        let searched = try await session.execute(DevelopmentToolCall(
+            name: VyronMacWorkTools.apps, arguments: ["query": .string(id)]
+        ))
+        XCTAssertTrue(searched.text.contains("Selected app"))
+        XCTAssertFalse(searched.text.contains("Calculator"))
 
         let opened = try await session.execute(DevelopmentToolCall(
             name: VyronMacWorkTools.openApp, arguments: ["application_id": .string(id)]

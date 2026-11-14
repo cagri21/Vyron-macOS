@@ -24,6 +24,15 @@ extension VyronMacWorkSession {
         return value
     }
 
+    func applicationQuery(_ call: DevelopmentToolCall) throws -> String? {
+        guard !call.function.arguments.isEmpty else { return nil }
+        let field = VyronMacWorkTools.applicationQueryField
+        try requireArguments(call, keys: [field])
+        let query = try string(field, in: call).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { throw argumentError() }
+        return query
+    }
+
     func optionalString(_ name: String, in call: DevelopmentToolCall) -> String? {
         guard case .string(let value) = call.function.arguments[name] else { return nil }
         return value

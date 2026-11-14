@@ -60,8 +60,7 @@ final class VyronMacWorkSession {
             }
             switch call.function.name {
             case VyronMacWorkTools.apps:
-                try requireArguments(call, keys: [])
-                return try applicationList()
+                return try applicationList(matching: applicationQuery(call))
             case VyronMacWorkTools.inspect:
                 try requireArguments(call, keys: ["application_id"])
                 let app = try runningApplication(id: applicationID(call))
@@ -139,13 +138,24 @@ final class VyronMacWorkSession {
         return DevelopmentExternalResult(text: String(decoding: data, as: UTF8.self))
     }
 
-    private func applicationList() throws -> DevelopmentExternalResult {
+    private func applicationList(matching query: String?) throws -> DevelopmentExternalResult {
         let permissions = dependencies.controller.permissions
         let attached = attachedApplicationURLs.keys.compactMap { attachedApplication(id: $0) }.sorted {
             $0.name.localizedStandardCompare($1.name) == .orderedAscending
         }
         let catalog = dependencies.controller.availableApplications().filter { !isAttachedApplicationID($0.id) }
-        let apps = (attached + catalog).prefix(128).map { app in
+        let available = attached + catalog
+        let matches: [DesktopApplication]
+        if let query {
+            let compactQuery = query.split(whereSeparator: \.isWhitespace).joined()
+            matches = available.filter { app in
+                app.name.split(whereSeparator: \.isWhitespace).joined().localizedStandardContains(compactQuery)
+                    || app.id.localizedStandardContains(query)
+            }
+        } else {
+            matches = available
+        }
+        let apps = matches.prefix(128).map { app in
             DevelopmentJSONValue.object([
                 "application_id": .string(app.id), "name": .string(app.name),
                 "is_running": .bool(app.processIdentifier > 0)

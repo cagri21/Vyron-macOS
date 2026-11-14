@@ -14,6 +14,10 @@ extension MacController {
     }
 
     public func launch(attachedApplicationAt url: URL, expectedApplicationID: String) async throws -> DesktopApplication {
+        try await launchApplication(at: url, expectedApplicationID: expectedApplicationID)
+    }
+
+    func launchApplication(at url: URL, expectedApplicationID: String) async throws -> DesktopApplication {
         try Task.checkCancellation()
         guard let application = Self.readAttachedApplication(at: url), application.id == expectedApplicationID else {
             throw MacControlError.applicationUnavailable

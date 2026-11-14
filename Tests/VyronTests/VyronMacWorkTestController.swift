@@ -38,14 +38,15 @@ final class VyronMacWorkTestController: VyronMacWorkControlling {
     func applications() -> [DesktopApplication] { running }
     func attachedApplication(at url: URL) -> DesktopApplication? { attachedCatalog[url] }
 
-    func launch(applicationID: String) async throws -> DesktopApplication {
-        launchedIDs.append(applicationID)
+    func launch(application: DesktopApplication) async throws -> DesktopApplication {
+        launchedIDs.append(application.id)
         try await onLaunch?()
-        guard let installed = catalog.first(where: { $0.id == applicationID }) else {
+        guard catalog.contains(application) else {
             throw MacControlError.applicationUnavailable
         }
         let app = DesktopApplication(
-            id: installed.id, name: installed.name, bundleIdentifier: installed.bundleIdentifier, processIdentifier: 42
+            id: application.id, name: application.name,
+            bundleIdentifier: application.bundleIdentifier, processIdentifier: 42
         )
         running = [app]
         catalog = [app]

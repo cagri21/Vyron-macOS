@@ -8,7 +8,7 @@ protocol VyronMacWorkControlling {
     func availableApplications() -> [DesktopApplication]
     func applications() -> [DesktopApplication]
     func attachedApplication(at url: URL) -> DesktopApplication?
-    func launch(applicationID: String) async throws -> DesktopApplication
+    func launch(application: DesktopApplication) async throws -> DesktopApplication
     func launch(attachedApplicationAt url: URL, expectedApplicationID: String) async throws -> DesktopApplication
     func activate(application: DesktopApplication) throws
     func inspect(application: DesktopApplication) throws -> AutomationSnapshot

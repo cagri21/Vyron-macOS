@@ -28,6 +28,15 @@ enum VyronEffortStyle {
     static let sparkleOpacityVariation: Double = 0.12
     static let sparkleRadius: CGFloat = 0.6
     static let sparkleRadiusVariation: CGFloat = 0.2
+    static let ultraDriftCount = 14
+    static let ultraDriftRadius: CGFloat = 1.5
+    static let ultraDriftGlowOpacity: Double = 0.34
+    static let ultraDriftGlowRadius: CGFloat = 2.5
+    static let ultraBurstCount = 16
+    static let ultraBurstSize: CGFloat = 76
+    static let ultraBurstRadius: CGFloat = 2.5
+    static let ultraBurstDistance: CGFloat = 34
+    static let ultraBurstDuration: TimeInterval = 0.62
     static let title = Font.system(size: 14)
     static let icon = Font.system(size: 13)
     static let control = VyronWorkspaceStyle.controlFont
