@@ -10,8 +10,19 @@ const id = number => "a11d4524-885b-4884-bd56-" + String(number).padStart(12, "0
 const snapshotID = "73b9b93a-ff2a-4dfb-a914-85f7b925f0d2";
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
-test("worker connects only trusted popup tabs and routes snapshot, reviewed action, cancellation, and disconnect", async () => {
+test("worker connects only trusted popup tabs and routes snapshot, reviewed action, cancellation, and disconnect", async (t) => {
     const previous = Object.getOwnPropertyDescriptor(globalThis, "chrome");
+    const schedule = globalThis.setTimeout;
+    const unschedule = globalThis.clearTimeout;
+    // Chromium rejects timer calls with a BridgeSession receiver. Node's timers accept it.
+    t.mock.method(globalThis, "setTimeout", function (callback, delay) {
+        if (this !== globalThis) throw new TypeError("Illegal invocation");
+        return schedule(callback, delay).unref();
+    });
+    t.mock.method(globalThis, "clearTimeout", function (timer) {
+        if (this !== globalThis) throw new TypeError("Illegal invocation");
+        unschedule(timer);
+    });
     const onMessage = event();
     const nativeMessage = event();
     const nativeDisconnect = event();
@@ -56,6 +67,7 @@ test("worker connects only trusted popup tabs and routes snapshot, reviewed acti
         assert.equal(outbound.find(item => item.id === id(1)).ok, true);
         nativeMessage.emit(request(2, "click", { tabID: 7, snapshotID, elementID: 1 })); await tick();
         assert.equal(scripts.length, 1);
+        assert.equal(outbound.find(item => item.id === id(2)), undefined);
         const status = await popup({ type: "status" });
         assert.equal(status.pending[0].targetLabel, "Find");
         assert.equal((await popup({ type: "approve", id: id(2) })).ok, true);

@@ -4,7 +4,11 @@ import {
 
 // Session state lives only in the service worker. Restarting it disconnects every tab.
 export class BridgeSession {
-    constructor({ execute, respond, changed = () => {}, now = Date.now, schedule = setTimeout, unschedule = clearTimeout }) {
+    constructor({
+        execute, respond, changed = () => {}, now = Date.now,
+        schedule = (callback, delay) => globalThis.setTimeout(callback, delay),
+        unschedule = timer => globalThis.clearTimeout(timer)
+    }) {
         this.execute = execute;
         this.respond = respond;
         this.changed = changed;

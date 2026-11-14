@@ -15,6 +15,7 @@ import uuid
 
 HOST_NAME = "ai.vyron.chrome"
 MANIFEST_NAME = HOST_NAME + ".json"
+REGISTRATION_NAME = "registration.json"
 DIRECTORY_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 EXTENSION_ID = re.compile(r"[a-p]{32}\Z")
 
@@ -81,25 +82,28 @@ def manifest_for(app: Path, extension_id: str) -> dict[str, object]:
     }
 
 
-def existing_manifest(directory: int) -> os.stat_result | None:
+def existing_registration_file(directory: int, name: str) -> os.stat_result | None:
     try:
-        metadata = os.stat(MANIFEST_NAME, dir_fd=directory, follow_symlinks=False)
+        metadata = os.stat(name, dir_fd=directory, follow_symlinks=False)
     except FileNotFoundError:
         return None
     if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid() or metadata.st_nlink != 1:
-        raise InstallationError("The existing Chrome host manifest must be a regular file owned only by you.")
+        raise InstallationError(f"The existing {name} must be a regular file owned only by you.")
     return metadata
 
 
-def write_manifest(destination: Path, manifest: dict[str, object]) -> None:
+def write_registration_file(destination: Path, manifest: dict[str, object], *, private_directory: bool) -> None:
     directory = open_directory(destination.parent, create=True)
-    temporary = "." + MANIFEST_NAME + "." + uuid.uuid4().hex
+    name = destination.name
+    temporary = "." + name + "." + uuid.uuid4().hex
     created = False
     try:
         parent = os.fstat(directory)
-        if parent.st_uid != os.getuid() or parent.st_mode & 0o022:
+        if private_directory and (parent.st_uid != os.getuid() or parent.st_mode & 0o077):
+            raise InstallationError("Vyron's ChromeBridge folder must be private and owned by you.")
+        if not private_directory and (parent.st_uid != os.getuid() or parent.st_mode & 0o022):
             raise InstallationError("Chrome's NativeMessagingHosts folder must be owned by you and not writable by others.")
-        previous = existing_manifest(directory)
+        previous = existing_registration_file(directory, name)
         descriptor = os.open(
             temporary,
             os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
@@ -111,11 +115,11 @@ def write_manifest(destination: Path, manifest: dict[str, object]) -> None:
             output.write((json.dumps(manifest, indent=2) + "\n").encode("utf-8"))
             output.flush()
             os.fsync(output.fileno())
-        current = existing_manifest(directory)
+        current = existing_registration_file(directory, name)
         identity = lambda item: None if item is None else (item.st_dev, item.st_ino)
         if identity(previous) != identity(current):
-            raise InstallationError("The Chrome host manifest changed during registration. Try again after reviewing it.")
-        os.replace(temporary, MANIFEST_NAME, src_dir_fd=directory, dst_dir_fd=directory)
+            raise InstallationError(f"{name} changed during registration. Try again after reviewing it.")
+        os.replace(temporary, name, src_dir_fd=directory, dst_dir_fd=directory)
         created = False
         os.fsync(directory)
     finally:
@@ -132,14 +136,18 @@ def main() -> int:
     arguments = parser.parse_args()
     try:
         manifest = manifest_for(arguments.app, arguments.extension_id)
-        destination = (
-            Path.home() / "Library" / "Application Support" / "Google" / "Chrome"
-            / "NativeMessagingHosts" / MANIFEST_NAME
-        )
+        support = Path.home() / "Library" / "Application Support"
+        destination = support / "Google" / "Chrome" / "NativeMessagingHosts" / MANIFEST_NAME
+        registration = support / "VyronAI" / "ChromeBridge" / REGISTRATION_NAME
         if arguments.dry_run:
-            print(json.dumps({"destination": str(destination), "manifest": manifest}, indent=2))
+            print(json.dumps({
+                "destination": str(destination),
+                "registration": str(registration),
+                "manifest": manifest,
+            }, indent=2))
         else:
-            write_manifest(destination, manifest)
+            write_registration_file(registration, manifest, private_directory=True)
+            write_registration_file(destination, manifest, private_directory=False)
             print(f"Registered {HOST_NAME} for extension {arguments.extension_id} at {destination}")
         return 0
     except (InstallationError, OSError) as error:

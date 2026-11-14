@@ -13,9 +13,9 @@ local development preview, not a Chrome Web Store release.
    and select this `extensions/chrome` folder.
 3. Copy the extension ID shown by Chrome. Register that exact ID using
    `scripts/install-chrome-host.py --app /absolute/path/to/Vyron.app
-   --extension-id THE_ID_FROM_CHROME`. This writes the current user's Chrome
-   native messaging manifest; it does not install another extension or change
-   Chrome settings. Use `--dry-run` to inspect the destination first.
+   --extension-id THE_ID_FROM_CHROME`. The installer writes the current user's
+   Chrome native messaging manifest and a private copy in Vyron's data folder.
+   Use `--dry-run` to preview both destinations.
 4. Open Vyron and a regular HTTP or HTTPS page in Chrome. Click the Vyron toolbar
    button and choose **Connect this tab**. Connect each additional tab separately.
 5. In a Vyron **Work** conversation, ask the model to list connected Chrome tabs,
@@ -25,9 +25,9 @@ local development preview, not a Chrome Web Store release.
 Moving the unpacked extension folder can change its extension ID. Moving the
 app changes the native host path. Repeat the corresponding setup if either
 changes. Removing the extension or disconnecting all tabs ends its native host
-connection. Use the installer's explicit removal option if one is provided;
-otherwise remove only `ai.vyron.chrome.json` from Chrome's user-level
-`NativeMessagingHosts` folder to unregister the helper.
+connection. To unregister the helper, remove `ai.vyron.chrome.json` from
+Chrome's user-level `NativeMessagingHosts` folder and `registration.json` from
+`~/Library/Application Support/VyronAI/ChromeBridge`.
 
 ## What this preview supports
 

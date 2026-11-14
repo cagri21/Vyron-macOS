@@ -8,9 +8,7 @@ enum VyronChromeNativeOrigin {
             origin == "chrome-extension://\(id)/", executable.hasPrefix("/"),
             URL(fileURLWithPath: executable).standardizedFileURL.path == executable
         else { throw VyronChromeBridgeError.invalidOrigin }
-        let location = home.appendingPathComponent("Library/Application Support/Google/Chrome/NativeMessagingHosts")
-        let directory = try VyronChromeBridgeDirectory.open(location, create: false, privateDirectory: false)
-        guard let data = try directory.read("ai.vyron.chrome.json") else {
+        guard let data = try registration(home: home) else {
             throw VyronChromeBridgeError.invalidOrigin
         }
         let manifest = try VyronChromeBridgePolicy.decode(VyronChromeNativeManifest.self, from: data)
@@ -22,5 +20,19 @@ enum VyronChromeNativeOrigin {
         )
         try packaged.validateExecutable("VyronChromeHost")
         return id
+    }
+
+    private static func registration(home: URL) throws -> Data? {
+        // macOS can restrict this helper from reading Chrome's app data. Chrome still checks its own manifest.
+        let location = VyronChromeNativeRegistration.privateDirectory(home: home)
+        if FileManager.default.fileExists(atPath: location.path) {
+            let directory = try VyronChromeBridgeDirectory.open(location, create: false)
+            if let data = try directory.read(VyronChromeNativeRegistration.registrationName) { return data }
+        }
+
+        // Existing installations can keep using their original manifest until they register again.
+        let chromeLocation = VyronChromeNativeRegistration.chromeDirectory(home: home)
+        let directory = try VyronChromeBridgeDirectory.open(chromeLocation, create: false, privateDirectory: false)
+        return try directory.read(VyronChromeNativeRegistration.manifestName)
     }
 }
