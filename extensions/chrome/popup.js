@@ -1,8 +1,10 @@
 import { normalPageURL } from "./protocol.js";
 
-const elements = Object.fromEntries(["page-title", "page-origin", "connect", "error", "reviews", "review-list", "connections",
+const elements = Object.fromEntries(["page-title", "page-origin", "connect", "connect-browser", "error", "reviews", "review-list", "connections",
     "connection-list", "disconnect-all", "status"].map(id => [id, document.getElementById(id)]));
 let activeTab = null;
+let activeWindowID;
+let browserConnected = false;
 let lastView = "";
 let busy = false;
 
@@ -21,7 +23,12 @@ async function perform(message) {
     if (busy) return;
     busy = true;
     showError(null);
-    try { await send(message); }
+    try {
+        if (message.type === "connectBrowser" && !await chrome.permissions.request({ permissions: ["tabGroups"] })) {
+            throw new Error("Chrome needs tab group permission to open named groups from Vyron.");
+        }
+        await send(message);
+    }
     catch (error) { showError(error.message); }
     finally { busy = false; await refresh(); }
 }
@@ -34,19 +41,23 @@ function node(tag, className, text) {
 }
 
 function actionTitle(method) {
-    return { click: "Click a page control", fill: "Enter text in a field", navigate: "Open a page on this website", reload: "Reload this page" }[method]
+    return { click: "Click a page control", fill: "Enter text in a field", navigate: "Open a page on this website",
+        reload: "Reload this page", openTabs: "Open a Chrome tab group" }[method]
         ?? "Browser action";
 }
 
 function render(view) {
     const connected = view.tabs.some(tab => tab.id === activeTab?.id);
+    browserConnected = view.browserConnected;
+    elements["connect-browser"].textContent = browserConnected ? "Disconnect browser" : "Connect for opening tabs";
+    elements["connect-browser"].disabled = activeWindowID === undefined || busy;
     elements.connect.textContent = connected ? "This tab is connected" : "Connect this tab";
     elements.connect.disabled = !activeTab || connected || busy;
     elements.connections.hidden = !view.tabs.length;
     elements.reviews.hidden = !view.pending.length;
     elements.status.textContent = view.connected && view.tabs.length
         ? `${view.tabs.length} ${view.tabs.length === 1 ? "tab connected" : "tabs connected"} · Vyron can request page snapshots`
-        : "Disconnected";
+        : view.connected ? "Connected · Vyron can request new tab groups" : "Disconnected";
     if (view.lastError) showError(view.lastError);
     const identity = JSON.stringify([view.tabs, view.pending]);
     if (identity === lastView) return;
@@ -64,7 +75,19 @@ function render(view) {
     elements["review-list"].replaceChildren(...view.pending.map(item => {
         const card = node("article", "review");
         const tab = view.tabs.find(value => value.id === item.arguments.tabID);
-        card.append(node("h3", "", actionTitle(item.method)), node("p", "muted", tab?.title || "Connected tab"));
+        const groupApproval = item.method === "openTabs";
+        card.append(node("h3", "", actionTitle(item.method)));
+        if (groupApproval) {
+            const urls = node("ol", "group-urls");
+            urls.append(...item.arguments.urls.map(url => {
+                const entry = node("li");
+                entry.append(node("pre", "", url));
+                return entry;
+            }));
+            card.append(node("p", "group-name", item.arguments.groupTitle), urls);
+        } else {
+            card.append(node("p", "muted", tab?.title || "Connected tab"));
+        }
         if (item.arguments.elementID) {
             card.append(node("p", "", item.targetLabel || "Page control #" + item.arguments.elementID));
             card.append(node("p", "muted", (item.targetRole || "Control") + " · #" + item.arguments.elementID));
@@ -77,7 +100,8 @@ function render(view) {
         const decline = node("button", "secondary", "Decline");
         const approve = node("button", "primary", "Approve once");
         decline.addEventListener("click", () => void perform({ type: "deny", id: item.id }));
-        approve.addEventListener("click", () => void perform({ type: "approve", id: item.id }));
+        approve.disabled = groupApproval && activeWindowID === undefined;
+        approve.addEventListener("click", () => void perform({ type: "approve", id: item.id, windowID: activeWindowID }));
         buttons.append(decline, approve);
         card.append(timing, buttons);
         return card;
@@ -90,10 +114,14 @@ async function refresh() {
 }
 
 elements.connect.addEventListener("click", () => void perform({ type: "connect", tabID: activeTab?.id }));
+elements["connect-browser"].addEventListener("click", () => void perform({
+    type: browserConnected ? "disconnectBrowser" : "connectBrowser", windowID: activeWindowID
+}));
 elements["disconnect-all"].addEventListener("click", () => void perform({ type: "disconnectAll" }));
 
 try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && !tab.incognito && Number.isSafeInteger(tab.windowId) && tab.windowId >= 0) activeWindowID = tab.windowId;
     if (!tab || tab.incognito || !Number.isSafeInteger(tab.id) || tab.pendingUrl) throw new Error("Choose a loaded regular website tab.");
     const url = normalPageURL(tab.url);
     activeTab = tab;

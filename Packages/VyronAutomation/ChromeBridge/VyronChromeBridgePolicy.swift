@@ -3,7 +3,10 @@ import Foundation
 enum VyronChromeBridgePolicy {
     static let messageLimit = 512 * 1_024
     static let heartbeatLifetime: TimeInterval = 15
-    static let methods: Set<String> = ["tabs", "snapshot", "click", "fill", "navigate", "back", "forward", "reload"]
+    static let openTabsMethod = "openTabs"
+    static let methods: Set<String> = [
+        "tabs", "snapshot", "click", "fill", "navigate", "back", "forward", "reload", openTabsMethod
+    ]
     static let maximumPending = 32
 
     static var root: URL {

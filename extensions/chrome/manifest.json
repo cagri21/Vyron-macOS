@@ -2,9 +2,10 @@
   "manifest_version": 3,
   "name": "Vyron for Chrome",
   "version": "0.1.0",
-  "description": "Connect a tab to Vyron on your Mac. Read pages and review browser actions before they run.",
+  "description": "Connect Chrome to Vyron on your Mac. Open tab groups, read connected pages, and review browser actions.",
   "minimum_chrome_version": "105",
   "permissions": ["activeTab", "scripting", "nativeMessaging"],
+  "optional_permissions": ["tabGroups"],
   "background": { "service_worker": "worker.js", "type": "module" },
   "action": {
     "default_title": "Vyron for Chrome",

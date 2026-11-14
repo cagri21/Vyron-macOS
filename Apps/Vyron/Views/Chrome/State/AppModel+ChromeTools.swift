@@ -31,6 +31,8 @@ extension AppModel {
             return DevelopmentExternalResult(text: try result.encodedJSON(), isError: !result.ok)
         } catch is CancellationError {
             throw CancellationError()
+        } catch VyronChromeBridgeError.hostUpdateRequired {
+            return chromeToolFailure(VyronChromeText.hostUpdateRequired)
         } catch {
             return chromeToolFailure(error.localizedDescription)
         }
@@ -47,6 +49,9 @@ extension AppModel {
         if call.function.name == VyronChromeTools.tabs {
             guard Set(values.keys) == ["session_id"] else { throw chromeArgumentError() }
             return VyronChromeBridgeRequest(method: "tabs")
+        }
+        if call.function.name == VyronChromeTools.openTabs {
+            return try chromeOpenTabsRequest(values, allowsActions: allowsActions)
         }
         guard let tabID = chromeInteger(values["tab_id"]) else { throw chromeArgumentError() }
         var arguments = VyronChromeBridgeArguments()
@@ -83,6 +88,21 @@ extension AppModel {
         }
         guard Set(values.keys) == expected else { throw chromeArgumentError() }
         return VyronChromeBridgeRequest(method: action, arguments: arguments)
+    }
+
+    private func chromeOpenTabsRequest(
+        _ values: [String: DevelopmentJSONValue], allowsActions: Bool
+    ) throws -> VyronChromeBridgeRequest {
+        guard allowsActions, Set(values.keys) == ["session_id", "urls", "group_title"],
+            case .array(let destinations) = values["urls"],
+            case .string(let title) = values["group_title"],
+            (1...VyronChromeBridgeRequest.maximumOpenTabCount).contains(destinations.count)
+        else { throw chromeArgumentError() }
+        let urls = try destinations.map { destination in
+            guard case .string(let url) = destination else { throw chromeArgumentError() }
+            return url
+        }
+        return try VyronChromeBridgeRequest.openTabs(urls: urls, groupTitle: title)
     }
 
     private func chromeInteger(_ value: DevelopmentJSONValue?) -> Int? {

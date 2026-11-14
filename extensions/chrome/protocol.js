@@ -1,12 +1,13 @@
 export const PROTOCOL_VERSION = 1;
 export const REQUEST_LIFETIME_MS = 30_000;
 export const RESPONSE_LIMIT_BYTES = 480 * 1_024;
-export const MUTATING_METHODS = new Set(["click", "fill", "navigate", "reload"]);
+export const PAGE_MUTATIONS = new Set(["click", "fill", "navigate", "reload"]);
+export const MUTATING_METHODS = new Set([...PAGE_MUTATIONS, "openTabs"]);
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const argumentKeys = new Set(["tabID", "snapshotID", "elementID", "text", "url"]);
 const requiredArguments = {
     tabs: [],
+    openTabs: ["urls", "groupTitle"],
     snapshot: ["tabID"],
     click: ["tabID", "snapshotID", "elementID"],
     fill: ["tabID", "snapshotID", "elementID", "text"],
@@ -33,6 +34,25 @@ export function sameOriginURL(value, origin) {
     return url;
 }
 
+function openTabsArguments({ urls, groupTitle }) {
+    const encoder = new TextEncoder();
+    if (!Array.isArray(urls) || urls.length < 1 || urls.length > 8) {
+        throw new Error("Choose between one and eight URLs to open.");
+    }
+    if (typeof groupTitle !== "string" || !groupTitle || groupTitle !== groupTitle.trim()
+        || /[\p{Cc}\p{Cf}]/u.test(groupTitle) || encoder.encode(groupTitle).length > 80) {
+        throw new Error("Enter a group name of up to 80 bytes, without surrounding spaces or control characters.");
+    }
+    const destinations = urls.map(url => {
+        if (typeof url !== "string" || !/^https?:\/\/[^/]/i.test(url) || /[\p{White_Space}\p{Cc}\p{Cf}\\]/u.test(url)
+            || encoder.encode(url).length > 8_192) {
+            throw new Error("Each tab needs a normal HTTP or HTTPS URL of up to 8,192 bytes.");
+        }
+        return normalPageURL(url).href;
+    });
+    return { urls: destinations, groupTitle };
+}
+
 export function validateRequest(value, now = Date.now()) {
     if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid request.");
     if (Object.keys(value).some(key => !["version", "id", "method", "arguments", "expiresAt"].includes(key))) {
@@ -47,9 +67,10 @@ export function validateRequest(value, now = Date.now()) {
     if (!args || typeof args !== "object" || Array.isArray(args)) throw new Error("Invalid command arguments.");
     const keys = Object.keys(args);
     const expected = requiredArguments[value.method];
-    if (keys.some(key => !argumentKeys.has(key) || !expected.includes(key))
-        || expected.some(key => !(key in args))) throw new Error("Unexpected or missing command arguments.");
-    if (value.method !== "tabs" && (!Number.isSafeInteger(args.tabID) || args.tabID < 0)) {
+    if (keys.length !== expected.length || keys.some(key => !expected.includes(key))) {
+        throw new Error("Unexpected or missing command arguments.");
+    }
+    if (expected.includes("tabID") && (!Number.isSafeInteger(args.tabID) || args.tabID < 0)) {
         throw new Error("A connected tab is required.");
     }
     if ("snapshotID" in args && !isRequestID(args.snapshotID)) throw new Error("A fresh page snapshot is required.");
@@ -59,7 +80,8 @@ export function validateRequest(value, now = Date.now()) {
     if ("text" in args && (typeof args.text !== "string" || args.text.includes("\0")
         || new TextEncoder().encode(args.text).length > 8_000)) throw new Error("Text must fit within 8,000 bytes.");
     if ("url" in args) normalPageURL(args.url);
-    return { version: PROTOCOL_VERSION, id: value.id, method: value.method, arguments: { ...args }, expiresAt: value.expiresAt };
+    const normalized = value.method === "openTabs" ? openTabsArguments(args) : { ...args };
+    return { version: PROTOCOL_VERSION, id: value.id, method: value.method, arguments: normalized, expiresAt: value.expiresAt };
 }
 
 export function successResponse(id, result) {

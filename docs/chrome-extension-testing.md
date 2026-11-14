@@ -5,22 +5,18 @@ Chrome Web Store. Use regular Google Chrome on macOS and a model that supports
 Work tools. A Work conversation needs a selected project; ordinary Chat and the
 existing Mac accessibility panel do not use these extension tools.
 
-The provided test app was built from the stable app revision plus the Chrome
-feature in `.build/chrome-source-20261105`, because concurrent, unfinished image
-processing edits in the main working folder prevented a combined build. Those
-edits are preserved. The isolated source checkout is retained for inspection.
-
 ## Install the test build
 
-1. Quit your existing Vyron app when you are ready to switch. Open
-   `.build/chrome-testing/Vyron.app`. This is a separate development build; the
-   existing app bundle and saved chats/model connections are retained.
+1. Use a packaged Vyron build with its bundled `VyronChromeHost`. See
+   [Rebuild locally](#rebuild-locally) to build a separate test app. Quit the
+   running Vyron app before switching builds.
 2. Open `chrome://extensions` in Chrome and turn on **Developer mode**.
 3. Choose **Load unpacked** and select this repository's `extensions/chrome`
    folder. Load the folder, rather than the ZIP file.
 4. Copy the extension's 32-letter **ID** from its card.
 5. In Vyron, open **Settings → Mac & browser**. Paste that ID under **Chrome
-   extension**, then select **Enable Chrome connection**.
+   extension**, then select **Enable Chrome connection**. If macOS blocks the
+   registration there, use the [local installer](../extensions/chrome/README.md#load-it-locally).
 6. Open a normal HTTP or HTTPS website, such as `https://example.com`. Open
    **Vyron for Chrome** from Chrome's extensions menu and choose **Connect this
    tab**. Pin the extension for easy access to action reviews.
@@ -36,6 +32,16 @@ extension is connected; no web server or listening port is installed.
 Start a Work conversation in a selected project and send:
 
 > Use the Chrome extension to list my connected tabs and summarize the page I connected.
+
+To test opening a group, choose **Connect for opening tabs** in the extension
+popup. On first use, grant Chrome's tab-group permission and reconnect if the
+permission dialog closes the popup. Then ask:
+
+> Open https://example.com and https://www.iana.org/domains/reserved in Chrome tabs grouped as References.
+
+Review the destinations and approve once. Verify both tabs appear in
+**References** in the Chrome window where you approved the action. To read an
+opened page, select that tab and choose **Connect this tab** in the popup.
 
 For a page with a normal search field, try:
 
@@ -71,8 +77,8 @@ history under the existing conversation retention behavior.
 
 - **Host not found / connection ended:** verify that you opened the test app and
   registered this extension ID there. Do not rename/move the app after registration.
-- **No sessions:** use **Connect this tab** in Chrome, then **Refresh connection**
-  in Vyron. The extension deliberately does not reconnect automatically.
+- **No sessions:** use **Connect for opening tabs** or **Connect this tab** in
+  Chrome, then **Refresh connection** in Vyron. Reconnect after an extension reload.
 - **No browser tools in Chat:** use Work with a selected project. Include
   “Chrome extension” in your request to use these tools instead of the existing
   Mac accessibility workflow.
@@ -81,10 +87,7 @@ history under the existing conversation retention behavior.
 - **Unpacked source changed:** choose **Reload** on the extension's card at
   `chrome://extensions`, then reconnect the tab.
 
-To remove the integration, disconnect its tabs, remove the extension in Chrome,
-and remove only
-`~/Library/Application Support/Google/Chrome/NativeMessagingHosts/ai.vyron.chrome.json`.
-This does not affect Vyron chats or model connections.
+To remove the integration, follow the [extension's unregister instructions](../extensions/chrome/README.md#load-it-locally).
 
 ## Rebuild locally
 

@@ -30,8 +30,11 @@ public actor VyronChromeBridgeClient {
         try request.validate()
         attempted = attempted.filter { $0.value > Date().timeIntervalSince1970 * 1_000 }
         guard inFlight.count < VyronChromeBridgePolicy.maximumPending,
-            attempted[request.id] == nil, try sessions().contains(where: { $0.id == sessionID })
+            attempted[request.id] == nil, let session = try sessions().first(where: { $0.id == sessionID })
         else { throw VyronChromeBridgeError.unavailable }
+        if request.method == VyronChromeBridgePolicy.openTabsMethod, session.hostSupportsOpeningTabs != true {
+            throw VyronChromeBridgeError.hostUpdateRequired
+        }
         let directory = try VyronChromeBridgeDirectory.open(root, create: false)
         let mailbox = try VyronChromeBridgeMailbox(root: directory, id: sessionID, create: false)
         let name = request.id.uuidString + ".json"

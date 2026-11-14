@@ -84,7 +84,9 @@ final class VyronChromeNativeHostConnection {
     }
 
     private func heartbeat() throws {
-        try mailbox.update(VyronChromeBridgeSession(id: id, extensionID: extensionID, updatedAt: Date()))
+        try mailbox.update(VyronChromeBridgeSession(
+            id: id, extensionID: extensionID, updatedAt: Date(), hostSupportsOpeningTabs: true
+        ))
     }
 
     private func cancellation(_ requestID: UUID) throws -> Data {

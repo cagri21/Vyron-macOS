@@ -26,13 +26,19 @@ final class VyronChromeToolTests: XCTestCase {
         let context = startResponse(test, allowsActions: false)
         let result = try await test.model.executeChromeTool(action(), context: context)
         XCTAssertTrue(result.isError)
+        let openGroup = DevelopmentToolCall(name: VyronChromeTools.openTabs, arguments: [
+            "session_id": .string(UUID().uuidString), "urls": .array([.string("https://example.com")]),
+            "group_title": .string("References")
+        ])
+        let blockedGroup = try await test.model.executeChromeTool(openGroup, context: context)
+        XCTAssertTrue(blockedGroup.isError)
         let unexpected = try await test.model.executeChromeTool(
             DevelopmentToolCall(name: VyronChromeTools.sessions, arguments: ["path": .string("/private")]),
             context: context
         )
         XCTAssertTrue(unexpected.isError)
         XCTAssertTrue(VyronChromeTools.definitions.filter(\.isReadOnly).allSatisfy {
-            $0.name != VyronChromeTools.action
+            $0.name != VyronChromeTools.action && $0.name != VyronChromeTools.openTabs
         })
     }
 
@@ -75,6 +81,8 @@ final class VyronChromeToolTests: XCTestCase {
 
     func testExplicitExtensionRequestsUseWorkTools() {
         XCTAssertTrue(VyronChromeTools.prefersExtension("Use the Chrome extension to read my connected tab"))
+        XCTAssertTrue(VyronChromeTools.prefersExtension("Open and group two tabs in Chrome"))
+        XCTAssertFalse(VyronChromeTools.prefersExtension("Open Chrome"))
         XCTAssertFalse(VyronChromeTools.prefersExtension("Open Safari"))
     }
 

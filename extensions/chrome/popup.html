@@ -9,17 +9,18 @@
 <body>
   <header>
     <img src="icons/icon48.png" width="36" height="36" alt="">
-    <div><p class="eyebrow">YOUR BROWSER, WITH VYRON</p><h1>One tab at a time.</h1></div>
+    <h1>Vyron for Chrome</h1>
   </header>
   <main>
-    <p class="intro">Connect this page to the Vyron app on your Mac.</p>
+    <p class="intro">Connect Chrome to open tab groups from Vyron.</p>
+    <button id="connect-browser" class="secondary" disabled>Connect for opening tabs</button>
     <section class="page-card" aria-label="Current tab">
       <p class="eyebrow">CURRENT PAGE</p>
       <p id="page-title" class="page-title">Checking the current tab…</p>
       <p id="page-origin" class="muted"></p>
       <button id="connect" class="primary" disabled>Connect this tab</button>
     </section>
-    <p class="disclosure">While connected, Vyron can read this page’s visible text and controls. Page content may be sent to the AI provider you select in Vyron. Review each click, text entry, or navigation here before it runs.</p>
+    <p class="disclosure">Connect a page to share its visible text and controls with the model you select in Vyron. Review browser actions here before they run.</p>
     <p id="error" class="error" role="alert" hidden></p>
     <section id="reviews" aria-label="Browser actions waiting for your review" hidden>
       <h2>Waiting for your review</h2>

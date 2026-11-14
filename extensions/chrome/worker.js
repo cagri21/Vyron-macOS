@@ -5,6 +5,8 @@ import { isRequestID, sameOriginURL } from "./protocol.js";
 let nativePort = null;
 let heartbeat = null;
 let lastError = null;
+let browserConnection = null;
+let openingTabs = false;
 
 const session = new BridgeSession({ execute: executeRequest, respond, changed: publishState });
 
@@ -26,9 +28,14 @@ function endConnection(reason) {
     if (heartbeat !== null) clearInterval(heartbeat);
     heartbeat = null;
     lastError = reason;
+    browserConnection = null;
     for (const tabID of session.tabs.keys()) discardSnapshot(tabID);
     session.disconnectAll(reason);
     try { port?.disconnect(); } catch { /* A closed Chrome port needs no further cleanup. */ }
+}
+
+function closeIfUnused() {
+    if (nativePort && !browserConnection && !session.tabs.size) endConnection(null);
 }
 
 function discardSnapshot(tabID) {
@@ -49,7 +56,7 @@ function connectHost() {
         if (message?.version === 1 && message.type === "cancel" && isRequestID(message.id)) {
             session.cancel(message.id);
         } else {
-            void session.receive(message);
+            void session.receive(message, Boolean(browserConnection));
         }
     });
     port.onDisconnect.addListener(() => {
@@ -71,16 +78,62 @@ async function currentTab(connected) {
     return tab;
 }
 
-function requireLiveRequest(request, connected) {
-    if (!nativePort || session.isCancelled(request.id) || Date.now() >= request.expiresAt
+function requireLiveRequest(request, connected, port = nativePort) {
+    if (!nativePort || nativePort !== port || session.isCancelled(request.id) || Date.now() >= request.expiresAt
         || (connected && session.tabs.get(connected.id) !== connected)) {
         throw new Error("The request expired or was cancelled. No action was retried.");
     }
 }
 
-async function executeRequest(request, connected) {
+async function normalWindow(windowID) {
+    if (!Number.isSafeInteger(windowID) || windowID < 0) throw new Error("Open the popup in a regular Chrome window.");
+    const window = await chrome.windows.get(windowID);
+    if (!window || window.id !== windowID || window.incognito || window.type !== "normal") {
+        throw new Error("Open the popup in a regular Chrome window.");
+    }
+    return window;
+}
+
+async function openGroupedTabs(request, windowID) {
+    if (openingTabs) throw new Error("Wait for the approved browser action to finish.");
+    const port = nativePort;
+    const connection = browserConnection;
+    const { urls, groupTitle } = request.arguments;
+    const tabIds = [];
+    function requireLiveGroupRequest() {
+        requireLiveRequest(request, null, port);
+        if (!connection || browserConnection !== connection) throw new Error("Chrome was disconnected while opening the group.");
+    }
+    openingTabs = true;
+    try {
+        await normalWindow(windowID);
+        for (const url of urls) {
+            requireLiveGroupRequest();
+            const tab = await chrome.tabs.create({ windowId: windowID, active: false, url });
+            if (!Number.isSafeInteger(tab.id) || tab.id < 0) throw new Error("Chrome did not identify the new tab.");
+            tabIds.push(tab.id);
+        }
+        requireLiveGroupRequest();
+        const groupID = await chrome.tabs.group({ tabIds, createProperties: { windowId: windowID } });
+        requireLiveGroupRequest();
+        await chrome.tabGroups.update(groupID, { title: groupTitle });
+        requireLiveGroupRequest();
+        return { groupID, groupTitle, tabCount: tabIds.length };
+    } catch (error) {
+        const cleanup = await Promise.allSettled(tabIds.map(async tabID => chrome.tabs.remove(tabID)));
+        if (cleanup.some(result => result.status === "rejected")) {
+            throw new Error("Chrome could not finish the group or close every new tab. Check Chrome before trying again.");
+        }
+        throw error;
+    } finally {
+        openingTabs = false;
+    }
+}
+
+async function executeRequest(request, connected, windowID) {
     const args = request.arguments;
     requireLiveRequest(request, connected);
+    if (request.method === "openTabs") return openGroupedTabs(request, windowID);
     if (request.method === "tabs") {
         const tabs = [];
         for (const item of [...session.tabs.values()]) {
@@ -131,7 +184,21 @@ async function executeRequest(request, connected) {
 async function popupMessage(message) {
     switch (message?.type) {
     case "status":
-        return { ok: true, connected: Boolean(nativePort), lastError, ...session.view() };
+        return { ok: true, connected: Boolean(nativePort), browserConnected: Boolean(browserConnection), lastError, ...session.view() };
+    case "connectBrowser":
+        await normalWindow(message.windowID);
+        if (!await chrome.permissions.contains({ permissions: ["tabGroups"] })) {
+            throw new Error("Chrome needs permission to create named tab groups.");
+        }
+        browserConnection ??= Symbol("Open Chrome tab groups");
+        try { connectHost(); }
+        catch (error) { endConnection(error.message); throw error; }
+        return { ok: true };
+    case "disconnectBrowser":
+        browserConnection = null;
+        session.disconnectBrowser();
+        closeIfUnused();
+        return { ok: true };
     case "connect": {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (!tab || tab.id !== message.tabID) throw new Error("The active tab changed. Open the extension on your chosen tab again.");
@@ -143,15 +210,27 @@ async function popupMessage(message) {
     case "disconnect":
         if (session.tabs.has(message.tabID)) discardSnapshot(message.tabID);
         session.disconnect(message.tabID);
-        if (!session.tabs.size) endConnection(null);
+        closeIfUnused();
         return { ok: true };
     case "disconnectAll":
-        endConnection(null);
+        for (const tabID of session.tabs.keys()) {
+            discardSnapshot(tabID);
+            session.disconnect(tabID);
+        }
+        closeIfUnused();
         return { ok: true };
-    case "approve":
+    case "approve": {
         if (!isRequestID(message.id)) throw new Error("Invalid action review.");
-        await session.approve(message.id);
+        const request = session.pending.get(message.id)?.request;
+        if (request?.method === "openTabs") {
+            await normalWindow(message.windowID);
+            if (!await chrome.permissions.contains({ permissions: ["tabGroups"] })) {
+                throw new Error("Chrome needs permission to create a named tab group.");
+            }
+        }
+        await session.approve(message.id, message.windowID);
         return { ok: true };
+    }
     case "deny":
         session.deny(message.id);
         return { ok: true };
@@ -167,15 +246,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.tabs.onRemoved.addListener(tabID => {
+    if (!session.tabs.has(tabID)) return;
     session.disconnect(tabID, "The connected tab was closed.");
-    if (!session.tabs.size && nativePort) endConnection(null);
+    closeIfUnused();
 });
 
 chrome.tabs.onUpdated.addListener((tabID, change, tab) => {
     if (!session.tabs.has(tabID)) return;
     if (change.status === "loading" || change.url) session.invalidate(tabID);
     if (change.url || change.title || change.status === "complete") session.update(tab);
-    if (!session.tabs.size && nativePort) endConnection(null);
+    closeIfUnused();
 });
 
 // An extension update or worker restart never restores a prior page connection.

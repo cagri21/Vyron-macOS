@@ -63,6 +63,91 @@ final class VyronChromeBridgeTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(try mailbox.requests.names().isEmpty)
     }
 
+    func testOpeningGroupedTabsDispatchesWithoutAnExistingTabOrSnapshot() throws {
+        let rootURL = try makeRoot()
+        defer { removeRoot(rootURL) }
+        let root = try VyronChromeBridgeDirectory.open(rootURL, create: false)
+        let id = UUID()
+        let host = try VyronChromeNativeHostConnection(root: root, id: id, extensionID: extensionID)
+        try host.accept(hello)
+        let mailbox = try VyronChromeBridgeMailbox(root: root, id: id, create: false)
+        XCTAssertEqual(try mailbox.metadata()?.hostSupportsOpeningTabs, true)
+        let urls = ["https://example.com/articles?q=Swift%20UI", "http://example.org/"]
+        let request = try VyronChromeBridgeRequest.openTabs(urls: urls, groupTitle: "Research")
+        let data = try VyronChromeBridgePolicy.encode(request)
+        try mailbox.requests.write(request.id.uuidString + ".json", data: data)
+
+        let dispatched = try XCTUnwrap(host.outgoing().first)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: dispatched) as? [String: Any])
+        XCTAssertEqual(object["method"] as? String, "openTabs")
+        let arguments = try XCTUnwrap(object["arguments"] as? [String: Any])
+        XCTAssertEqual(Set(arguments.keys), ["urls", "groupTitle"])
+        XCTAssertEqual(arguments["urls"] as? [String], urls)
+        XCTAssertEqual(arguments["groupTitle"] as? String, "Research")
+        XCTAssertTrue(try host.outgoing().isEmpty)
+    }
+
+    func testOpeningGroupedTabsRejectsInvalidURLsCountsAndTitles() throws {
+        let validURL = "https://example.com/"
+        let invalidURLs = [
+            "javascript:void(0)", "https://", "https:/example.com", "https://user@example.com/",
+            "https://example.com/white space", "https://example.com/line\nbreak", "https://example.com\\path",
+            "https://example.com:65536/", validURL + String(repeating: "a", count: 8_192)
+        ]
+        for url in invalidURLs {
+            XCTAssertThrowsError(try VyronChromeBridgeRequest.openTabs(urls: [url], groupTitle: "Research"))
+        }
+        XCTAssertThrowsError(try VyronChromeBridgeRequest.openTabs(urls: [], groupTitle: "Research"))
+        XCTAssertThrowsError(try VyronChromeBridgeRequest.openTabs(
+            urls: Array(repeating: validURL, count: VyronChromeBridgeRequest.maximumOpenTabCount + 1),
+            groupTitle: "Research"
+        ))
+        for title in ["", " Research", "line\nbreak", "direction\u{202E}control", String(repeating: "é", count: 41)] {
+            XCTAssertThrowsError(try VyronChromeBridgeRequest.openTabs(urls: [validURL], groupTitle: title))
+        }
+    }
+
+    func testNativeHostRejectsUnexpectedOpenTabArguments() throws {
+        let rootURL = try makeRoot()
+        defer { removeRoot(rootURL) }
+        let root = try VyronChromeBridgeDirectory.open(rootURL, create: false)
+        let id = UUID()
+        let host = try VyronChromeNativeHostConnection(root: root, id: id, extensionID: extensionID)
+        try host.accept(hello)
+        let mailbox = try VyronChromeBridgeMailbox(root: root, id: id, create: false)
+        let requestID = UUID()
+        let expiresAt = Date().addingTimeInterval(30).timeIntervalSince1970 * 1_000
+        let data = Data("""
+        {"version":1,"id":"\(requestID)","method":"openTabs","expiresAt":\(expiresAt),
+         "arguments":{"urls":["https://example.com"],"groupTitle":"Research","extra":null}}
+        """.utf8)
+        try mailbox.requests.write(requestID.uuidString + ".json", data: data)
+        XCTAssertThrowsError(try host.outgoing()) { error in
+            XCTAssertEqual(error as? VyronChromeBridgeError, .invalidMessage)
+        }
+    }
+
+    func testOpeningGroupedTabsPreservesLegacyHostConnection() async throws {
+        let rootURL = try makeRoot()
+        defer { removeRoot(rootURL) }
+        let root = try VyronChromeBridgeDirectory.open(rootURL, create: false)
+        let id = UUID()
+        let mailbox = try VyronChromeBridgeMailbox(root: root, id: id, create: true)
+        try mailbox.update(VyronChromeBridgeSession(id: id, extensionID: extensionID, updatedAt: Date()))
+        let client = VyronChromeBridgeClient(root: rootURL)
+        let request = try VyronChromeBridgeRequest.openTabs(urls: ["https://example.com/"], groupTitle: "Research")
+
+        do {
+            _ = try await client.send(request, to: id)
+            XCTFail("The legacy host does not recognize the openTabs method")
+        } catch let error as VyronChromeBridgeError {
+            XCTAssertEqual(error, .hostUpdateRequired)
+        }
+        XCTAssertTrue(try mailbox.requests.names().isEmpty)
+        let sessions = try await client.sessions()
+        XCTAssertEqual(sessions.map(\.id), [id])
+    }
+
     func testCancellationBeforeDispatchRemovesRequestAndAfterDispatchSendsCancel() throws {
         let rootURL = try makeRoot()
         defer { removeRoot(rootURL) }

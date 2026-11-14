@@ -445,6 +445,7 @@
 "cancel" = "Vazgeç";
 "chat" = "Sohbet";
 "chromeExtensionID" = "Chrome uzantı kimliği";
+"chromeHostUpdateRequired" = "Sekme grupları açmak için Vyron Chrome yardımcısını güncelleyin ve yeniden bağlayın.";
 "chromeInstall" = "Chrome bağlantısını etkinleştir";
 "chromeInstalled" = "Bağlantı etkinleştirildi. Chrome’da Vyron uzantısını açın ve Bu sekmeyi bağla’yı seçin.";
 "chromeInvalidID" = "chrome://extensions sayfasında gösterilen 32 harfli uzantı kimliğini yapıştırın.";
@@ -454,7 +455,7 @@
 "chromeSetup" = "Vyron uzantısını Chrome’un geliştirici modunda yükleyin, ardından yerel bağlantıyı etkinleştirmek için uzantı kimliğini buraya yapıştırın.";
 "chromeTitle" = "Chrome uzantısı";
 "chromeUnsafePath" = "Chrome bağlantı yolu sembolik bağlantı içeriyor. Normal bir uygulama ve Chrome profil konumu seçin.";
-"chromeWorkHint" = "Bir Work sohbetinde şunu isteyin: “Chrome uzantısını kullanarak bağlı sekmemi oku.” Yalnızca bağladığınız sekmeler seçili modelinizle paylaşılır. Sayfa değişikliklerini Chrome penceresinde onaylayın. Plan modu yalnızca okuyabilir.";
+"chromeWorkHint" = "Work modunda Vyron’dan web sitelerini bir Chrome sekme grubunda açmasını veya bağlı bir sekmeyi okumasını isteyin. Tarayıcı işlemlerini Chrome uzantısında onaylayın. Modeliniz yalnızca bağladığınız sekmelerin içeriğini okuyabilir. Plan modu yalnızca okuyabilir.";
 "close" = "Kapat";
 "compactionAlreadyCompact" = "Kısaltılacak yeni mesaj yok.";
 "compactionAttachments" = "/compact komutunu kullanmadan önce gönderilmemiş ekleri kaldırın. Ekleriniz hâlâ taslakta.";

@@ -16,21 +16,28 @@ local development preview, not a Chrome Web Store release.
    --extension-id THE_ID_FROM_CHROME`. The installer writes the current user's
    Chrome native messaging manifest and a private copy in Vyron's data folder.
    Use `--dry-run` to preview both destinations.
-4. Open Vyron and a regular HTTP or HTTPS page in Chrome. Click the Vyron toolbar
-   button and choose **Connect this tab**. Connect each additional tab separately.
-5. In a Vyron **Work** conversation, ask the model to list connected Chrome tabs,
-   read one, or request an action. Open the extension popup when the toolbar badge
-   displays **!** to review and approve or decline the pending action.
+4. Open Vyron and click the Vyron toolbar button in a regular Chrome window.
+   Choose **Connect for opening tabs** to enable requests for new groups. Grant
+   Chrome's tab-group permission when prompted. Reopen the popup and choose
+   **Connect for opening tabs** again if Chrome closes it. To share a page,
+   open it and choose **Connect this tab**.
+5. In a Vyron **Work** conversation, ask to open websites in a named Chrome
+   group, read a connected tab, or request a page action. Open the extension popup
+   when the toolbar badge displays **!** to review the pending action.
 
 Moving the unpacked extension folder can change its extension ID. Moving the
 app changes the native host path. Repeat the corresponding setup if either
-changes. Removing the extension or disconnecting all tabs ends its native host
-connection. To unregister the helper, remove `ai.vyron.chrome.json` from
+changes. Use **Disconnect browser** and disconnect any shared tabs to end the
+native host connection. To unregister the helper, remove `ai.vyron.chrome.json` from
 Chrome's user-level `NativeMessagingHosts` folder and `registration.json` from
 `~/Library/Application Support/VyronAI/ChromeBridge`.
 
 ## What this preview supports
 
+- Open up to eight HTTP or HTTPS URLs as background tabs in a new named Chrome
+  group. Review the group name and each URL, then select **Approve once**. The
+  group opens in the window where you approve it. Choose **Connect this tab** on
+  any new page you want Vyron to read or interact with.
 - List explicitly connected tabs and inspect their main-frame visible text,
   links, buttons, and ordinary editable fields.
 - Request a click, fill, reload, or same-origin navigation with a fresh snapshot.

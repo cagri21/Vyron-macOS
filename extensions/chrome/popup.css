@@ -30,12 +30,15 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 button:disabled { opacity: 0.5; cursor: default; }
 .primary { color: var(--accent-ink); background: var(--accent); border: 1px solid var(--accent); width: 100%; margin-top: 14px; }
 .secondary { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+#connect-browser { width: 100%; margin-bottom: 14px; }
 .quiet { background: transparent; color: var(--muted); padding: 8px 0; border: 0; font-size: 11px; }
 .disclosure { margin-top: 14px; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .error { margin-top: 14px; color: var(--danger); font-size: 12px; overflow-wrap: anywhere; }
 .review { border: 1px solid var(--warning); background: var(--warning-surface); border-radius: 10px; padding: 12px; margin-top: 10px; }
 .review h3 { margin: 0 0 5px; font-size: 13px; }
 .review pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 11px; margin: 8px 0; max-height: 120px; overflow: auto; }
+.review .group-name { overflow-wrap: anywhere; }
+.review .group-urls { padding-left: 22px; max-height: 180px; overflow: auto; }
 .review-actions { display: flex; gap: 8px; margin-top: 10px; }
 .review-actions button { flex: 1; margin: 0; font-size: 12px; }
 .connected-tab { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }

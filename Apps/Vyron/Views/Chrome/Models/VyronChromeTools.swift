@@ -1,4 +1,5 @@
 import Foundation
+import VyronAutomation
 import VyronCore
 
 enum VyronChromeTools {
@@ -6,12 +7,13 @@ enum VyronChromeTools {
     static let tabs = "vyron_chrome_tabs"
     static let snapshot = "vyron_chrome_snapshot"
     static let action = "vyron_chrome_action"
+    static let openTabs = "vyron_chrome_open_tabs"
 
     static let definitions: [DevelopmentExternalTool] = [
         DevelopmentExternalTool(
             name: sessions,
-            description: "List local Vyron Chrome extension sessions explicitly connected by the user. "
-                + "No browser history or unconnected tabs are available. Connect a tab using the Chrome toolbar popup first.",
+            description: "List local Vyron Chrome extension sessions connected by the user through the toolbar popup. "
+                + "Use Connect for opening tabs to start a session without sharing page content.",
             inputSchema: schema(properties: [:], required: []), isReadOnly: true
         ),
         DevelopmentExternalTool(
@@ -42,6 +44,24 @@ enum VyronChromeTools {
                 )]),
                 "element_id": integer, "text": string, "url": string
             ], required: ["session_id", "tab_id", "snapshot_id", "action"]), isReadOnly: false
+        ),
+        DevelopmentExternalTool(
+            name: openTabs,
+            description: "Request opening one or more HTTP or HTTPS URLs in new background Chrome tabs in a named "
+                + "group. Use a session_id returned by vyron_chrome_sessions. The user reviews the group and every "
+                + "destination in the Chrome popup. To read or interact with an opened page, the user connects it "
+                + "separately. Never retry when the result is uncertain.",
+            inputSchema: schema(properties: [
+                "session_id": string,
+                "urls": .object([
+                    "type": .string("array"), "items": string, "minItems": .number(1),
+                    "maxItems": .number(Double(VyronChromeBridgeRequest.maximumOpenTabCount))
+                ]),
+                "group_title": .object([
+                    "type": .string("string"), "minLength": .number(1),
+                    "maxLength": .number(Double(VyronChromeBridgeRequest.maximumGroupTitleBytes))
+                ])
+            ], required: ["session_id", "urls", "group_title"]), isReadOnly: false
         )
     ]
 
@@ -51,7 +71,12 @@ enum VyronChromeTools {
 
     static func prefersExtension(_ prompt: String) -> Bool {
         let text = prompt.lowercased()
-        return ["chrome extension", "connected chrome tab", "vyron_chrome_"].contains(where: text.contains)
+        if ["chrome extension", "connected chrome tab", "vyron_chrome_"].contains(where: text.contains) {
+            return true
+        }
+        let words = Set(text.split { !$0.isLetter && !$0.isNumber })
+        return words.contains("chrome") && !words.isDisjoint(with: ["tab", "tabs"])
+            && !words.isDisjoint(with: ["open", "create", "group", "launch"])
     }
 
     private static var string: DevelopmentJSONValue { .object(["type": .string("string")]) }

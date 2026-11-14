@@ -1145,10 +1145,11 @@ The existing Python Vyron skill and command runner remain separate and unchanged
 ## Supporting Mac and browser tools
 
 **Vyron for Chrome** is available as a local Manifest V3 extension under
-`extensions/chrome`. It connects only tabs explicitly selected in its popup to
-Vyron's Work tools through a bundled native messaging helper. Read visible page
-text and numbered controls; approve clicks, text entry, same-origin navigation,
-and reload in Chrome before they run. Plan mode can only read. Set up the exact
+`extensions/chrome`. Use **Connect for opening tabs** in its popup to let Work
+request new Chrome tabs in a named group. The popup shows the group name and
+destinations for approval. Use **Connect this tab** on individual pages to let
+Work read visible text and controls. Clicks, text entry, same-origin navigation,
+and reload also need Chrome approval. Plan mode can only read. Set up the exact
 extension ID in **Settings → Mac & browser**. See
 [Chrome extension guide](../extensions/chrome/README.md) for installation,
 limitations, and rebuilding. This development extension has not been published

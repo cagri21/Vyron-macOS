@@ -1,5 +1,5 @@
 import {
-    errorResponse, isRequestID, MUTATING_METHODS, normalPageURL, sameOriginURL, successResponse, validateRequest
+    errorResponse, isRequestID, MUTATING_METHODS, normalPageURL, PAGE_MUTATIONS, sameOriginURL, successResponse, validateRequest
 } from "./protocol.js";
 
 // Session state lives only in the service worker. Restarting it disconnects every tab.
@@ -75,7 +75,7 @@ export class BridgeSession {
     }
 
     requireSnapshot(request) {
-        if (!MUTATING_METHODS.has(request.method)) return null;
+        if (!PAGE_MUTATIONS.has(request.method)) return null;
         const snapshot = this.snapshots.get(request.arguments.tabID);
         const age = this.now() - (snapshot?.capturedAt ?? 0);
         const element = snapshot?.elements.find(item => item.id === request.arguments.elementID);
@@ -86,7 +86,7 @@ export class BridgeSession {
         return element;
     }
 
-    async receive(value) {
+    async receive(value, browserConnected = false) {
         let request;
         try {
             request = validateRequest(value, this.now());
@@ -101,12 +101,15 @@ export class BridgeSession {
             }
             if (this.seen.size >= 256) throw new Error("Too many browser requests. Wait a moment and try again.");
             this.seen.set(request.id, request.expiresAt + 30_000);
-            if (request.method !== "tabs") this.requireTab(request.arguments.tabID);
+            if (request.arguments.tabID !== undefined) this.requireTab(request.arguments.tabID);
+            if (request.method === "openTabs" && !browserConnected) {
+                throw new Error("Choose Connect for opening tabs in the Vyron for Chrome popup first.");
+            }
             if (MUTATING_METHODS.has(request.method)) {
                 const target = this.requireSnapshot(request);
                 if (this.pending.size >= 8 || [...this.pending.values()].some(item =>
                     item.request.arguments.tabID === request.arguments.tabID)) {
-                    throw new Error("Review the pending action for this tab first.");
+                    throw new Error("Review the pending browser action first.");
                 }
                 const item = { request, generation: this.generation, targetLabel: target?.label, targetRole: target?.role,
                     targetURL: target?.url };
@@ -123,20 +126,28 @@ export class BridgeSession {
         }
     }
 
-    async approve(id) {
+    async approve(id, windowID) {
         const item = this.pending.get(id);
         if (!item) throw new Error("This action is no longer waiting for review.");
         this.pending.delete(id);
         this.unschedule(item.timer);
         this.changed();
         // Remove first so a second click cannot repeat a side effect.
-        await this.run(item.request, item.generation);
+        await this.run(item.request, item.generation, windowID);
     }
 
     deny(id) {
         const item = this.pending.get(id);
         if (!item) return;
         this.finishPending(item, errorResponse(id, "The browser action was declined in Chrome. No action ran."));
+    }
+
+    disconnectBrowser() {
+        for (const item of [...this.pending.values()]) {
+            if (item.request.method === "openTabs") {
+                this.finishPending(item, errorResponse(item.request.id, "Chrome was disconnected before approval."));
+            }
+        }
     }
 
     cancel(id) {
@@ -160,17 +171,17 @@ export class BridgeSession {
         this.changed();
     }
 
-    async run(request, generation) {
+    async run(request, generation, windowID) {
         try {
             if (generation !== this.generation || request.expiresAt <= this.now() || this.isCancelled(request.id)) {
                 throw new Error("The request expired or the connection ended. No action was retried.");
             }
-            const tab = request.method === "tabs" ? null : this.requireTab(request.arguments.tabID);
+            const tab = request.arguments.tabID === undefined ? null : this.requireTab(request.arguments.tabID);
             const revision = tab?.revision;
             this.requireSnapshot(request);
             if (request.method === "navigate") sameOriginURL(request.arguments.url, tab.origin);
-            if (MUTATING_METHODS.has(request.method)) this.snapshots.delete(tab.id);
-            const result = await this.execute(request, tab);
+            if (PAGE_MUTATIONS.has(request.method)) this.snapshots.delete(tab.id);
+            const result = await this.execute(request, tab, windowID);
             if (generation !== this.generation || this.isCancelled(request.id) || (tab && this.tabs.get(tab.id) !== tab)
                 || (request.method === "snapshot" && tab.revision !== revision)) {
                 throw new Error("The tab or connection changed while the command was running. Check the page before retrying.");

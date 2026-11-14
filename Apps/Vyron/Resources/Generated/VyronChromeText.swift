@@ -5,6 +5,9 @@ enum VyronChromeText {
     static var extensionID: String {
         VyronResourceBundle.string("chromeExtensionID", fallback: "Chrome extension ID")
     }
+    static var hostUpdateRequired: String {
+        VyronResourceBundle.string("chromeHostUpdateRequired", fallback: "Update and reconnect the Vyron Chrome helper to open tab groups.")
+    }
     static var install: String {
         VyronResourceBundle.string("chromeInstall", fallback: "Enable Chrome connection")
     }
@@ -37,6 +40,6 @@ enum VyronChromeText {
         VyronResourceBundle.string("chromeUnsafePath", fallback: "The Chrome connection path contains a symbolic link. Choose a regular app and Chrome profile location.")
     }
     static var workHint: String {
-        VyronResourceBundle.string("chromeWorkHint", fallback: "In a Work chat, ask: “Use the Chrome extension to read my connected tab.” Only connected tabs are shared with your selected model. Approve page changes in the Chrome popup. Plan mode can only read.")
+        VyronResourceBundle.string("chromeWorkHint", fallback: "In Work, ask Vyron to open websites in a Chrome tab group or read a connected tab. Approve browser actions in the Chrome popup. Only tabs you connect can share page content with your model. Plan mode can only read.")
     }
 }

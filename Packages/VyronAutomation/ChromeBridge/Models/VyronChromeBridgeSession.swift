@@ -4,11 +4,13 @@ public struct VyronChromeBridgeSession: Codable, Sendable, Identifiable, Equatab
     public let id: UUID
     public let extensionID: String
     public let updatedAt: Date
+    let hostSupportsOpeningTabs: Bool?
 
-    init(id: UUID, extensionID: String, updatedAt: Date) {
+    init(id: UUID, extensionID: String, updatedAt: Date, hostSupportsOpeningTabs: Bool? = nil) {
         self.id = id
         self.extensionID = extensionID
         self.updatedAt = updatedAt
+        self.hostSupportsOpeningTabs = hostSupportsOpeningTabs
     }
 
     func isLive(now: Date = Date()) -> Bool {

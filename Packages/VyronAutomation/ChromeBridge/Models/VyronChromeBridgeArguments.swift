@@ -7,6 +7,8 @@ public struct VyronChromeBridgeArguments: Codable, Sendable, Equatable {
     public var elementID: Int?
     public var text: String?
     public var url: String?
+    public internal(set) var urls: [String]?
+    public internal(set) var groupTitle: String?
 
     public init() {}
 }

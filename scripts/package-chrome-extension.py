@@ -24,6 +24,8 @@ def main():
         raise SystemExit("The extension version is invalid.")
     if set(manifest.get("permissions", [])) != {"activeTab", "scripting", "nativeMessaging"}:
         raise SystemExit("Review changed permissions before packaging.")
+    if set(manifest.get("optional_permissions", [])) != {"tabGroups"}:
+        raise SystemExit("Review changed optional permissions before packaging.")
     if any(manifest.get(key) for key in ("host_permissions", "optional_host_permissions", "externally_connectable")):
         raise SystemExit("Unexpected website or external connection access requires review.")
     sources = []

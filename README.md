@@ -116,7 +116,7 @@ for discovery, downloads, model parameters, and provider-specific behavior.
 | Integration | Setup |
 | --- | --- |
 | **MCP and Penpot** | Add a Streamable HTTP or local stdio connection in **Plugins**. Choose its tool permissions and review proposed writes. [MCP setup](docs/user-guide.md#mcp-connections-and-penpot) |
-| **Vyron for Chrome** | Load the extension locally, register its exact ID with the native host, and connect individual tabs. Page mutations require approval in Chrome. [Extension setup](extensions/chrome/README.md) |
+| **Vyron for Chrome** | Load the extension locally and register its exact ID with the native host. In Work, ask Vyron to open and group Chrome tabs or connect individual tabs for page access. Browser actions require approval in Chrome. [Extension setup](extensions/chrome/README.md) |
 | **Local Office processing** | Use macOS PDF rendering or configure the optional Python-based Office engine for supported conversion and recalculation. [Office setup](docs/user-guide.md#local-office-processing) |
 | **Local credential backup** | Run the optional loopback Docker service to store encrypted API-key backups. The encryption key stays in macOS Keychain. [Service setup](services/local-auth/README.md) |
 

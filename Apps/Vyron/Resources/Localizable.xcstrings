@@ -34930,19 +34930,42 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "In a Work chat, ask: “Use the Chrome extension to read my connected tab.” Only connected tabs are shared with your selected model. Approve page changes in the Chrome popup. Plan mode can only read."
+            "value": "In Work, ask Vyron to open websites in a Chrome tab group or read a connected tab. Approve browser actions in the Chrome popup. Only tabs you connect can share page content with your model. Plan mode can only read."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bir Work sohbetinde şunu isteyin: “Chrome uzantısını kullanarak bağlı sekmemi oku.” Yalnızca bağladığınız sekmeler seçili modelinizle paylaşılır. Sayfa değişikliklerini Chrome penceresinde onaylayın. Plan modu yalnızca okuyabilir."
+            "value": "Work modunda Vyron’dan web sitelerini bir Chrome sekme grubunda açmasını veya bağlı bir sekmeyi okumasını isteyin. Tarayıcı işlemlerini Chrome uzantısında onaylayın. Modeliniz yalnızca bağladığınız sekmelerin içeriğini okuyabilir. Plan modu yalnızca okuyabilir."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "У чаті Work попросіть: «Use the Chrome extension to read my connected tab.» Лише підключені вкладки передаються вибраній моделі. Підтверджуйте зміни сторінки у вікні розширення Chrome. Режим Plan може лише читати."
+            "value": "У режимі Work попросіть Vyron відкрити сайти в групі вкладок Chrome або прочитати підключену вкладку. Підтверджуйте дії у вікні розширення Chrome. Вміст передається моделі лише з підключених вкладок. У режимі Plan доступне лише читання."
+          }
+        }
+      }
+    },
+    "chromeHostUpdateRequired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update and reconnect the Vyron Chrome helper to open tab groups."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekme grupları açmak için Vyron Chrome yardımcısını güncelleyin ve yeniden bağlayın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновіть і підключіть знову допоміжну програму Vyron для Chrome, щоб відкривати групи вкладок."
           }
         }
       }

@@ -32,6 +32,21 @@ test("navigation accepts only credential-free normal pages on the connected orig
     }
 });
 
+test("tab groups accept only a name and a bounded list of explicit web URLs", () => {
+    const args = { urls: ["HTTPS://Example.com", "http://example.org/a#part"], groupTitle: "Trip planning" };
+    assert.deepEqual(validateRequest(request("openTabs", args), now).arguments, {
+        urls: ["https://example.com/", "http://example.org/a#part"], groupTitle: "Trip planning"
+    });
+    for (const overrides of [
+        { tabID: 12 }, { urls: [] }, { urls: Array(9).fill("https://example.com") },
+        { urls: ["https://" + "é".repeat(4094) + ".example"] },
+        { urls: ["https://example.com/a b"] }, { urls: ["https://example.com\\path"] },
+        { urls: ["https:/example.com"] }, { urls: ["chrome://newtab"] },
+        { urls: ["https://user:secret@example.com/"] }, { groupTitle: "" },
+        { groupTitle: " name" }, { groupTitle: "name\nline" }, { groupTitle: "a\u202Eb" }, { groupTitle: "é".repeat(41) }
+    ]) assert.throws(() => validateRequest(request("openTabs", { ...args, ...overrides }), now));
+});
+
 test("native responses are bounded by encoded UTF-8 bytes", () => {
     assert.equal(successResponse(id, { text: "Hello" }).ok, true);
     assert.throws(() => successResponse(id, { text: "é".repeat(450_000) }));

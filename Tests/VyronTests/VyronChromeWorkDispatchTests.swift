@@ -22,12 +22,13 @@ final class VyronChromeWorkDispatchTests: XCTestCase {
             test.model.composer.mode = mode
             test.model.computerWork.automaticRequestRouting = true
             test.model.chromeBridge = VyronChromeBridgeClient(root: test.directory.appendingPathComponent("chrome"))
-            test.send("Inspect my connected Chrome tab with the Chrome extension.")
+            test.send("Open example.com and iana.org in Chrome tabs, grouped as References.")
             try await waitUntil { await test.provider.developmentRequests.count == 1 }
             XCTAssertFalse(test.model.appNavigation.showAutomation)
             let catalogs = await test.provider.developmentToolCatalogs
             XCTAssertTrue(catalogs[0].contains { $0.name == VyronChromeTools.sessions })
             XCTAssertEqual(catalogs[0].contains { $0.name == VyronChromeTools.action }, mode == .agent)
+            XCTAssertEqual(catalogs[0].contains { $0.name == VyronChromeTools.openTabs }, mode == .agent)
             await test.provider.completeDevelopment(0, message: DevelopmentMessage(
                 role: "assistant", toolCalls: [DevelopmentToolCall(name: VyronChromeTools.sessions, arguments: [:])]
             ))
