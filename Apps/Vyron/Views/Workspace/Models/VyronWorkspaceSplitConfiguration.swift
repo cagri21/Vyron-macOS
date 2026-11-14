@@ -22,6 +22,15 @@ struct VyronWorkspaceSplitConfiguration {
         minimumContentWidth: VyronWorkspaceStyle.minimumConversationWidth
     )
 
+    func canDockPanel(available: CGFloat) -> Bool {
+        available >= minimumContentWidth + panelWidths.lowerBound + VyronWorkspaceStyle.dividerWidth
+    }
+
+    func overlayPanelWidth(preferred: CGFloat, available: CGFloat) -> CGFloat {
+        let maximumWidth = min(panelWidths.upperBound, available - VyronWorkspaceStyle.dividerWidth)
+        return max(0, min(max(preferred, panelWidths.lowerBound), maximumWidth))
+    }
+
     func panelWidth(preferred: CGFloat, available: CGFloat) -> CGFloat {
         let availablePanelWidth = available - minimumContentWidth - VyronWorkspaceStyle.dividerWidth
         let maximumWidth = max(panelWidths.lowerBound, min(panelWidths.upperBound, availablePanelWidth))

@@ -10,11 +10,11 @@ final class VyronWorkspaceSplitRenderTests: XCTestCase {
         let sidebar = VyronWorkspaceSplitConfiguration.sidebar(minimumContentWidth: 560)
         let inspector = VyronWorkspaceSplitConfiguration.inspector
 
-        let left = try render(split(isPresented: true, configuration: sidebar), width: 1_000)
+        let left = try render(split(presentation: .docked, configuration: sidebar), width: 1_000)
         XCTAssertTrue(try color(in: left, at: 20).redComponent > 0.9)
         XCTAssertTrue(try color(in: left, at: 980).greenComponent > 0.9)
 
-        let right = try render(split(isPresented: true, configuration: inspector), width: 1_000)
+        let right = try render(split(presentation: .docked, configuration: inspector), width: 1_000)
         XCTAssertTrue(try color(in: right, at: 20).greenComponent > 0.9)
         XCTAssertTrue(try color(in: right, at: 980).redComponent > 0.9)
     }
@@ -25,7 +25,7 @@ final class VyronWorkspaceSplitRenderTests: XCTestCase {
             .inspector
         ]
         for configuration in configurations {
-            let image = try render(split(isPresented: false, configuration: configuration), width: 1_000)
+            let image = try render(split(presentation: .hidden, configuration: configuration), width: 1_000)
 
             for x in [0, 299, 500, 669, 999] {
                 let sample = try color(in: image, at: x)
@@ -37,10 +37,10 @@ final class VyronWorkspaceSplitRenderTests: XCTestCase {
 
     func testNestedPanelsKeepConversationVisibleAtTheMinimumWindowSize() throws {
         let sidebar = VyronWorkspaceSplitConfiguration.sidebar(minimumContentWidth: 821)
-        let content = VyronWorkspaceSplitView(isPresented: true, configuration: sidebar) {
+        let content = VyronWorkspaceSplitView(presentation: .constant(.docked), configuration: sidebar) {
             Color(nsColor: .red)
         } content: {
-            VyronWorkspaceSplitView(isPresented: true, configuration: .inspector) {
+            VyronWorkspaceSplitView(presentation: .constant(.docked), configuration: .inspector) {
                 Color(nsColor: .blue)
             } content: {
                 Color(nsColor: .green)
@@ -56,11 +56,28 @@ final class VyronWorkspaceSplitRenderTests: XCTestCase {
         XCTAssertGreaterThan(try color(in: image, at: 1_041).blueComponent, 0.9)
     }
 
+    func testCompactOverlayKeepsTheWorkspaceInPlaceAtNarrowWidths() throws {
+        let sidebar = VyronWorkspaceSplitConfiguration.sidebar(minimumContentWidth: 560)
+        let content = VyronWorkspaceSplitView(presentation: .constant(.overlay), configuration: sidebar) {
+            Color(nsColor: .red)
+        } content: {
+            HStack(spacing: 0) {
+                Color(nsColor: .green).frame(width: 400)
+                Color(nsColor: .blue)
+            }
+        }
+        let image = try render(content, width: 668)
+
+        XCTAssertGreaterThan(try color(in: image, at: 20).redComponent, 0.9)
+        XCTAssertGreaterThan(try color(in: image, at: 350).greenComponent, 0.5)
+        XCTAssertGreaterThan(try color(in: image, at: 500).blueComponent, 0.5)
+    }
+
     private func split(
-        isPresented: Bool,
+        presentation: VyronWorkspacePanelPresentation,
         configuration: VyronWorkspaceSplitConfiguration
     ) -> some View {
-        VyronWorkspaceSplitView(isPresented: isPresented, configuration: configuration) {
+        VyronWorkspaceSplitView(presentation: .constant(presentation), configuration: configuration) {
             Color(nsColor: .red)
         } content: {
             Color(nsColor: .green)

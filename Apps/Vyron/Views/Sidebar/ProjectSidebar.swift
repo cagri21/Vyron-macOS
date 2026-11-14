@@ -11,7 +11,13 @@ struct ProjectSidebar: View {
     @State var expandedChatProjects: Set<String> = []
     @State private var showsSearch = false
     @State private var showsNotifications = false
+    @FocusState private var newTaskFocused: Bool
     @FocusState private var searchFocused: Bool
+    let presentation: VyronWorkspacePanelPresentation
+
+    init(presentation: VyronWorkspacePanelPresentation) {
+        self.presentation = presentation
+    }
 
     var query: String { model.sidebarState.sidebarSearchText.trimmingCharacters(in: .whitespacesAndNewlines) }
     var isSearching: Bool { !query.isEmpty }
@@ -40,6 +46,10 @@ struct ProjectSidebar: View {
         .background(VyronSidebarStyle.background)
         .onChange(of: showsNotifications) { _, isPresented in
             if isPresented { searchFocused = false }
+        }
+        .onChange(of: presentation) { _, presentation in
+            newTaskFocused = presentation == .overlay
+            if presentation == .hidden { searchFocused = false }
         }
         .sheet(item: $nameRequest) { request in
             VyronSidebarNameEditor(title: request.title, initialValue: request.initialValue) { name in
@@ -155,6 +165,7 @@ struct ProjectSidebar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .focused($newTaskFocused)
         .modifier(VyronSidebarRowBackground())
         .padding(.horizontal, VyronSidebarStyle.listInset)
         .padding(.bottom, VyronSidebarStyle.controlSpacing)

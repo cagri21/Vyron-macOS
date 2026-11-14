@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronSidebarProjectRow<MenuContent: View>: View {
+    @Environment(\.isEnabled) private var isEnabled
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @State private var isHovered = false
@@ -105,6 +106,12 @@ struct VyronSidebarProjectRow<MenuContent: View>: View {
         .modifier(VyronSidebarRowBackground(isSelected: selected))
         .contextMenu { menu() }
         .onHover { isHovered = $0 }
+        .onChange(of: isEnabled) { _, isEnabled in
+            guard !isEnabled else { return }
+            isHovered = false
+            dismissInfo()
+            suppressesInfoUntilExit = false
+        }
         .onDisappear { dismissInfo() }
         .sheet(isPresented: $showsEditor) {
             VyronSidebarProjectEditor(projectPath: path).environmentObject(model)
@@ -122,7 +129,7 @@ struct VyronSidebarProjectRow<MenuContent: View>: View {
 
     private func scheduleInfo(visible: Bool, immediately: Bool = false) {
         hoverTask?.cancel()
-        guard !visible || (!suppressesInfoUntilExit && !showsEditor) else { return }
+        guard !visible || (isEnabled && !suppressesInfoUntilExit && !showsEditor) else { return }
         hoverTask = Task { @MainActor in
             do {
                 let delay = visible ? VyronSidebarStyle.projectHoverDelay : VyronSidebarStyle.projectHoverDismissDelay

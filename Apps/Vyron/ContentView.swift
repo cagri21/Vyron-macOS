@@ -6,34 +6,18 @@ import VyronCore
 struct ContentView: View {
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
-    @State private var showSidebar = true
+    @State private var sidebar = VyronWorkspaceSidebarPresentation()
     @StateObject private var plugins = VyronPluginsPresentation()
     @StateObject private var skills = VyronSkillsPresentation()
     @StateObject private var workspaceTabs = VyronWorkspaceTabsPresentation()
 
     var body: some View {
         let _ = localizationLocale
-        HStack(spacing: 0) {
-            VyronNavigationRail()
-            if model.appNavigation.destination == .settings {
-                VyronSettingsView()
-            } else {
-                destinationContent
-            }
+        GeometryReader { geometry in
+            mainLayout(windowWidth: geometry.size.width)
         }
         .frame(minWidth: minimumWidth)
         .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
-        .toolbar {
-            VyronWorkspaceToolbar(showSidebar: $showSidebar, showConversation: workspaceTabs.selectConversation)
-            ToolbarItem(placement: .primaryAction) {
-                if model.appNavigation.destination == .workspace {
-                    VyronWorkspaceToolsButton()
-                        .environmentObject(workspaceTabs.library)
-                        .environmentObject(workspaceTabs)
-                }
-            }
-            .vyronPlainStyle()
-        }
         .toolbarBackground(VyronSidebarStyle.railBackground, for: .windowToolbar)
         .toolbarBackground(.visible, for: .windowToolbar)
         .sheet(isPresented: Binding(
@@ -114,8 +98,12 @@ struct ContentView: View {
             let root = workspace.standardizedFileURL.path + "/"
             if url.path.hasPrefix(root) { workspaceTabs.library.recordFile(url) }
         }
-        .onChange(of: model.selectedConversationID) { _, _ in workspaceTabs.selectConversation() }
+        .onChange(of: model.selectedConversationID) { _, _ in
+            sidebar.dismissOverlay()
+            workspaceTabs.selectConversation()
+        }
         .onReceive(model.appNavigation.$destination.dropFirst()) { destination in
+            sidebar.dismissOverlay()
             if destination == .workspace { workspaceTabs.selectConversation() }
         }
         .onChange(of: model.selectedConversation?.title) { _, title in
@@ -123,7 +111,50 @@ struct ContentView: View {
         }
     }
 
-    private var destinationContent: some View {
+    private func mainLayout(windowWidth: CGFloat) -> some View {
+        let sidebarConfiguration = VyronWorkspaceSplitConfiguration.sidebar(minimumContentWidth: minimumWorkspaceWidth)
+        let isCompact = !sidebarConfiguration.canDockPanel(available: windowWidth - VyronSidebarStyle.railWidth)
+        let presentation = sidebar.panelPresentation(isCompact: isCompact)
+
+        return HStack(spacing: 0) {
+            VyronNavigationRail(
+                showsNewTask: model.appNavigation.destination == .workspace && presentation != .docked
+            )
+            if model.appNavigation.destination == .settings {
+                VyronSettingsView()
+            } else {
+                destinationContent(
+                    sidebarPresentation: Binding(
+                        get: { sidebar.panelPresentation(isCompact: isCompact) },
+                        set: { if $0 == .hidden { sidebar.dismissOverlay() } }
+                    ),
+                    sidebarConfiguration: sidebarConfiguration
+                )
+            }
+        }
+        .toolbar {
+            VyronWorkspaceToolbar(
+                isSidebarPresented: presentation != .hidden,
+                toggleSidebar: { sidebar.toggle(isCompact: isCompact) },
+                showConversation: workspaceTabs.selectConversation
+            )
+            ToolbarItem(placement: .primaryAction) {
+                if model.appNavigation.destination == .workspace {
+                    VyronWorkspaceToolsButton()
+                        .environmentObject(workspaceTabs.library)
+                        .environmentObject(workspaceTabs)
+                }
+            }
+            .vyronPlainStyle()
+        }
+        .onChange(of: isCompact) { _, _ in sidebar.dismissOverlay() }
+        .onExitCommand(perform: presentation == .overlay ? { sidebar.dismissOverlay() } : nil)
+    }
+
+    private func destinationContent(
+        sidebarPresentation: Binding<VyronWorkspacePanelPresentation>,
+        sidebarConfiguration: VyronWorkspaceSplitConfiguration
+    ) -> some View {
         Group {
             if model.appNavigation.destination == .plugins {
                 VyronCustomizeSidebar(connections: model.mcpConnections, presentation: plugins)
@@ -138,10 +169,10 @@ struct ContentView: View {
                 }
             } else {
                 VyronWorkspaceSplitView(
-                    isPresented: showSidebar,
-                    configuration: .sidebar(minimumContentWidth: minimumWorkspaceWidth)
+                    presentation: sidebarPresentation,
+                    configuration: sidebarConfiguration
                 ) {
-                    ProjectSidebar()
+                    ProjectSidebar(presentation: sidebarPresentation.wrappedValue)
                 } content: {
                     workspace
                 }
@@ -156,14 +187,13 @@ struct ContentView: View {
         if model.appNavigation.destination == .plugins {
             return VyronSidebarStyle.railWidth + VyronPluginsStyle.sidebarWidth + VyronPluginsStyle.minimumPageWidth
         }
-        let workspaceMinimum = minimumWorkspaceWidth + VyronSidebarStyle.railWidth
-            + (showSidebar ? VyronWorkspaceStyle.minimumSidebarWidth + VyronWorkspaceStyle.dividerWidth : 0)
-        return max(VyronWorkspaceStyle.minimumWindowWidth, workspaceMinimum)
+        return max(VyronWorkspaceStyle.minimumWindowWidth, minimumWorkspaceWidth + VyronSidebarStyle.railWidth)
     }
 
     private var minimumWorkspaceWidth: CGFloat {
         VyronWorkspaceStyle.minimumConversationWidth
-            + (showsInspector ? VyronWorkspaceStyle.minimumInspectorWidth + VyronWorkspaceStyle.dividerWidth : 0)
+            + (showsInspector && workspaceTabs.tabs.selectedTab.kind == .conversation
+                ? VyronWorkspaceStyle.minimumInspectorWidth + VyronWorkspaceStyle.dividerWidth : 0)
     }
 
     private var workspace: some View {
@@ -190,7 +220,10 @@ struct ContentView: View {
             VyronWorkspaceTerminalSplitView(isPresented: !model.isChatWorkspace && model.inspector.showTerminal) {
                 DevelopmentTerminal()
             } content: {
-                VyronWorkspaceSplitView(isPresented: showsInspector, configuration: .inspector) {
+                VyronWorkspaceSplitView(
+                    presentation: .constant(showsInspector ? .docked : .hidden),
+                    configuration: .inspector
+                ) {
                     if model.appNavigation.trackingSelection != nil {
                         VyronActivityPanel()
                     } else {

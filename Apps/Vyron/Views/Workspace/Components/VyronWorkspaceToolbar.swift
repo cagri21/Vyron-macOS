@@ -2,13 +2,14 @@ import SwiftUI
 
 struct VyronWorkspaceToolbar: ToolbarContent {
     @EnvironmentObject private var model: AppModel
-    @Binding var showSidebar: Bool
+    let isSidebarPresented: Bool
+    let toggleSidebar: () -> Void
     var showConversation: () -> Void = {}
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .navigation) {
             if model.appNavigation.destination == .workspace {
-                VyronWorkspaceNavigationControls(showSidebar: $showSidebar)
+                VyronWorkspaceNavigationControls(isSidebarPresented: isSidebarPresented, toggleSidebar: toggleSidebar)
             }
         }
         .vyronPlainStyle()

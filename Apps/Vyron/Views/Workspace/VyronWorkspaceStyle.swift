@@ -27,6 +27,7 @@ enum VyronWorkspaceStyle {
     static let panelResizeTargetWidth: CGFloat = 8
     static let panelResizeAccessibilityStep: CGFloat = 20
     static let panelAnimation = Animation.easeOut(duration: 0.24)
+    static let sidebarOverlayScrimOpacity = 0.30
     static let headerSideWidth: CGFloat = 100
     static let headerControlSpacing: CGFloat = 6
     static let modeInset: CGFloat = 2

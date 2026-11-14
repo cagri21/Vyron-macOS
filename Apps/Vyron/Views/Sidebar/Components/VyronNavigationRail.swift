@@ -3,6 +3,7 @@ import SwiftUI
 struct VyronNavigationRail: View {
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
+    let showsNewTask: Bool
 
     var body: some View {
         let _ = localizationLocale
@@ -13,6 +14,11 @@ struct VyronNavigationRail: View {
                 selected: model.appNavigation.destination == .workspace
             ) {
                 model.returnToWorkspace()
+            }
+            if showsNewTask {
+                railButton(VyronSidebarText.newTask, symbol: VyronSymbols.newTask) {
+                    model.requestNewTask()
+                }
             }
             railButton(
                 VyronScheduledTaskText.scheduledTasks,

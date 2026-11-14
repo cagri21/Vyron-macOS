@@ -2,15 +2,17 @@ import SwiftUI
 
 struct VyronWorkspaceNavigationControls: View {
     @Environment(\.locale) private var localizationLocale
-    @Binding var showSidebar: Bool
+    let isSidebarPresented: Bool
+    let toggleSidebar: () -> Void
 
     var body: some View {
         let _ = localizationLocale
-        Button { showSidebar.toggle() } label: {
+        Button(action: toggleSidebar) {
             VyronWorkspaceHeaderIcon(symbol: VyronSymbols.sidebarLeft)
         }
         .buttonStyle(.plain)
-        .help(showSidebar ? VyronWorkspaceText.hideSidebar : VyronWorkspaceText.showSidebar)
-        .accessibilityLabel(showSidebar ? VyronWorkspaceText.hideSidebar : VyronWorkspaceText.showSidebar)
+        .keyboardShortcut("b", modifiers: .command)
+        .help(isSidebarPresented ? VyronWorkspaceText.hideSidebar : VyronWorkspaceText.showSidebar)
+        .accessibilityLabel(isSidebarPresented ? VyronWorkspaceText.hideSidebar : VyronWorkspaceText.showSidebar)
     }
 }
