@@ -31,7 +31,7 @@ extension AppModel: VyronVoiceConversation {
         defer { voice.isSendingTurn = false }
         send()
         guard let activeGeneration = foregroundRun.activeGeneration else { return false }
-        voice.generationID = foregroundRun.activeGeneration
+        voice.generationID = activeGeneration
         return true
     }
 

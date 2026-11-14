@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronUserInputRequestView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     let request: VyronUserInputRequest
@@ -37,8 +38,8 @@ struct VyronUserInputRequestView: View {
             .frame(height: min(contentHeight, VyronUserInputStyle.maximumQuestionsHeight))
         }
         .padding(VyronUserInputStyle.padding)
-        .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronUserInputStyle.radius))
-        .overlay(RoundedRectangle(cornerRadius: VyronUserInputStyle.radius).stroke(Palette.border))
+        .background(palette.field, in: RoundedRectangle(cornerRadius: VyronUserInputStyle.radius))
+        .overlay(RoundedRectangle(cornerRadius: VyronUserInputStyle.radius).stroke(palette.border))
         .disabled(!isCurrentRequest)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(VyronQuestionText.waitingForAnswer)
@@ -63,7 +64,7 @@ struct VyronUserInputRequestView: View {
             .accessibilityLabel(VyronQuestionText.dismiss)
         }
         .font(VyronUserInputStyle.option)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
     }
 
     private var actions: some View {
@@ -76,22 +77,22 @@ struct VyronUserInputRequestView: View {
             }
             .padding(.horizontal, VyronUserInputStyle.actionHorizontalPadding)
             .padding(.vertical, VyronUserInputStyle.actionVerticalPadding)
-            .background(Palette.selection, in: Capsule())
-            .overlay(Capsule().stroke(Palette.border))
+            .background(palette.selection, in: Capsule())
+            .overlay(Capsule().stroke(palette.border))
             .disabled(draft.responseSkippingUnanswered(
                 to: request, skippedAnswer: VyronQuestionText.skippedAnswer
             ) == nil)
 
             Button(VyronQuestionText.send, action: submit)
-                .foregroundStyle(Palette.onAccent)
+                .foregroundStyle(palette.onAccent)
                 .padding(.horizontal, VyronUserInputStyle.actionHorizontalPadding)
                 .padding(.vertical, VyronUserInputStyle.actionVerticalPadding)
-                .background(Palette.text, in: Capsule())
+                .background(palette.text, in: Capsule())
                 .opacity(draft.response(to: request) == nil ? 0.4 : 1)
                 .disabled(draft.response(to: request) == nil)
         }
         .font(VyronUserInputStyle.option)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .buttonStyle(.plain)
         .fixedSize()
     }

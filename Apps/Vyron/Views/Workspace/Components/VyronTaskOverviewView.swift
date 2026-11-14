@@ -3,6 +3,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronTaskOverviewView: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
     @State private var showsAllSources = false
@@ -25,8 +26,8 @@ struct VyronTaskOverviewView: View {
             maxHeight: VyronTaskOverviewStyle.maximumHeight
         )
         .font(VyronTaskOverviewStyle.body)
-        .foregroundStyle(Palette.text)
-        .background(Palette.surface)
+        .foregroundStyle(palette.text)
+        .background(palette.surface)
         .onChange(of: context.conversationID) { _, _ in
             showsAllSources = false
             selectedSourceID = nil
@@ -36,7 +37,7 @@ struct VyronTaskOverviewView: View {
     private func projectSection(_ context: VyronTaskOverviewSnapshot) -> some View {
         VStack(alignment: .leading, spacing: VyronTaskOverviewStyle.rowSpacing) {
             Text(verbatim: context.project.name ?? VyronHeaderText.overview)
-                .font(VyronTaskOverviewStyle.heading).foregroundStyle(Palette.muted)
+                .font(VyronTaskOverviewStyle.heading).foregroundStyle(palette.muted)
                 .lineLimit(1).truncationMode(.middle)
             if context.project.path != nil {
                 Button {
@@ -48,7 +49,7 @@ struct VyronTaskOverviewView: View {
                         Text(VyronHeaderText.changes)
                         Spacer(minLength: 0)
                         Text(context.project.changes.count, format: .number)
-                            .foregroundStyle(Palette.muted).monospacedDigit()
+                            .foregroundStyle(palette.muted).monospacedDigit()
                     }
                     .contentShape(Rectangle())
                 }
@@ -72,7 +73,7 @@ struct VyronTaskOverviewView: View {
                 }
             }
             if context.project.outputs.isEmpty {
-                Text(VyronHeaderText.noOutputs).foregroundStyle(Palette.muted)
+                Text(VyronHeaderText.noOutputs).foregroundStyle(palette.muted)
             } else {
                 ForEach(context.project.outputs, id: \.path) { output in
                     Button {
@@ -104,12 +105,12 @@ struct VyronTaskOverviewView: View {
         return VStack(alignment: .leading, spacing: VyronTaskOverviewStyle.rowSpacing) {
             sectionTitle(VyronHeaderText.subagents)
             if workers.isEmpty {
-                Text(VyronHeaderText.noSubagents).foregroundStyle(Palette.muted)
+                Text(VyronHeaderText.noSubagents).foregroundStyle(palette.muted)
             } else {
                 HStack {
                     Label(VyronHeaderText.workingCount(working), systemImage: VyronSymbols.subagents)
                     Spacer(minLength: 0)
-                    Text(VyronHeaderText.doneCount(done)).foregroundStyle(Palette.muted)
+                    Text(VyronHeaderText.doneCount(done)).foregroundStyle(palette.muted)
                 }
                 ForEach(workers) { worker in
                     Button {
@@ -122,7 +123,7 @@ struct VyronTaskOverviewView: View {
                             Text(VyronTrackingPresentation.status(
                                 worker.activity.state == .working && !isLive ? .stopped : worker.activity.state
                             ))
-                                .foregroundStyle(Palette.muted)
+                                .foregroundStyle(palette.muted)
                         }
                         .contentShape(Rectangle())
                     }
@@ -153,7 +154,7 @@ struct VyronTaskOverviewView: View {
                 .help(VyronHeaderText.addSource).accessibilityLabel(VyronHeaderText.addSource)
             }
             if context.sources.isEmpty {
-                Text(VyronHeaderText.noSources).foregroundStyle(Palette.muted)
+                Text(VyronHeaderText.noSources).foregroundStyle(palette.muted)
             } else {
                 ForEach(showsAllSources ? sources : Array(sources.prefix(
                     VyronTaskOverviewStyle.visibleSourceCount
@@ -201,6 +202,6 @@ struct VyronTaskOverviewView: View {
     }
 
     private func sectionTitle(_ title: String) -> some View {
-        Text(verbatim: title).font(VyronTaskOverviewStyle.heading).foregroundStyle(Palette.muted)
+        Text(verbatim: title).font(VyronTaskOverviewStyle.heading).foregroundStyle(palette.muted)
     }
 }

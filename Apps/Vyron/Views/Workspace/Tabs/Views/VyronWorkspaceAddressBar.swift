@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct VyronWorkspaceAddressBar: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var presentation: VyronWorkspaceTabsPresentation
     @State private var input = ""
     @FocusState private var isFocused: Bool
@@ -43,7 +44,7 @@ struct VyronWorkspaceAddressBar: View {
                 .padding(.horizontal, VyronWorkspaceTabsStyle.padding)
                 .frame(minWidth: VyronWorkspaceTabsStyle.minimumAddressWidth)
                 .frame(height: VyronWorkspaceTabsStyle.controlSize)
-                .background(Palette.field, in: Capsule())
+                .background(palette.field, in: Capsule())
                 control(
                     VyronBrowserText.openExternal, symbol: VyronSymbols.browserExternal,
                     enabled: !navigation.address.isEmpty
@@ -59,7 +60,7 @@ struct VyronWorkspaceAddressBar: View {
             .frame(height: VyronWorkspaceTabsStyle.chromeHeight)
             if let error = presentation.addressError ?? presentation.tabs.errorMessage {
                 Text(error)
-                    .font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(Palette.muted)
+                    .font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(palette.muted)
                     .padding(.horizontal, VyronWorkspaceTabsStyle.padding)
                     .padding(.bottom, VyronWorkspaceTabsStyle.spacing)
                     .frame(maxWidth: .infinity, alignment: .leading)

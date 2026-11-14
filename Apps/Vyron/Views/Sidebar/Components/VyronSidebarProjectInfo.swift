@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronSidebarProjectInfo: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     let path: String
@@ -15,7 +16,7 @@ struct VyronSidebarProjectInfo: View {
                 Text(verbatim: model.sidebarProjectName(path)).lineLimit(1)
                 Spacer(minLength: 0)
                 if model.sidebarState.sidebarOrganization.isPinned(.project(path)) {
-                    Image(systemName: VyronSymbols.pinFilled).foregroundStyle(Palette.muted)
+                    Image(systemName: VyronSymbols.pinFilled).foregroundStyle(palette.muted)
                         .accessibilityLabel(VyronSidebarText.pin)
                 }
             }
@@ -25,7 +26,7 @@ struct VyronSidebarProjectInfo: View {
                         + " · " + VyronSidebarText.projectActiveCount(model.sidebarProjectActiveChatCount(path))
                 )
             } icon: {
-                Image(systemName: VyronSymbols.chat).foregroundStyle(Palette.muted)
+                Image(systemName: VyronSymbols.chat).foregroundStyle(palette.muted)
             }
             Divider()
             sourceFolders
@@ -35,11 +36,11 @@ struct VyronSidebarProjectInfo: View {
             }
         }
         .font(VyronSidebarStyle.rowFont)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .buttonStyle(.plain)
         .padding(VyronSidebarStyle.projectInfoPadding)
         .frame(width: VyronSidebarStyle.projectInfoWidth, alignment: .leading)
-        .background(Palette.raised)
+        .background(palette.raised)
     }
 
     private var sourceFolders: some View {
@@ -55,7 +56,7 @@ struct VyronSidebarProjectInfo: View {
                                 .lineLimit(1)
                                 .truncationMode(.middle)
                         } icon: {
-                            Image(systemName: VyronSymbols.folder).foregroundStyle(Palette.muted)
+                            Image(systemName: VyronSymbols.folder).foregroundStyle(palette.muted)
                         }
                     }
                     .help(source)

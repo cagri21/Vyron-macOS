@@ -1,20 +1,21 @@
 import SwiftUI
 
 struct VyronWorkspaceRecentRow: View {
+    @Environment(\.vyronPalette) private var palette
     let item: VyronWorkspaceRecentItem
 
     var body: some View {
         HStack(spacing: VyronWorkspaceToolsStyle.padding) {
             Image(systemName: symbol)
-                .foregroundStyle(Palette.controlAccent)
+                .foregroundStyle(palette.controlAccent)
                 .frame(width: VyronWorkspaceToolsStyle.iconWidth)
             VStack(alignment: .leading, spacing: VyronWorkspaceToolsStyle.gridSpacing) {
                 Text(item.title).font(VyronWorkspaceToolsStyle.controlFont).lineLimit(1)
-                Text(kind).font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(Palette.muted)
+                Text(kind).font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(palette.muted)
             }
             Spacer(minLength: 0)
             Text(item.openedAt, style: .time)
-                .font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(Palette.muted)
+                .font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(palette.muted)
         }
         .padding(VyronWorkspaceToolsStyle.padding)
         .contentShape(Rectangle())

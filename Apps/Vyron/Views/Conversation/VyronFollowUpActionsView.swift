@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronFollowUpActionsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     let submit: () -> Void
@@ -13,7 +14,7 @@ struct VyronFollowUpActionsView: View {
                 Button(VyronScheduledTaskText.cancel) { model.composer.cancelQueuedMessageEdit() }
                     .font(VyronFollowUpStyle.caption)
                     .buttonStyle(.plain)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .keyboardShortcut(.cancelAction)
             } else if model.foregroundRun.isGenerating {
                 Menu {
@@ -25,7 +26,7 @@ struct VyronFollowUpActionsView: View {
                     Image(systemName: model.composer.queueMessages
                         ? VyronSymbols.messageQueue : VyronSymbols.messageSteer)
                         .font(VyronFollowUpStyle.icon)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
@@ -39,7 +40,7 @@ struct VyronFollowUpActionsView: View {
                         .font(VyronFollowUpStyle.icon)
                         .frame(width: VyronFollowUpStyle.actionSize, height: VyronFollowUpStyle.actionSize)
                         .background(
-                            Palette.field,
+                            palette.field,
                             in: Circle()
                         )
                 }
@@ -51,10 +52,10 @@ struct VyronFollowUpActionsView: View {
                 Button(action: submit) {
                     Image(systemName: sendSymbol)
                         .font(VyronFollowUpStyle.sendIcon)
-                        .foregroundStyle(canSubmit ? Palette.text : Palette.muted)
+                        .foregroundStyle(canSubmit ? palette.onControlAccent : palette.muted)
                         .frame(width: VyronFollowUpStyle.actionSize, height: VyronFollowUpStyle.actionSize)
                         .background(
-                            canSubmit ? Palette.controlAccent : Palette.field,
+                            canSubmit ? palette.controlAccent : palette.field,
                             in: Circle()
                         )
                 }

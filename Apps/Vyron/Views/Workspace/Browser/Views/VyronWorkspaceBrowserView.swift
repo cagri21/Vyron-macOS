@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceBrowserView: View {
+    @Environment(\.vyronPalette) private var palette
     @ObservedObject var browser: VyronWorkspaceBrowserModel
     let openedLink: (URL) -> Void
 
@@ -15,7 +16,7 @@ struct VyronWorkspaceBrowserView: View {
                 ProgressView(VyronBrowserText.loading)
                     .controlSize(.small)
                     .padding(VyronWorkspaceBrowserStyle.spacing)
-                    .background(Palette.surface, in: Capsule())
+                    .background(palette.surface, in: Capsule())
                     .padding(VyronWorkspaceBrowserStyle.padding)
                     .allowsHitTesting(false)
             }
@@ -31,10 +32,10 @@ struct VyronWorkspaceBrowserView: View {
                 .frame(maxWidth: VyronWorkspaceBrowserStyle.messageWidth)
                 .padding(VyronWorkspaceBrowserStyle.padding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Palette.canvas)
+                .background(palette.canvas)
             }
         }
-        .foregroundStyle(Palette.text)
-        .background(Palette.canvas)
+        .foregroundStyle(palette.text)
+        .background(palette.canvas)
     }
 }

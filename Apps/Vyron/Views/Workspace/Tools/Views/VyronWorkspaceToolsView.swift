@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct VyronWorkspaceToolsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var locale
     @EnvironmentObject private var library: VyronWorkspaceLibraryModel
     @EnvironmentObject private var presentation: VyronWorkspaceTabsPresentation
@@ -29,7 +30,7 @@ struct VyronWorkspaceToolsView: View {
                     Text(error).font(VyronWorkspaceToolsStyle.captionFont).textSelection(.enabled)
                     Button(VyronToolsText.retry) { library.reload() }
                 }
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -47,12 +48,12 @@ struct VyronWorkspaceToolsView: View {
                     Label(VyronToolsText.addLink, systemImage: VyronSymbols.plus)
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .font(VyronWorkspaceToolsStyle.captionFont)
             }
             if library.links.isEmpty {
                 Text(VyronToolsText.noLinks)
-                    .font(VyronWorkspaceToolsStyle.controlFont).foregroundStyle(Palette.muted)
+                    .font(VyronWorkspaceToolsStyle.controlFont).foregroundStyle(palette.muted)
             } else {
                 LazyVGrid(
                     columns: [GridItem(.adaptive(minimum: 120), spacing: VyronWorkspaceToolsStyle.padding)],
@@ -63,7 +64,7 @@ struct VyronWorkspaceToolsView: View {
                             VStack(spacing: VyronWorkspaceToolsStyle.padding) {
                                 Image(systemName: VyronSymbols.web)
                                     .font(.system(size: VyronWorkspaceToolsStyle.shortcutIconSize))
-                                    .foregroundStyle(Palette.controlAccent)
+                                    .foregroundStyle(palette.controlAccent)
                                 Text(link.title).lineLimit(1).truncationMode(.tail)
                                     .font(VyronWorkspaceToolsStyle.controlFont)
                             }
@@ -89,11 +90,11 @@ struct VyronWorkspaceToolsView: View {
                 Spacer()
                 Button(VyronToolsText.openFile, action: chooseFile)
                     .buttonStyle(.plain).font(VyronWorkspaceToolsStyle.captionFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
             if library.recents.isEmpty {
                 Text(VyronToolsText.noRecents)
-                    .font(VyronWorkspaceToolsStyle.controlFont).foregroundStyle(Palette.muted)
+                    .font(VyronWorkspaceToolsStyle.controlFont).foregroundStyle(palette.muted)
             } else {
                 VStack(spacing: 0) {
                     ForEach(visibleRecents) { recent in
@@ -106,7 +107,7 @@ struct VyronWorkspaceToolsView: View {
                         }
                     }
                 }
-                .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceToolsStyle.cornerRadius))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceToolsStyle.cornerRadius))
                 if library.recents.count > VyronWorkspaceToolsStyle.recentLimit {
                     Button(showsAllRecents ? VyronToolsText.showLess : VyronToolsText.showAll) {
                         showsAllRecents.toggle()
@@ -125,11 +126,11 @@ struct VyronWorkspaceToolsView: View {
                         performTool { presentation.openPage(page) }
                     } label: {
                         HStack(spacing: VyronWorkspaceToolsStyle.padding) {
-                            Image(systemName: VyronSymbols.newPage).foregroundStyle(Palette.controlAccent)
+                            Image(systemName: VyronSymbols.newPage).foregroundStyle(palette.controlAccent)
                             Text(page.displayTitle).lineLimit(1)
                             Spacer()
                             Text(page.updatedAt, style: .date)
-                                .font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(Palette.muted)
+                                .font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(palette.muted)
                         }
                         .padding(VyronWorkspaceToolsStyle.padding)
                         .contentShape(Rectangle())

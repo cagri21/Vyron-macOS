@@ -4,6 +4,8 @@ import SwiftUI
 /// Click-through feedback for a native action that has already succeeded.
 @MainActor
 final class VyronComputerActionOverlay {
+    // This badge also appears over other apps, separate from Vyron's windows.
+    private let palette = VyronAppearancePalette.default
     private var panel: NSPanel?
     private var pointer: NSPanel?
     private var badge: NSPanel?
@@ -38,7 +40,7 @@ final class VyronComputerActionOverlay {
         let overlay = makePanel(frame: frame)
         overlay.contentView = NSHostingView(
             rootView: RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.highlightRadius)
-                .strokeBorder(Palette.controlAccent, lineWidth: VyronComputerPreviewStyle.highlightWidth)
+                .strokeBorder(palette.controlAccent, lineWidth: VyronComputerPreviewStyle.highlightWidth)
                 .padding(VyronComputerPreviewStyle.highlightInset)
         )
         panel = overlay
@@ -68,13 +70,13 @@ final class VyronComputerActionOverlay {
         overlay.contentView = NSHostingView(
             rootView: Label(title, systemImage: VyronSymbols.computerPreview)
                 .font(VyronComputerPreviewStyle.title)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .lineLimit(1)
                 .padding(VyronComputerPreviewStyle.padding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Palette.canvas, in: RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius))
+                .background(palette.canvas, in: RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius))
                 .overlay {
-                    RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius).stroke(Palette.controlAccent)
+                    RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius).stroke(palette.controlAccent)
                 }
         )
         badge = overlay

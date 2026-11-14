@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronResponseSpeedControl: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var model: AppModel
@@ -12,19 +13,19 @@ struct VyronResponseSpeedControl: View {
         VStack(alignment: .leading, spacing: VyronEffortStyle.speedDetailSpacing) {
             HStack {
                 Text(VyronWorkspaceText.responseSpeed)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 Spacer(minLength: 0)
                 HStack(spacing: 0) {
                     choice(.standard)
                     choice(.fast)
                 }
-                .background(Palette.surface, in: Capsule())
+                .background(palette.surface, in: Capsule())
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(VyronWorkspaceText.responseSpeed)
             }
             Text(selectionFailed ? VyronWorkspaceText.speedChangeFailed : description)
                 .font(VyronEffortStyle.speedCaption)
-                .foregroundStyle(selectionFailed ? Palette.warning : Palette.muted)
+                .foregroundStyle(selectionFailed ? palette.warning : palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
                 .help(
                     selectionFailed
@@ -47,7 +48,7 @@ struct VyronResponseSpeedControl: View {
         } label: {
             Text(VyronInferenceSelectionPresentation.speedTitle(speed))
                 .font(VyronEffortStyle.speedCaption)
-                .foregroundStyle(model.responseSpeed == speed ? Palette.text : Palette.muted)
+                .foregroundStyle(model.responseSpeed == speed ? palette.text : palette.muted)
                 .padding(.horizontal, VyronEffortStyle.speedButtonHorizontalPadding)
                 .padding(.vertical, VyronEffortStyle.speedButtonVerticalPadding)
                 .background(selectionColor(speed), in: Capsule())
@@ -62,6 +63,6 @@ struct VyronResponseSpeedControl: View {
 
     private func selectionColor(_ speed: VyronResponseSpeed) -> Color {
         guard model.responseSpeed == speed else { return .clear }
-        return speed == .fast ? Palette.effortAccent.opacity(VyronEffortStyle.speedSelectedOpacity) : Palette.raised
+        return speed == .fast ? Palette.effortAccent.opacity(VyronEffortStyle.speedSelectedOpacity) : palette.raised
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronChatHandoffSheet: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var model: AppModel
@@ -33,10 +34,10 @@ struct VyronChatHandoffSheet: View {
             Text(VyronHandoffText.title).font(VyronChatHandoffStyle.titleFont)
             Text(VyronHandoffText.explanation)
                 .font(VyronChatHandoffStyle.bodyFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
             if projects.isEmpty {
-                Text(VyronHandoffText.noProjects).foregroundStyle(Palette.warning)
+                Text(VyronHandoffText.noProjects).foregroundStyle(palette.warning)
             } else {
                 destinationFields
                 requestField
@@ -44,19 +45,19 @@ struct VyronChatHandoffSheet: View {
                     .font(VyronChatHandoffStyle.bodyFont)
                 Text(VyronHandoffText.contextLimit)
                     .font(VyronChatHandoffStyle.detailFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if let error = state.error {
                 Text(verbatim: error)
                     .font(VyronChatHandoffStyle.detailFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if !model.canPrepareChatHandoff(presentation), !state.isSaving {
                 Text(VyronHandoffText.busy)
                     .font(VyronChatHandoffStyle.detailFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
             }
             Divider()
             HStack {
@@ -76,9 +77,9 @@ struct VyronChatHandoffSheet: View {
         }
         .padding(VyronChatHandoffStyle.padding)
         .frame(width: VyronChatHandoffStyle.width)
-        .background(Palette.canvas)
-        .foregroundStyle(Palette.text)
-        .tint(Palette.controlAccent)
+        .background(palette.canvas)
+        .foregroundStyle(palette.text)
+        .tint(palette.controlAccent)
         .interactiveDismissDisabled(state.isSaving)
         .onAppear(perform: initialize)
         .onChange(of: state.selection.projectPath) { _, _ in
@@ -135,17 +136,17 @@ struct VyronChatHandoffSheet: View {
                 .scrollContentBackground(.hidden)
                 .padding(VyronChatHandoffStyle.requestPadding)
                 .frame(height: VyronChatHandoffStyle.requestHeight)
-                .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronChatHandoffStyle.cornerRadius))
+                .background(palette.field, in: RoundedRectangle(cornerRadius: VyronChatHandoffStyle.cornerRadius))
                 .overlay {
                     RoundedRectangle(cornerRadius: VyronChatHandoffStyle.cornerRadius)
-                        .stroke(Palette.border, lineWidth: VyronChatHandoffStyle.borderWidth)
+                        .stroke(palette.border, lineWidth: VyronChatHandoffStyle.borderWidth)
                 }
                 .accessibilityLabel(VyronHandoffText.request)
                 .disabled(state.isSaving)
             if let failure = VyronChatHandoffContext.requestError(state.request) {
                 Text(verbatim: failure)
                     .font(VyronChatHandoffStyle.detailFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
             }
         }
     }

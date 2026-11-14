@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronInferenceSelectionLabel: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let modelName: String
     let effort: AgentEffort
@@ -21,10 +22,10 @@ struct VyronInferenceSelectionLabel: View {
     private var label: some View {
         HStack(spacing: VyronEffortStyle.controlSpacing) {
             Image(systemName: VyronSymbols.model)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .accessibilityHidden(true)
             Text(verbatim: modelName)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .layoutPriority(-1)
@@ -44,10 +45,10 @@ struct VyronInferenceSelectionLabel: View {
                 .accessibilityHidden(true)
         }
         .font(VyronEffortStyle.control)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .padding(.horizontal, VyronEffortStyle.controlPadding)
         .frame(height: VyronEffortStyle.controlHeight)
-        .background(Palette.field, in: Capsule())
+        .background(palette.field, in: Capsule())
         .contentShape(Capsule())
     }
 }

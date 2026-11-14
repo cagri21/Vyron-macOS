@@ -2,6 +2,7 @@ import SwiftUI
 import VyronDevelopment
 
 struct VyronConversationChangedFileRow: View {
+    @Environment(\.vyronPalette) private var palette
     @State private var isHovered = false
     @State private var showsPreview = false
     @State private var dismissedPreview = false
@@ -28,7 +29,7 @@ struct VyronConversationChangedFileRow: View {
             .padding(.horizontal, VyronConversationChangesStyle.headerInset)
             .frame(minHeight: VyronConversationChangesStyle.rowHeight)
             .background(
-                isHovered || isSelected ? Palette.field : Color.clear,
+                isHovered || isSelected ? palette.field : Color.clear,
                 in: RoundedRectangle(cornerRadius: VyronConversationChangesStyle.cardRadius)
             )
             .contentShape(Rectangle())
@@ -66,12 +67,12 @@ struct VyronConversationChangedFileRow: View {
                 Text(verbatim: directory)
                     .lineLimit(1)
                     .truncationMode(.head)
-                    .foregroundStyle(Palette.text.opacity(0.75))
+                    .foregroundStyle(palette.text.opacity(0.75))
             }
             Text(verbatim: filename)
                 .lineLimit(1)
                 .truncationMode(.middle)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .layoutPriority(1)
         }
         .accessibilityElement(children: .ignore)
@@ -81,8 +82,9 @@ struct VyronConversationChangedFileRow: View {
     private func preview(_ diff: VyronUnifiedDiff) -> some View {
         GeometryReader { geometry in
             let viewport = geometry.bounds(of: .scrollView)
+            let rowHeight = geometry.size.height
             let roomAbove = viewport.map { -$0.minY } ?? VyronConversationChangesStyle.previewPreferredRoom
-            let roomBelow = viewport.map { $0.maxY - geometry.size.height } ?? 0
+            let roomBelow = viewport.map { $0.maxY - rowHeight } ?? 0
             let above = roomAbove >= roomBelow || roomAbove >= VyronConversationChangesStyle.previewPreferredRoom
             let gap = VyronConversationChangesStyle.previewGap
             let availableHeight = max(
@@ -95,7 +97,7 @@ struct VyronConversationChangedFileRow: View {
                     .clipped()
                     .padding(.horizontal, VyronConversationChangesStyle.previewInset)
                     .alignmentGuide(.top) { dimensions in
-                        above ? dimensions[.bottom] + gap : -geometry.size.height - gap
+                        above ? dimensions[.bottom] + gap : -rowHeight - gap
                     }
             }
         }

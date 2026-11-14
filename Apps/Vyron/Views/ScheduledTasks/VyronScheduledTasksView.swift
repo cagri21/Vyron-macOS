@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronScheduledTasksView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var model: VyronScheduledTasksModel
     let context: VyronScheduledTaskContext
@@ -30,19 +31,19 @@ struct VyronScheduledTasksView: View {
                 Button { dismiss() } label: { Image(systemName: VyronSymbols.close) }
                     .buttonStyle(QuietButtonStyle()).help(VyronScheduledTaskText.close)
             }.padding(VyronScheduledTaskStyle.contentPadding)
-            Divider().overlay(Palette.border)
+            Divider().overlay(palette.border)
             ScrollView {
                 VStack(alignment: .leading, spacing: VyronScheduledTaskStyle.sectionSpacing) {
                     Button { creating = true } label: {
                         Label(VyronScheduledTaskText.addTask, systemImage: VyronSymbols.plus)
                     }.buttonStyle(AccentButtonStyle())
                     Text(VyronScheduledTaskText.executionNote)
-                        .font(VyronScheduledTaskStyle.body).foregroundStyle(Palette.muted)
+                        .font(VyronScheduledTaskStyle.body).foregroundStyle(palette.muted)
                     Text(VyronScheduledTaskText.reviewNote)
-                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                     if let error = model.errorMessage {
                         Label(error, systemImage: VyronSymbols.warning)
-                            .font(VyronScheduledTaskStyle.body).foregroundStyle(Palette.warning)
+                            .font(VyronScheduledTaskStyle.body).foregroundStyle(palette.warning)
                             .textSelection(.enabled)
                     }
                     if model.tasks.isEmpty { emptyState }
@@ -61,7 +62,7 @@ struct VyronScheduledTasksView: View {
             }
         }
         .frame(width: VyronScheduledTaskStyle.sheetWidth, height: VyronScheduledTaskStyle.sheetHeight)
-        .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
+        .background(palette.canvas).foregroundStyle(palette.text).tint(palette.controlAccent)
         .sheet(isPresented: $creating) {
             VyronScheduledTaskEditor(initial: nil, context: context, save: model.save)
         }
@@ -88,9 +89,9 @@ struct VyronScheduledTasksView: View {
             Image(systemName: VyronSymbols.clock).font(VyronScheduledTaskStyle.heading)
             Text(VyronScheduledTaskText.noTasksTitle).font(VyronScheduledTaskStyle.title)
             Text(VyronScheduledTaskText.noTasksBody)
-                .font(VyronScheduledTaskStyle.body).foregroundStyle(Palette.muted)
+                .font(VyronScheduledTaskStyle.body).foregroundStyle(palette.muted)
         }
         .padding(VyronScheduledTaskStyle.contentPadding).frame(maxWidth: .infinity, alignment: .leading)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius))
     }
 }

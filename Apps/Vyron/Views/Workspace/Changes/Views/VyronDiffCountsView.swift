@@ -1,15 +1,16 @@
 import SwiftUI
 
 struct VyronDiffCountsView: View {
+    @Environment(\.vyronPalette) private var palette
     let added: Int
     let removed: Int
 
     var body: some View {
         HStack(spacing: VyronWorkspaceStyle.composerHintKeyRadius) {
             Text(verbatim: "+\(added.formatted())")
-                .foregroundStyle(Palette.diffAdded)
+                .foregroundStyle(palette.diffAdded)
             Text(verbatim: "−\(removed.formatted())")
-                .foregroundStyle(Palette.diffRemoved)
+                .foregroundStyle(palette.diffRemoved)
         }
         .font(VyronChangesStyle.countFont)
         .fixedSize()

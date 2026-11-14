@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronModelScoreLabel: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var locale
     let score: Double?
 
@@ -10,7 +11,7 @@ struct VyronModelScoreLabel: View {
                 ?? VyronModelRankingText.unrated
         )
         .font(VyronWorkspaceStyle.captionFont)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .help(VyronModelRankingText.basis)
     }
 }

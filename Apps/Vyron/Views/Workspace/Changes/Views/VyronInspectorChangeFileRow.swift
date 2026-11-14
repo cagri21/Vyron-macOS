@@ -3,6 +3,7 @@ import SwiftUI
 import VyronDevelopment
 
 struct VyronInspectorChangeFileRow: View {
+    @Environment(\.vyronPalette) private var palette
     let change: DevelopmentChange
     let isSelected: Bool
     let select: () -> Void
@@ -14,12 +15,12 @@ struct VyronInspectorChangeFileRow: View {
         Button(action: select) {
             HStack(spacing: VyronWorkspaceStyle.compactSpacing) {
                 Image(systemName: change.before == nil ? VyronSymbols.outputs : VyronSymbols.files)
-                    .foregroundStyle(change.before == nil ? Palette.diffAdded : Palette.muted)
+                    .foregroundStyle(change.before == nil ? palette.diffAdded : palette.muted)
                     .accessibilityHidden(true)
                 Text(verbatim: URL(fileURLWithPath: change.path).lastPathComponent)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                    .foregroundStyle(isSelected ? Palette.controlAccent : Palette.text)
+                    .foregroundStyle(isSelected ? palette.controlAccent : palette.text)
                 Spacer(minLength: 0)
                 if let diff {
                     VyronDiffCountsView(added: diff.addedCount, removed: diff.removedCount)
@@ -29,7 +30,7 @@ struct VyronInspectorChangeFileRow: View {
             .padding(.horizontal, VyronWorkspaceStyle.compactSpacing)
             .contentShape(Rectangle())
             .background(
-                isSelected || isHovering ? Palette.field : .clear,
+                isSelected || isHovering ? palette.field : .clear,
                 in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.composerHintKeyRadius)
             )
             .padding(.horizontal, VyronWorkspaceStyle.compactSpacing)

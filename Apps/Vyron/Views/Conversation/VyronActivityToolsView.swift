@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronActivityToolsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     let group: VyronActivityToolGroup
     let isCurrent: Bool
@@ -32,7 +33,7 @@ struct VyronActivityToolsView: View {
             .accessibilityValue(isExpanded ? VyronAppText.activityExpanded : VyronAppText.activityCollapsed)
             .accessibilityHint(isExpanded ? VyronAppText.activityHideDetails : VyronAppText.activityShowDetails)
             .help(isExpanded ? VyronAppText.activityHideDetails : VyronAppText.activityShowDetails)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .padding(.vertical, VyronConversationStyle.statusVerticalPadding)
 
             if isExpanded {
@@ -51,7 +52,7 @@ struct VyronActivityToolsView: View {
                                     .fixedSize(horizontal: false, vertical: true)
                                 Spacer(minLength: 0)
                             }
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                             .padding(.vertical, VyronConversationStyle.statusVerticalPadding)
                             .contentShape(Rectangle())
                         }

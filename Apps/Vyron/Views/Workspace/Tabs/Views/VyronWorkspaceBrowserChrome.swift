@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceBrowserChrome: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var presentation: VyronWorkspaceTabsPresentation
 
     var body: some View {
@@ -11,6 +12,6 @@ struct VyronWorkspaceBrowserChrome: View {
                 VyronWorkspaceAddressBar(navigation: VyronWorkspaceNavigationContext(), command: { _ in })
             }
         }
-        .background(Palette.canvas)
+        .background(palette.canvas)
     }
 }

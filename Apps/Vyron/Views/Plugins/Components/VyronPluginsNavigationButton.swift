@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronPluginsNavigationButton: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
 
@@ -14,14 +15,14 @@ struct VyronPluginsNavigationButton: View {
                 Text(VyronPluginText.title)
                 Spacer()
                 Image(systemName: VyronSymbols.arrow)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
             .font(VyronPluginsStyle.action)
             .padding(VyronPluginsStyle.rowSpacing)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .padding(.horizontal, VyronPluginsStyle.compactSpacing)
         .help(VyronPluginText.subtitle)
     }

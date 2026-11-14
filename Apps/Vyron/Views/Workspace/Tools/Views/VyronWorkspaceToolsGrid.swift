@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceToolsGrid: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var model: AppModel
@@ -48,7 +49,7 @@ struct VyronWorkspaceToolsGrid: View {
             }
         }
         .buttonStyle(.plain)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
     }
 
     private func tool(
@@ -68,14 +69,14 @@ struct VyronWorkspaceToolsGrid: View {
         HStack(spacing: VyronWorkspaceToolsStyle.gridSpacing) {
             Image(systemName: symbol)
                 .frame(width: VyronWorkspaceToolsStyle.iconWidth)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             Text(title)
             Spacer(minLength: 0)
         }
         .font(VyronWorkspaceToolsStyle.controlFont)
         .padding(.horizontal, VyronWorkspaceToolsStyle.padding)
         .frame(maxWidth: .infinity, minHeight: VyronWorkspaceToolsStyle.toolHeight)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceToolsStyle.cornerRadius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceToolsStyle.cornerRadius))
         .contentShape(RoundedRectangle(cornerRadius: VyronWorkspaceToolsStyle.cornerRadius))
     }
 
@@ -85,7 +86,7 @@ struct VyronWorkspaceToolsGrid: View {
                 .overlay(alignment: .trailing) {
                     Image(systemName: VyronSymbols.chevronDown)
                         .font(VyronWorkspaceToolsStyle.controlFont)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .padding(.trailing, VyronWorkspaceToolsStyle.padding)
                 }
         }

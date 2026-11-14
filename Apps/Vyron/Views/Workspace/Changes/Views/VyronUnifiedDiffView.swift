@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronUnifiedDiffView: View {
+    @Environment(\.vyronPalette) private var palette
     let diff: VyronUnifiedDiff
     var maximumLineCount: Int?
 
@@ -29,6 +30,6 @@ struct VyronUnifiedDiffView: View {
             }
         }
         .font(VyronChangesStyle.codeFont)
-        .background(Palette.canvas)
+        .background(palette.canvas)
     }
 }

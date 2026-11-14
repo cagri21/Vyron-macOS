@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronLocalAuthenticationRow: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var model: AppModel
     @Environment(\.locale) private var locale
     @ObservedObject var authentication: VyronLocalAuthenticationModel
@@ -11,7 +12,7 @@ struct VyronLocalAuthenticationRow: View {
         VyronSettingsRow(VyronLocalAuthText.title, detail: detail) {
             HStack(spacing: VyronSettingsStyle.rowSpacing) {
                 if authentication.status == .connecting { ProgressView().controlSize(.small) }
-                Text(verbatim: status).foregroundStyle(Palette.muted)
+                Text(verbatim: status).foregroundStyle(palette.muted)
                 Button(VyronLocalAuthText.retry) { model.requestLocalCredentialSynchronization() }
                     .buttonStyle(QuietButtonStyle())
                     .disabled(authentication.status == .connecting || model.isShuttingDown)

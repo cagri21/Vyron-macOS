@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct VyronWorkspaceSplitView<Panel: View, Content: View>: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.layoutDirection) private var layoutDirection
     @State private var preferredPanelWidth: CGFloat
@@ -41,7 +42,7 @@ struct VyronWorkspaceSplitView<Panel: View, Content: View>: View {
                 .accessibilityHidden(isOverlay)
                 .overlay {
                     if isOverlay {
-                        Palette.canvas.opacity(VyronWorkspaceStyle.sidebarOverlayScrimOpacity)
+                        palette.canvas.opacity(VyronWorkspaceStyle.sidebarOverlayScrimOpacity)
                             .contentShape(Rectangle())
                             .onTapGesture(perform: dismissOverlay)
                             .accessibilityHidden(true)
@@ -90,7 +91,7 @@ struct VyronWorkspaceSplitView<Panel: View, Content: View>: View {
 
     private func divider(width: CGFloat, availableWidth: CGFloat) -> some View {
         Rectangle()
-            .fill(Palette.border)
+            .fill(palette.border)
             .frame(width: VyronWorkspaceStyle.dividerWidth)
             .overlay {
                 if presentation == .docked {

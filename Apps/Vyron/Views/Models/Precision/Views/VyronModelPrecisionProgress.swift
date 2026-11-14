@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronModelPrecisionProgress: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var model: AppModel
     @ObservedObject var downloads: VyronModelDownloads
     let transfer: VyronModelTransfer
@@ -23,12 +24,12 @@ struct VyronModelPrecisionProgress: View {
             if !downloads.isRemovingPreviousVariant,
                 let progress = downloads.progressByTag[transfer.tag], progress.phase != .modelFilesReady,
                 let fraction = progress.fraction {
-                ProgressView(value: fraction).tint(Palette.accent)
+                ProgressView(value: fraction).tint(palette.accent)
             } else {
-                ProgressView().progressViewStyle(.linear).tint(Palette.accent)
+                ProgressView().progressViewStyle(.linear).tint(palette.accent)
             }
         }
         .padding(VyronSettingsStyle.modelManagerInset)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 10))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: 10))
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronMCPActionReviewView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var connections: MCPConnectionsModel
     let canRespond: () -> Bool
@@ -12,15 +13,15 @@ struct VyronMCPActionReviewView: View {
             if let request = connections.pendingReview {
                 Text("\(request.connectionName) · \(request.toolName)").font(VyronMCPStyle.reviewIdentity)
                 Text(VyronPluginText.reviewDescription)
-                    .font(VyronMCPStyle.reviewBody).foregroundStyle(Palette.muted)
+                    .font(VyronMCPStyle.reviewBody).foregroundStyle(palette.muted)
                 ScrollView {
                     Text(request.arguments).font(VyronMCPStyle.code).textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(VyronMCPStyle.reviewArgumentsPadding)
-                .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronMCPStyle.reviewArgumentsRadius))
+                .background(palette.field, in: RoundedRectangle(cornerRadius: VyronMCPStyle.reviewArgumentsRadius))
                 Text(VyronPluginText.reviewRetryWarning)
-                    .font(VyronMCPStyle.helper).foregroundStyle(Palette.muted)
+                    .font(VyronMCPStyle.helper).foregroundStyle(palette.muted)
                 HStack {
                     Spacer()
                     Button(VyronPluginText.reviewDecline, role: .cancel) { respond(false, to: request.id) }
@@ -31,7 +32,7 @@ struct VyronMCPActionReviewView: View {
             }
         }.padding(VyronMCPStyle.reviewPadding)
             .frame(width: VyronMCPStyle.reviewSize.width, height: VyronMCPStyle.reviewSize.height)
-            .background(Palette.canvas).foregroundStyle(Palette.text)
+            .background(palette.canvas).foregroundStyle(palette.text)
     }
 
     private func respond(_ approved: Bool, to requestID: UUID) {

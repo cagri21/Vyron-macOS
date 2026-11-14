@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronQueuedMessageRow: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @State private var isDropTarget = false
@@ -28,7 +29,7 @@ struct VyronQueuedMessageRow: View {
                 .font(VyronFollowUpStyle.caption).fixedSize()
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .disabled(isPending || !model.canSteerQueuedMessage(message))
             .help(isPending ? VyronQueueText.updatePending : steerHelp)
             Button {
@@ -38,7 +39,7 @@ struct VyronQueuedMessageRow: View {
                     .font(VyronFollowUpStyle.icon)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .disabled(isPending)
             .help(VyronQueueText.deleteMessage)
             .accessibilityLabel(VyronQueueText.deleteMessage)
@@ -75,9 +76,9 @@ struct VyronQueuedMessageRow: View {
         }
         .padding(.horizontal, VyronFollowUpStyle.horizontalPadding)
         .padding(.vertical, VyronFollowUpStyle.verticalPadding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronFollowUpStyle.cornerRadius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronFollowUpStyle.cornerRadius))
         .overlay(RoundedRectangle(cornerRadius: VyronFollowUpStyle.cornerRadius).stroke(
-            isDropTarget && model.canReorderQueuedMessage(message.id) ? Palette.accent : Palette.border
+            isDropTarget && model.canReorderQueuedMessage(message.id) ? palette.accent : palette.border
         ))
         .dropDestination(for: VyronQueuedMessageDrag.self) { items, _ in
             guard items.count == 1, let item = items.first else { return false }
@@ -101,11 +102,11 @@ struct VyronQueuedMessageRow: View {
         HStack(alignment: .firstTextBaseline, spacing: VyronFollowUpStyle.controlSpacing) {
             Image(systemName: VyronSymbols.messageQueue)
                 .font(VyronFollowUpStyle.icon)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .accessibilityHidden(true)
             Text(verbatim: message.content)
                 .font(VyronFollowUpStyle.body)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .lineLimit(2)
                 .help(message.content)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronModelSettingsFields: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Binding var draft: VyronModelSettingsDraft
     let thinkingSupport: VyronModelThinkingSupport
@@ -41,7 +42,7 @@ struct VyronModelSettingsFields: View {
         let _ = localizationLocale
         VStack(alignment: .leading, spacing: 12) {
             Text(VyronAppText.settingsDefaultsHint)
-                .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
             setting(
                 VyronAppText.settingsContextBudget,
                 placeholder: contextPlaceholder,
@@ -49,7 +50,7 @@ struct VyronModelSettingsFields: View {
             )
             if let profile, profile.kind != .ollama {
                 Text(VyronAppText.settingsRequestBudgetHint)
-                    .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                    .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
             }
             setting(
                 VyronAppText.settingsMaxResponseTokens,
@@ -58,7 +59,7 @@ struct VyronModelSettingsFields: View {
             )
             if let tokens = publishedOutputTokenLimit {
                 Text(VyronAppText.settingsClaudeOutputLimit(tokens.formatted(.number.locale(localizationLocale))))
-                    .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                    .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
             }
             if profile == nil { ollamaTimeoutField }
             if claudeModelID == nil {
@@ -84,7 +85,7 @@ struct VyronModelSettingsFields: View {
                 String(allowed.lowerBound), String(allowed.upperBound), defaultSeconds
             ))
             .font(VyronWorkspaceStyle.captionFont)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
         }
     }
 
@@ -120,7 +121,7 @@ struct VyronModelSettingsFields: View {
             .disabled(thinkingChoices.count == 1)
             Text(VyronAppText.settingsThinkingHint)
                 .font(VyronWorkspaceStyle.captionFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
         }
     }
 

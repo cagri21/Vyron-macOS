@@ -2,6 +2,7 @@ import SwiftUI
 
 struct VyronSettingsView: View {
     @Environment(\.locale) private var localizationLocale
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var model: AppModel
     @State private var search = ""
 
@@ -15,26 +16,36 @@ struct VyronSettingsView: View {
 
     var body: some View {
         let _ = localizationLocale
-        HStack(spacing: 0) {
-            VyronSettingsSidebar(search: $search, matchingSections: matchingSections)
-            Rectangle().fill(Palette.border).frame(width: VyronSettingsStyle.dividerWidth)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(matchingSections.isEmpty ? VyronSettingsText.search : model.appNavigation.settingsSection.title)
-                    .font(VyronSettingsStyle.title)
-                    .foregroundStyle(Palette.text)
-                    .frame(maxWidth: VyronSettingsStyle.contentWidth, alignment: .leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, VyronSettingsStyle.contentPadding)
-                    .padding(.top, VyronSettingsStyle.contentTopPadding)
-                    .padding(.bottom, VyronSettingsStyle.sectionSpacing)
-                detail
+        GeometryReader { geometry in
+            let isCollapsed = VyronSettingsStyle.shouldCollapseSidebar(availableWidth: geometry.size.width)
+            HStack(spacing: 0) {
+                VyronSettingsSidebar(
+                    search: $search,
+                    matchingSections: matchingSections,
+                    isCollapsed: isCollapsed
+                )
+                Rectangle().fill(palette.border).frame(width: VyronSettingsStyle.dividerWidth)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(matchingSections.isEmpty ? VyronSettingsText.search : model.appNavigation.settingsSection.title)
+                        .font(VyronSettingsStyle.title)
+                        .foregroundStyle(palette.text)
+                        .frame(maxWidth: VyronSettingsStyle.contentWidth, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, VyronSettingsStyle.contentPadding)
+                        .padding(.top, VyronSettingsStyle.contentTopPadding)
+                        .padding(.bottom, VyronSettingsStyle.sectionSpacing)
+                    detail
+                }
+                .frame(minWidth: VyronSettingsStyle.minimumContentWidth)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .frame(minWidth: VyronSettingsStyle.minimumContentWidth)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .onChange(of: isCollapsed) { _, isCollapsed in
+                if isCollapsed { search = "" }
+            }
         }
-        .frame(minWidth: VyronSettingsStyle.minimumWidth, minHeight: VyronSettingsStyle.minimumHeight)
-        .background(Palette.canvas)
-        .tint(Palette.controlAccent)
+        .frame(minWidth: VyronSettingsStyle.collapsedMinimumWidth, minHeight: VyronSettingsStyle.minimumHeight)
+        .background(palette.canvas)
+        .tint(palette.controlAccent)
         .onChange(of: search) { _, _ in
             if !matchingSections.contains(model.appNavigation.settingsSection), let first = matchingSections.first {
                 model.appNavigation.settingsSection = first
@@ -52,7 +63,7 @@ struct VyronSettingsView: View {
         if matchingSections.isEmpty {
             Text(VyronSettingsText.noResults)
                 .font(VyronSettingsStyle.body)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .padding(.horizontal, VyronSettingsStyle.contentPadding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else if model.appNavigation.settingsSection == .models {
@@ -78,6 +89,10 @@ struct VyronSettingsView: View {
         switch model.appNavigation.settingsSection {
         case .general:
             VyronGeneralSettingsView()
+        case .appearance:
+            VyronAppearanceSettingsView()
+        case .permissions:
+            VyronPermissionsSettingsView()
         case .voice:
             VyronVoiceSettingsView(voice: model.voice)
         case .models:

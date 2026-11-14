@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronSubagentsLaunchView: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var model: AppModel
     let messageID: UUID
     let subagents: [VyronSubagentActivity]
@@ -33,7 +34,7 @@ struct VyronSubagentsLaunchView: View {
                         }
                     }
                     .font(VyronTrackingStyle.activity)
-                    .foregroundStyle(subagent.activity.state == .failed ? Palette.warning : Palette.muted)
+                    .foregroundStyle(subagent.activity.state == .failed ? palette.warning : palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .contentShape(Rectangle())
                 }

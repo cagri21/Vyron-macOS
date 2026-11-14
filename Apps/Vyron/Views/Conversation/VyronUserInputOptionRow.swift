@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronUserInputOptionRow: View {
+    @Environment(\.vyronPalette) private var palette
     let option: VyronUserInputOption
     let number: Int
     let isSelected: Bool
@@ -13,10 +14,10 @@ struct VyronUserInputOptionRow: View {
             HStack(alignment: .top, spacing: VyronUserInputStyle.controlSpacing) {
                 Text(number.formatted())
                     .font(VyronUserInputStyle.number)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(width: VyronUserInputStyle.numberSize, height: VyronUserInputStyle.numberSize)
-                    .background(Palette.selection, in: RoundedRectangle(cornerRadius: VyronUserInputStyle.numberRadius))
-                    .overlay(RoundedRectangle(cornerRadius: VyronUserInputStyle.numberRadius).stroke(Palette.border))
+                    .background(palette.selection, in: RoundedRectangle(cornerRadius: VyronUserInputStyle.numberRadius))
+                    .overlay(RoundedRectangle(cornerRadius: VyronUserInputStyle.numberRadius).stroke(palette.border))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: VyronUserInputStyle.rowSpacing) {
                     Text(verbatim: option.label)
@@ -24,22 +25,22 @@ struct VyronUserInputOptionRow: View {
                     if !option.description.isEmpty {
                         Text(verbatim: option.description)
                             .font(VyronUserInputStyle.description)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: VyronUserInputStyle.numberSize, alignment: .leading)
                 Image(systemName: VyronSymbols.optionArrow)
                     .font(VyronUserInputStyle.icon)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .opacity(isSelected || isHovered ? 1 : 0)
                     .frame(height: VyronUserInputStyle.numberSize)
                     .accessibilityHidden(true)
             }
-            .foregroundStyle(Palette.text)
+            .foregroundStyle(palette.text)
             .padding(.horizontal, VyronUserInputStyle.rowHorizontalPadding)
             .padding(.vertical, VyronUserInputStyle.rowVerticalPadding)
             .background(
-                isSelected || isHovered ? Palette.selection : Color.clear,
+                isSelected || isHovered ? palette.selection : Color.clear,
                 in: RoundedRectangle(cornerRadius: VyronUserInputStyle.rowRadius)
             )
             .contentShape(RoundedRectangle(cornerRadius: VyronUserInputStyle.rowRadius))

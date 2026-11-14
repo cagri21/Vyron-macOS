@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronPluginConnectionCard: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var connections: MCPConnectionsModel
     @ObservedObject var presentation: VyronPluginsPresentation
@@ -20,12 +21,12 @@ struct VyronPluginConnectionCard: View {
                     VyronPluginAvatar(isPenpot: item.isPenpot)
                     VStack(alignment: .leading, spacing: VyronPluginsStyle.compactSpacing) {
                         Text(verbatim: profile.name).font(VyronPluginsStyle.sectionTitle)
-                            .foregroundStyle(Palette.text)
+                            .foregroundStyle(palette.text)
                         Text(verbatim: item.address).font(VyronPluginsStyle.caption)
-                            .foregroundStyle(Palette.muted).lineLimit(1).truncationMode(.middle)
+                            .foregroundStyle(palette.muted).lineLimit(1).truncationMode(.middle)
                     }
                     Spacer(minLength: 0)
-                    Image(systemName: VyronSymbols.arrow).foregroundStyle(Palette.muted)
+                    Image(systemName: VyronSymbols.arrow).foregroundStyle(palette.muted)
                 }
                 .contentShape(Rectangle())
             }
@@ -35,10 +36,10 @@ struct VyronPluginConnectionCard: View {
             HStack {
                 HStack(spacing: VyronPluginsStyle.compactSpacing) {
                     Circle()
-                        .fill(connections.isConnected(profile.id) ? Palette.success : Palette.muted)
+                        .fill(connections.isConnected(profile.id) ? palette.success : palette.muted)
                         .frame(width: VyronPluginsStyle.statusSize, height: VyronPluginsStyle.statusSize)
                     Text(verbatim: status)
-                        .font(VyronPluginsStyle.caption).foregroundStyle(Palette.muted).lineLimit(1)
+                        .font(VyronPluginsStyle.caption).foregroundStyle(palette.muted).lineLimit(1)
                 }
                 Spacer(minLength: 0)
                 VyronPluginConnectionActions(
@@ -50,8 +51,8 @@ struct VyronPluginConnectionCard: View {
             }
         }
         .padding(VyronPluginsStyle.cardPadding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius))
-        .overlay(RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius).stroke(Palette.border))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius))
+        .overlay(RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius).stroke(palette.border))
     }
 
     private var status: String {

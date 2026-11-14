@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronGeneralSettingsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var localization: VyronLocalization
@@ -22,7 +23,7 @@ struct VyronGeneralSettingsView: View {
                         .pickerStyle(.menu)
                         .frame(width: VyronSettingsStyle.controlWidth)
                     }
-                    Divider().overlay(Palette.border)
+                    Divider().overlay(palette.border)
                     VyronSettingsRow(VyronQueueText.messages, detail: VyronSettingsText.queueDescription) {
                         Toggle(VyronQueueText.messages, isOn: Binding(
                             get: { model.composer.queueMessages },
@@ -31,6 +32,8 @@ struct VyronGeneralSettingsView: View {
                             .labelsHidden()
                             .toggleStyle(.switch)
                     }
+                    Divider().overlay(palette.border)
+                    permissionsLink
                 }
             }
             VStack(alignment: .leading, spacing: VyronSettingsStyle.headingSpacing) {
@@ -44,7 +47,7 @@ struct VyronGeneralSettingsView: View {
                             .labelsHidden()
                             .toggleStyle(.switch)
                     }
-                    Divider().overlay(Palette.border)
+                    Divider().overlay(palette.border)
                     VyronSettingsRow(VyronSettingsText.terminal, detail: VyronSettingsText.terminalDescription) {
                         Toggle(
                             VyronSettingsText.terminal,
@@ -59,6 +62,22 @@ struct VyronGeneralSettingsView: View {
                 }
             }
         }
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
+    }
+
+    private var permissionsLink: some View {
+        Button {
+            model.appNavigation.settingsSection = .permissions
+        } label: {
+            VyronSettingsRow(VyronPermissionsText.title, detail: VyronPermissionsText.generalDescription) {
+                Image(systemName: VyronSymbols.chevronRight)
+                    .foregroundStyle(palette.muted)
+                    .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(VyronPermissionsText.title)
+        .accessibilityHint(VyronPermissionsText.generalDescription)
     }
 }

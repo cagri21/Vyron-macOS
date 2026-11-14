@@ -5,6 +5,7 @@ struct VyronApp: App {
     @NSApplicationDelegateAdaptor(VyronAppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel(storagePaths: .applicationSupport, preferences: .standard)
     @StateObject private var localization = VyronLocalization()
+    @State private var appearance = VyronAppearanceState(defaults: .standard)
 
     var body: some Scene {
         Window("Vyron", id: VyronAppWindow.main) {
@@ -12,7 +13,7 @@ struct VyronApp: App {
                 .environmentObject(model)
                 .environmentObject(localization)
                 .environment(\.locale, localization.locale)
-                .preferredColorScheme(.dark)
+                .modifier(VyronAppearanceScope(appearance: appearance))
                 .frame(
                     minWidth: VyronWorkspaceStyle.minimumWindowWidth,
                     minHeight: VyronWorkspaceStyle.minimumWindowHeight
@@ -51,7 +52,7 @@ struct VyronApp: App {
                     .environmentObject(model)
                     .environmentObject(localization)
                     .environment(\.locale, localization.locale)
-                    .preferredColorScheme(.dark)
+                    .modifier(VyronAppearanceScope(appearance: appearance))
                     .frame(
                         minWidth: VyronConversationWindowStyle.minimumWidth,
                         minHeight: VyronConversationWindowStyle.minimumHeight
@@ -69,8 +70,11 @@ struct VyronApp: App {
                 .environmentObject(model)
                 .environmentObject(localization)
                 .environment(\.locale, localization.locale)
-                .preferredColorScheme(.dark)
-                .frame(minWidth: VyronSettingsStyle.minimumWidth, minHeight: VyronSettingsStyle.minimumHeight)
+                .modifier(VyronAppearanceScope(appearance: appearance))
+                .frame(
+                    minWidth: VyronSettingsStyle.collapsedMinimumWidth,
+                    minHeight: VyronSettingsStyle.minimumHeight
+                )
         }
         .defaultSize(width: VyronSettingsStyle.preferredWidth, height: VyronSettingsStyle.preferredHeight)
     }

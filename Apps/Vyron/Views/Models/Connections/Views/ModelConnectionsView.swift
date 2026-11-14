@@ -4,6 +4,7 @@ import VyronCore
 /// Saved inference connections and public model sources share the model manager,
 /// but remain separate: a server URL runs inference, while a source URL installs weights.
 struct ModelConnectionsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @ObservedObject private var selection: VyronModelSelectionModel
@@ -50,7 +51,7 @@ struct ModelConnectionsView: View {
                     isLocal: true
                 )
                 ForEach(selection.connectionProfiles) { profile in
-                    Rectangle().fill(Palette.border).frame(height: 1)
+                    Rectangle().fill(palette.border).frame(height: 1)
                     connectionRow(
                         id: profile.id,
                         name: profile.name,
@@ -67,19 +68,19 @@ struct ModelConnectionsView: View {
                     )
                 }
             }
-            .background(Palette.surface, in: RoundedRectangle(cornerRadius: 10))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 10))
             VyronLocalAuthenticationRow(authentication: model.localAuthentication)
             if selection.connectionOperationInProgress {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
-                    Text(VyronAppText.settingsCheckingConnection).font(.system(size: 10)).foregroundStyle(Palette.muted)
+                    Text(VyronAppText.settingsCheckingConnection).font(.system(size: 10)).foregroundStyle(palette.muted)
                 }
             }
             if let message = selection.connectionError {
                 Label(message, systemImage: VyronSymbols.warning)
-                    .font(.system(size: 11)).foregroundStyle(Palette.warning).textSelection(.enabled)
+                    .font(.system(size: 11)).foregroundStyle(palette.warning).textSelection(.enabled)
             } else if let message = selection.connectionStatus {
-                Text(message).font(.system(size: 10)).foregroundStyle(Palette.muted).textSelection(.enabled)
+                Text(message).font(.system(size: 10)).foregroundStyle(palette.muted).textSelection(.enabled)
             }
             VyronModelFeatureNotice(report: model.modelFeatureReport)
             ModelSourceSection(selection: selection)
@@ -107,17 +108,17 @@ struct ModelConnectionsView: View {
             } label: {
                 HStack(spacing: 11) {
                     Image(systemName: isLocal ? VyronSymbols.computerPreview : VyronSymbols.network)
-                        .font(.system(size: 17)).frame(width: 24).foregroundStyle(Palette.accent)
+                        .font(.system(size: 17)).frame(width: 24).foregroundStyle(palette.accent)
                     VStack(alignment: .leading, spacing: 5) {
                         Text(name).font(.system(size: 12, weight: .medium))
-                        Text(detail).font(.system(size: 10)).foregroundStyle(Palette.muted).lineLimit(2)
+                        Text(detail).font(.system(size: 10)).foregroundStyle(palette.muted).lineLimit(2)
                     }
                     Spacer(minLength: 6)
                     if selection.activeConnectionID == id {
-                        Image(systemName: VyronSymbols.selected).foregroundStyle(Palette.controlAccent)
+                        Image(systemName: VyronSymbols.selected).foregroundStyle(palette.controlAccent)
                             .accessibilityLabel(VyronAppText.settingsActiveConnection)
                     } else {
-                        Text(VyronAppText.settingsUse).font(.system(size: 11)).foregroundStyle(Palette.accent)
+                        Text(VyronAppText.settingsUse).font(.system(size: 11)).foregroundStyle(palette.accent)
                     }
                 }
                 .contentShape(Rectangle())
@@ -130,7 +131,7 @@ struct ModelConnectionsView: View {
                         model.appNavigation.showSetup = false
                         model.openSettings(.billing)
                     }
-                    .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                    .buttonStyle(QuietButtonStyle(foreground: palette.text))
                 }
                 Button {
                     editingProfile = profile
@@ -161,6 +162,7 @@ struct ModelConnectionsView: View {
 }
 
 private struct ModelSourceSection: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @ObservedObject private var selection: VyronModelSelectionModel
@@ -183,7 +185,7 @@ private struct ModelSourceSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Eyebrow(text: VyronAppText.settingsDownloadByURL)
             Text(VyronAppText.settingsSourceHint)
-                .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
             HStack(spacing: 8) {
                 TextField(VyronAppText.settingsModelSourceURLPlaceholder, text: $sourceURL)
                     .textFieldStyle(.roundedBorder).font(.system(size: 11))
@@ -197,7 +199,7 @@ private struct ModelSourceSection: View {
             if isDiscovering {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
-                    Text(VyronAppText.settingsFindingVariants).font(.system(size: 10)).foregroundStyle(Palette.muted)
+                    Text(VyronAppText.settingsFindingVariants).font(.system(size: 10)).foregroundStyle(palette.muted)
                     Spacer()
                     Button(VyronAppText.settingsCancel) { cancelDiscovery() }
                         .buttonStyle(QuietButtonStyle()).font(.system(size: 10))
@@ -206,14 +208,14 @@ private struct ModelSourceSection: View {
             if !variants.isEmpty { variantControls }
             if let discoveryError {
                 Label(discoveryError, systemImage: VyronSymbols.warning)
-                    .font(.system(size: 10)).foregroundStyle(Palette.warning).textSelection(.enabled)
+                    .font(.system(size: 10)).foregroundStyle(palette.warning).textSelection(.enabled)
             }
             if !selection.isBuiltinConnection {
                 Text(VyronAppText.settingsChooseLocalHint)
-                    .font(.system(size: 10)).foregroundStyle(Palette.muted)
+                    .font(.system(size: 10)).foregroundStyle(palette.muted)
             }
         }
-        .padding(16).background(Palette.surface, in: RoundedRectangle(cornerRadius: 10))
+        .padding(16).background(palette.surface, in: RoundedRectangle(cornerRadius: 10))
         .onChange(of: sourceURL) { _, _ in
             cancelDiscovery()
             variants = []
@@ -229,7 +231,7 @@ private struct ModelSourceSection: View {
         VStack(alignment: .leading, spacing: 11) {
             HStack {
                 Text(VyronAppText.settingsAvailableVariantCount(variants.count)).font(.system(size: 10))
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 Spacer()
                 if !precisions.isEmpty {
                     Picker(VyronAppText.settingsPrecision, selection: $selectedPrecision) {
@@ -251,7 +253,7 @@ private struct ModelSourceSection: View {
             }
             if let variant = selectedVariant {
                 Text(variantDetails(variant)).font(.system(size: 10, design: .monospaced)).foregroundStyle(
-                    Palette.muted
+                    palette.muted
                 )
                 if variant.ollamaTag == nil {
                     LabeledContent(VyronAppText.settingsLocalModelName) {
@@ -260,10 +262,10 @@ private struct ModelSourceSection: View {
                     }.font(.system(size: 11))
                 }
                 Text(VyronAppText.settingsPrecisionHint)
-                    .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                    .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
                 if let bytes = variant.sizeBytes, bytes > model.physicalMemoryBytes {
                     Label(VyronAppText.settingsWeightsExceedMemory, systemImage: VyronSymbols.memoryChip)
-                        .font(.system(size: 10)).foregroundStyle(Palette.warning)
+                        .font(.system(size: 10)).foregroundStyle(palette.warning)
                 }
                 HStack {
                     Spacer()

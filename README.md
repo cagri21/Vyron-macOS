@@ -34,6 +34,8 @@ macOS 14 and later, built with Swift 6, SwiftUI, and Swift Package Manager.
   Schedules run while Vyron is open and the Mac is awake.
 - **Choose an interface language.** Use English, Turkish, Ukrainian, or the
   first supported language in your macOS preferences.
+- **Make Vyron your own.** Use System, Light, or Dark mode, choose a theme such
+  as Codex or Catppuccin, and adjust the colors and font in Settings → Appearance.
 
 ## Build from source
 

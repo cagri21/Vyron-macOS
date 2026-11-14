@@ -8,7 +8,7 @@ extension ProjectSidebar {
         case .section(let section):
             Text(section.title)
                 .font(VyronSidebarStyle.sectionFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .padding(.horizontal, VyronSidebarStyle.rowInset)
                 .padding(.top, VyronSidebarStyle.sectionSpacing)
                 .padding(.bottom, VyronSidebarStyle.sectionBottomSpacing)
@@ -21,7 +21,7 @@ extension ProjectSidebar {
         case .hint(let hint):
             Text(hint.title)
                 .font(VyronSidebarStyle.detailFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .padding(VyronSidebarStyle.rowInset)
         case .overflow(let overflow):
             Button {
@@ -33,7 +33,7 @@ extension ProjectSidebar {
             } label: {
                 Text(overflow.showsAll ? VyronSidebarText.showLess : VyronSidebarText.showMore)
                     .font(VyronSidebarStyle.rowFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .padding(.horizontal, VyronSidebarStyle.rowInset)
                     .frame(maxWidth: .infinity, minHeight: VyronSidebarStyle.rowHeight, alignment: .leading)
                     .contentShape(Rectangle())
@@ -51,13 +51,13 @@ extension ProjectSidebar {
         } label: {
             HStack(spacing: VyronSidebarStyle.rowContentSpacing) {
                 Image(systemName: expanded ? VyronSymbols.folderFilled : VyronSymbols.folder)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(width: VyronSidebarStyle.rowIconWidth)
                 Text(folder.name).lineLimit(1)
                 Spacer(minLength: 0)
                 Image(systemName: expanded ? VyronSymbols.chevronDown : VyronSymbols.chevronRight)
                     .font(VyronSidebarStyle.disclosureFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
             .font(VyronSidebarStyle.rowFont)
             .padding(.horizontal, VyronSidebarStyle.rowInset)
@@ -91,7 +91,7 @@ extension ProjectSidebar {
             HStack(spacing: VyronSidebarStyle.rowContentSpacing) {
                 if chat.showsProject {
                     Image(systemName: VyronSymbols.chat)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .frame(width: VyronSidebarStyle.rowIconWidth)
                 }
                 VStack(alignment: .leading, spacing: VyronSidebarStyle.rowSpacing) {
@@ -99,7 +99,7 @@ extension ProjectSidebar {
                     if chat.showsProject, let path = conversation.sidebarProjectPath {
                         Text(projectName(path) + (projectDisambiguation(path).map { " · " + $0 } ?? ""))
                             .font(VyronSidebarStyle.captionFont)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                             .lineLimit(1)
                     }
                 }
@@ -108,7 +108,7 @@ extension ProjectSidebar {
                     Image(systemName: VyronSymbols.unread)
                         .resizable()
                         .frame(width: VyronSidebarStyle.statusSize, height: VyronSidebarStyle.statusSize)
-                        .foregroundStyle(Palette.text)
+                        .foregroundStyle(palette.text)
                         .help(VyronHeaderText.unread)
                         .accessibilityLabel(VyronHeaderText.unread)
                 }
@@ -118,13 +118,13 @@ extension ProjectSidebar {
                 } else if chat.hasFailedResponse {
                     Image(systemName: VyronSymbols.warning)
                         .font(VyronSidebarStyle.iconFont)
-                        .foregroundStyle(Palette.warning)
+                        .foregroundStyle(palette.warning)
                         .help(VyronStatusText.responseFailed)
                         .accessibilityLabel(VyronStatusText.responseFailed)
                 } else if chat.isPinned {
                     Image(systemName: VyronSymbols.pinFilled)
                         .font(VyronSidebarStyle.pinFont)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }
             }
             .font(VyronSidebarStyle.rowFont)

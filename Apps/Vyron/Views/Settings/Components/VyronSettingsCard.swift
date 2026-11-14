@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronSettingsCard<Content: View>: View {
+    @Environment(\.vyronPalette) private var palette
     private let content: Content
 
     init(@ViewBuilder content: () -> Content) {
@@ -12,9 +13,9 @@ struct VyronSettingsCard<Content: View>: View {
             content
         }
         .padding(.horizontal, VyronSettingsStyle.rowInset)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronSettingsStyle.cardRadius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronSettingsStyle.cardRadius))
         .overlay {
-            RoundedRectangle(cornerRadius: VyronSettingsStyle.cardRadius).stroke(Palette.border)
+            RoundedRectangle(cornerRadius: VyronSettingsStyle.cardRadius).stroke(palette.border)
         }
     }
 }

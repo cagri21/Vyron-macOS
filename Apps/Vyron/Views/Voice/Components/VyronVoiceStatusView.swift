@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronVoiceStatusView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var voice: VyronVoiceModel
 
@@ -10,11 +11,11 @@ struct VyronVoiceStatusView: View {
             VStack(alignment: .leading, spacing: VyronVoiceStyle.spacing) {
                 if let error = voice.errorMessage {
                     HStack(alignment: .top, spacing: VyronVoiceStyle.spacing) {
-                        Image(systemName: VyronSymbols.warning).foregroundStyle(Palette.warning)
+                        Image(systemName: VyronSymbols.warning).foregroundStyle(palette.warning)
                         Text(verbatim: error).textSelection(.enabled)
                         Spacer(minLength: 0)
                         Button(VyronVoiceText.retry) { voice.retryLastSession() }
-                            .foregroundStyle(Palette.accent)
+                            .foregroundStyle(palette.accent)
                         Button { voice.dismissError() } label: { Image(systemName: VyronSymbols.close) }
                             .help(VyronVoiceText.dismissError)
                             .accessibilityLabel(VyronVoiceText.dismissError)
@@ -24,13 +25,13 @@ struct VyronVoiceStatusView: View {
                     }
                 } else {
                     HStack(spacing: VyronVoiceStyle.spacing) {
-                        Image(systemName: VyronSymbols.liveVoice).foregroundStyle(Palette.accent)
+                        Image(systemName: VyronSymbols.liveVoice).foregroundStyle(palette.accent)
                         Text(status)
                             .accessibilityAddTraits(.updatesFrequently)
                         Spacer(minLength: 0)
                         if voice.isLiveConversation && (voice.phase == .speaking || voice.phase == .thinking) {
                             Button(VyronVoiceText.interrupt) { voice.interrupt() }
-                                .foregroundStyle(Palette.accent)
+                                .foregroundStyle(palette.accent)
                         }
                         Button { voice.end() } label: { Image(systemName: VyronSymbols.close) }
                             .help(voice.isLiveConversation ? VyronVoiceText.endLive : VyronVoiceText.stopDictation)
@@ -42,14 +43,14 @@ struct VyronVoiceStatusView: View {
                         Text(verbatim: voice.transcript).textSelection(.enabled)
                     } else if voice.phase == .listening {
                         Text(voice.isLiveConversation ? VyronVoiceText.listeningHint : VyronVoiceText.dictationHint)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                     }
                 }
             }
             .font(VyronVoiceStyle.caption)
             .buttonStyle(.plain)
             .padding(VyronVoiceStyle.padding)
-            .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronVoiceStyle.radius))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronVoiceStyle.radius))
         }
     }
 

@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronModelConnectionEditor: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
@@ -54,14 +55,14 @@ struct VyronModelConnectionEditor: View {
                     .font(.system(size: 12, weight: .medium))
                     .disabled(busy)
                     Text(VyronAppText.settingsSaveTestHint)
-                        .font(.system(size: 10)).foregroundStyle(Palette.muted)
+                        .font(.system(size: 10)).foregroundStyle(palette.muted)
                     if let error {
                         Label(error, systemImage: VyronSymbols.warning)
-                            .font(.system(size: 11)).foregroundStyle(Palette.warning).textSelection(.enabled)
+                            .font(.system(size: 11)).foregroundStyle(palette.warning).textSelection(.enabled)
                     }
                     if let testResult {
                         Label(testResult, systemImage: VyronSymbols.checkCircle)
-                            .font(.system(size: 11)).foregroundStyle(Palette.success).textSelection(.enabled)
+                            .font(.system(size: 11)).foregroundStyle(palette.success).textSelection(.enabled)
                     }
                 }.padding(22)
             }
@@ -82,7 +83,7 @@ struct VyronModelConnectionEditor: View {
             }.padding(18)
         }
         .frame(width: 570, height: 700)
-        .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
+        .background(palette.canvas).foregroundStyle(palette.text).tint(palette.controlAccent)
         .onAppear {
             do { apiKey = try model.savedAPIKey(for: profile.id) } catch { self.error = error.localizedDescription }
         }
@@ -141,7 +142,7 @@ struct VyronModelConnectionEditor: View {
                     .textFieldStyle(.roundedBorder).font(.system(size: 11))
                     .accessibilityLabel(apiKeyTitle)
             }
-            Text(apiKeyPrivacy).font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+            Text(apiKeyPrivacy).font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
         }
     }
 
@@ -207,7 +208,7 @@ struct VyronModelConnectionEditor: View {
                     }
                 }.font(.system(size: 11))
                 if let local = discoveredModels.first(where: { $0.name == profile.selectedModel }) {
-                    Text(modelDetails(local)).font(.system(size: 10)).foregroundStyle(Palette.muted)
+                    Text(modelDetails(local)).font(.system(size: 10)).foregroundStyle(palette.muted)
                 }
             }
             labeledField(
@@ -220,7 +221,7 @@ struct VyronModelConnectionEditor: View {
                     ? VyronAppText.settingsManualModelHint
                     : VyronAppText.settingsPrecisionVariantHint
             )
-            .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+            .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
         }
     }
 

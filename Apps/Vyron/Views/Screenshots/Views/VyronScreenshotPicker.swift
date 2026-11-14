@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronScreenshotPicker: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var localizationLocale
     @StateObject private var state = VyronScreenshotPickerState()
@@ -13,7 +14,7 @@ struct VyronScreenshotPicker: View {
             Text(VyronScreenshotText.pickerTitle)
                 .font(VyronScreenshotPickerStyle.title)
             Text(VyronScreenshotText.pickerHint)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             sources
             if let error = state.errorMessage {
                 Label {
@@ -21,7 +22,7 @@ struct VyronScreenshotPicker: View {
                 } icon: {
                     Image(systemName: VyronSymbols.warning)
                 }
-                .foregroundStyle(Palette.warning)
+                .foregroundStyle(palette.warning)
             }
             if state.needsPermission {
                 HStack(spacing: VyronScreenshotPickerStyle.rowSpacing) {
@@ -34,7 +35,7 @@ struct VyronScreenshotPicker: View {
         .font(VyronScreenshotPickerStyle.body)
         .padding(VyronScreenshotPickerStyle.padding)
         .frame(width: VyronScreenshotPickerStyle.width)
-        .background(Palette.canvas)
+        .background(palette.canvas)
         .onAppear { state.start() }
         .onDisappear { state.stop() }
     }
@@ -46,14 +47,14 @@ struct VyronScreenshotPicker: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if state.sources.isEmpty {
                 Text(VyronScreenshotText.noSources)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List(selection: $state.selectedSourceID) {
                     ForEach(state.sources) { source in
                         HStack(spacing: VyronScreenshotPickerStyle.rowSpacing) {
                             Image(systemName: VyronSymbols.computerPreview)
-                                .foregroundStyle(Palette.muted)
+                                .foregroundStyle(palette.muted)
                             VStack(alignment: .leading, spacing: VyronScreenshotPickerStyle.compactSpacing) {
                                 Text(verbatim: source.name).lineLimit(2)
                                 Text(
@@ -61,7 +62,7 @@ struct VyronScreenshotPicker: View {
                                         ? VyronScreenshotText.windowKind : VyronScreenshotText.displayKind
                                 )
                                     .font(VyronScreenshotPickerStyle.caption)
-                                    .foregroundStyle(Palette.muted)
+                                    .foregroundStyle(palette.muted)
                             }
                         }
                         .tag(source.id)

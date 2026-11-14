@@ -11,4 +11,5 @@ enum VyronUserDefaultsKey: String {
     case automaticallySetUpSkills = "automaticallySetUpSkills"
     case selectedSpeechVoiceID = "selectedSpeechVoiceID"
     case officePythonExecutable = "officePythonExecutable"
+    case appearancePreferences = "vyron.appearance.preferences"
 }

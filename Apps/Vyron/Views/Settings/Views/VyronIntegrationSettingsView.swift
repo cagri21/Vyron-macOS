@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronIntegrationSettingsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var model: AppModel
@@ -23,21 +24,21 @@ struct VyronIntegrationSettingsView: View {
                     }
                     .buttonStyle(.bordered)
                 }
-                Divider().overlay(Palette.border)
+                Divider().overlay(palette.border)
                 HStack {
                     Text(VyronSettingsText.savedConnections)
                     Spacer()
                     Text(connections.profiles.count, format: .number)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }
                 .font(VyronSettingsStyle.body)
                 .padding(.vertical, VyronSettingsStyle.rowPadding)
             }
             Text(VyronPluginText.securityNote)
                 .font(VyronSettingsStyle.detail)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronOpenAIBillingPage: View {
+    @Environment(\.vyronPalette) private var palette
     @ObservedObject var browser: VyronBillingBrowserModel
 
     var body: some View {
@@ -9,7 +10,7 @@ struct VyronOpenAIBillingPage: View {
                 VStack(alignment: .leading, spacing: VyronSettingsStyle.textSpacing) {
                     Text(VyronBillingText.officialPage).font(VyronSettingsStyle.body)
                     if let host = browser.state.host {
-                        Text(verbatim: host).font(VyronSettingsStyle.detail).foregroundStyle(Palette.muted)
+                        Text(verbatim: host).font(VyronSettingsStyle.detail).foregroundStyle(palette.muted)
                     }
                 }
                 Spacer(minLength: 0)
@@ -30,15 +31,15 @@ struct VyronOpenAIBillingPage: View {
                 .help(VyronBillingText.closePage)
                 .accessibilityLabel(VyronBillingText.closePage)
             }
-            .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+            .buttonStyle(QuietButtonStyle(foreground: palette.text))
             Text(VyronBillingText.organizationHint)
                 .font(VyronSettingsStyle.detail)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
             if browser.state.phase == .failed || browser.state.phase == .browserSignInRequired {
                 Text(browser.state.phase == .failed ? VyronBillingText.loadFailed : VyronBillingText.browserSignIn)
                     .font(VyronSettingsStyle.body)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
             VyronBillingWebView(browser: browser)
@@ -46,10 +47,10 @@ struct VyronOpenAIBillingPage: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: VyronBillingStyle.browserRadius))
                 .overlay {
-                    RoundedRectangle(cornerRadius: VyronBillingStyle.browserRadius).stroke(Palette.border)
+                    RoundedRectangle(cornerRadius: VyronBillingStyle.browserRadius).stroke(palette.border)
                 }
         }
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

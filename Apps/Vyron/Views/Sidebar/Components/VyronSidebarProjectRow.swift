@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronSidebarProjectRow<MenuContent: View>: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
@@ -28,7 +29,7 @@ struct VyronSidebarProjectRow<MenuContent: View>: View {
                 model.setSidebarProjectExpanded(path, expanded: !expanded)
             } label: {
                 Image(systemName: disclosureSymbol)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(width: VyronSidebarStyle.disclosureWidth, height: VyronSidebarStyle.rowHeight)
                     .contentShape(Rectangle())
             }
@@ -45,7 +46,7 @@ struct VyronSidebarProjectRow<MenuContent: View>: View {
                     if let detail {
                         Text(verbatim: detail)
                             .font(VyronSidebarStyle.captionFont)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                             .lineLimit(1)
                             .truncationMode(.middle)
                     }
@@ -101,7 +102,7 @@ struct VyronSidebarProjectRow<MenuContent: View>: View {
             .opacity(showsActions ? 1 : 0)
         }
         .font(VyronSidebarStyle.rowFont)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .buttonStyle(.plain)
         .modifier(VyronSidebarRowBackground(isSelected: selected))
         .contextMenu { menu() }

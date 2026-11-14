@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronComposerModelMenu: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     var isCompact = false
@@ -34,14 +35,14 @@ struct VyronComposerModelMenu: View {
                     .truncationMode(.middle)
             }
             .font(VyronWorkspaceStyle.controlFont)
-            .foregroundStyle(isCompact ? Palette.muted : Palette.text)
+            .foregroundStyle(isCompact ? palette.muted : palette.text)
             .frame(maxWidth: VyronWorkspaceStyle.modelLabelWidth)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.visible)
         .font(VyronWorkspaceStyle.controlFont)
         .controlSize(isCompact ? .small : .regular)
-        .tint(isCompact || model.isChatWorkspace ? Palette.muted : Palette.text)
+        .tint(isCompact || model.isChatWorkspace ? palette.muted : palette.text)
         .fixedSize(horizontal: false, vertical: true)
         .disabled(!model.canManageModelSelection || model.modelDownloads.isActive)
         .help(VyronWorkspaceText.modelSelection)

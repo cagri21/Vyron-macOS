@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronAutomationPlannerView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var chat: AppModel
     @ObservedObject var model: AutomationModel
@@ -34,7 +35,7 @@ struct VyronAutomationPlannerView: View {
                         : VyronAppText.automationOneActionHint
             )
             .font(VyronAutomationTypography.caption)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .lineSpacing(VyronAutomationCenterStyle.explanationLineSpacing)
             if model.isAgentMode {
                 HStack(spacing: VyronAutomationPlannerStyle.preferenceSpacing) {
@@ -53,7 +54,7 @@ struct VyronAutomationPlannerView: View {
             if !chat.modelSelection.isBuiltinConnection {
                 Text(VyronAppText.automationLocalRequired)
                     .font(VyronAutomationTypography.caption)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .lineSpacing(VyronAutomationCenterStyle.explanationLineSpacing)
             }
             HStack(alignment: .top, spacing: VyronAutomationPlannerStyle.rowSpacing) {
@@ -79,12 +80,12 @@ struct VyronAutomationPlannerView: View {
                         ProgressView().controlSize(.small).padding(VyronAutomationPlannerStyle.progressInset)
                     }
                     Button(VyronAppText.automationStopTask) { model.stopTask() }
-                        .font(VyronAutomationTypography.emphasizedBody).foregroundStyle(Palette.warning)
+                        .font(VyronAutomationTypography.emphasizedBody).foregroundStyle(palette.warning)
                 } else if model.isPlanning {
                     ProgressView().controlSize(.small).padding(VyronAutomationPlannerStyle.progressInset)
                     Button(VyronAppText.automationStop) { model.cancelPlanning() }
                         .font(VyronAutomationTypography.caption).buttonStyle(.plain)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 } else {
                     Button(
                         !isOneAction ? VyronAppText.automationStartGoal : VyronAppText.automationPlanAction
@@ -115,7 +116,7 @@ struct VyronAutomationPlannerView: View {
                         Spacer()
                         if model.isFollowingTask {
                             Circle()
-                                .fill(Palette.success)
+                                .fill(palette.success)
                                 .frame(
                                     width: VyronAutomationPlannerStyle.runningIndicatorSize,
                                     height: VyronAutomationPlannerStyle.runningIndicatorSize
@@ -132,7 +133,7 @@ struct VyronAutomationPlannerView: View {
                             )
                             : VyronAppText.automationPlanningCounts(model.taskPlanningPasses, model.approvedTaskActions)
                     )
-                    .font(VyronAutomationTypography.monospacedSmallCaption).foregroundStyle(Palette.muted)
+                    .font(VyronAutomationTypography.monospacedSmallCaption).foregroundStyle(palette.muted)
                     if model.isAgentMode, let decision = model.agentDecision {
                         Text(
                             VyronAppText.automationDecisionBudget(
@@ -143,7 +144,7 @@ struct VyronAutomationPlannerView: View {
                             )
                         )
                         .font(VyronAutomationTypography.monospacedSmallCaption)
-                        .foregroundStyle(Palette.accent)
+                        .foregroundStyle(palette.accent)
                         .lineLimit(VyronAutomationPlannerStyle.budgetLineLimit)
                     }
                     if let wake = model.nextAgentWake, model.isFollowingTask {
@@ -151,7 +152,7 @@ struct VyronAutomationPlannerView: View {
                             .periodic(from: .now, by: VyronAutomationDisplayTiming.clockRefreshInterval)
                         ) { context in
                             Text(VyronAppText.automationNextCheck(max(0, Int(wake.timeIntervalSince(context.date)))))
-                                .font(VyronAutomationTypography.emphasizedCaption).foregroundStyle(Palette.accent)
+                                .font(VyronAutomationTypography.emphasizedCaption).foregroundStyle(palette.accent)
                         }
                     }
                     if !model.taskEvents.isEmpty {
@@ -161,7 +162,7 @@ struct VyronAutomationPlannerView: View {
                                     HStack(alignment: .top, spacing: VyronAutomationPlannerStyle.rowSpacing) {
                                         Text(event.date, style: .time)
                                             .font(VyronAutomationTypography.monospacedTinyCaption)
-                                            .foregroundStyle(Palette.accent)
+                                            .foregroundStyle(palette.accent)
                                             .frame(
                                                 width: VyronAutomationPlannerStyle.eventTimeWidth,
                                                 alignment: .leading
@@ -169,7 +170,7 @@ struct VyronAutomationPlannerView: View {
                                         Text(event.summary)
                                             .font(VyronAutomationTypography.monospacedSmallCaption)
                                             .foregroundStyle(
-                                                Palette.text.opacity(VyronAutomationPlannerStyle.eventTextOpacity)
+                                                palette.text.opacity(VyronAutomationPlannerStyle.eventTextOpacity)
                                             )
                                             .lineSpacing(VyronAutomationCenterStyle.explanationLineSpacing)
                                             .textSelection(.enabled)
@@ -185,11 +186,11 @@ struct VyronAutomationPlannerView: View {
                             : VyronAppText.automationFreshReadsHint
                     )
                     .font(VyronAutomationTypography.smallCaption)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .lineSpacing(VyronAutomationCenterStyle.explanationLineSpacing)
                 }
                 .padding(VyronAutomationPlannerStyle.taskLogInset)
-                .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius))
             }
             if let proposal = model.proposal {
                 VStack(alignment: .leading, spacing: VyronAutomationPlannerStyle.rowSpacing) {
@@ -204,14 +205,14 @@ struct VyronAutomationPlannerView: View {
                             systemImage: VyronSymbols.sparkle
                         )
                         .font(VyronAutomationTypography.proposalHeading)
-                        .foregroundStyle(Palette.accent)
+                        .foregroundStyle(palette.accent)
                         Spacer()
                         if proposal.kind != .complete && proposal.kind != .wait
                             && !(model.isFollowingTask && proposal.kind == .inspect) {
                             Button(VyronAppText.automationReviewExecute) { model.reviewProposal() }
                                 .font(VyronAutomationTypography.emphasizedCaption)
                                 .buttonStyle(.plain)
-                                .foregroundStyle(Palette.accent)
+                                .foregroundStyle(palette.accent)
                                 .disabled(model.isExecuting || model.isPlanning)
                         }
                     }
@@ -232,12 +233,12 @@ struct VyronAutomationPlannerView: View {
                 }
                 .padding(VyronAutomationPlannerStyle.proposalInset)
                 .background(
-                    Palette.accent.opacity(VyronAutomationPlannerStyle.proposalFillOpacity),
+                    palette.accent.opacity(VyronAutomationPlannerStyle.proposalFillOpacity),
                     in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius)
-                        .stroke(Palette.accent.opacity(VyronAutomationPlannerStyle.proposalBorderOpacity))
+                        .stroke(palette.accent.opacity(VyronAutomationPlannerStyle.proposalBorderOpacity))
                 )
             }
         }
@@ -246,7 +247,7 @@ struct VyronAutomationPlannerView: View {
     private func detail(_ name: String, _ value: String) -> some View {
         HStack(alignment: .top, spacing: VyronAutomationPlannerStyle.detailSpacing) {
             Text(VyronAutomationCenterText.detailLabel(name))
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .frame(width: VyronAutomationPlannerStyle.detailLabelWidth, alignment: .leading)
             Text(value).textSelection(.enabled)
         }.font(VyronAutomationTypography.monospacedCaption)

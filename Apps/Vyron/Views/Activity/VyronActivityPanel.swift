@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronActivityPanel: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @State private var showsSubagents = false
@@ -11,7 +12,7 @@ struct VyronActivityPanel: View {
         let _ = localizationLocale
         VStack(spacing: 0) {
             panelHeader
-            Rectangle().fill(Palette.border).frame(height: VyronTrackingStyle.dividerWidth)
+            Rectangle().fill(palette.border).frame(height: VyronTrackingStyle.dividerWidth)
             if let activity = model.trackedActivity {
                 if let subagent = model.trackedSubagent {
                     workerHeader(subagent)
@@ -30,7 +31,7 @@ struct VyronActivityPanel: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Palette.canvas)
+        .background(palette.canvas)
         .onChange(of: model.appNavigation.trackingSelection) { previous, selection in
             if previous?.messageID != selection?.messageID || selection?.entryID != nil {
                 showsSubagents = false
@@ -65,7 +66,7 @@ struct VyronActivityPanel: View {
             .accessibilityLabel(VyronTrackingText.close)
         }
         .font(VyronTrackingStyle.icon)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .padding(.horizontal, VyronTrackingStyle.padding)
         .frame(height: VyronTrackingStyle.headerHeight)
     }
@@ -81,7 +82,7 @@ struct VyronActivityPanel: View {
                 }
             }
             .font(VyronTrackingStyle.title)
-            .foregroundStyle(showsSubagents == isSubagents ? Palette.text : Palette.muted)
+            .foregroundStyle(showsSubagents == isSubagents ? palette.text : palette.muted)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(showsSubagents == isSubagents ? .isSelected : [])
@@ -90,15 +91,15 @@ struct VyronActivityPanel: View {
     private func workerHeader(_ subagent: VyronSubagentActivity) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: VyronTrackingStyle.rowSpacing) {
             Image(systemName: VyronSymbols.subagents)
-                .foregroundStyle(Palette.accent)
+                .foregroundStyle(palette.accent)
             Text(verbatim: subagent.identity.name)
                 .font(VyronTrackingStyle.title)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .lineLimit(2)
             Spacer(minLength: 0)
             Text(verbatim: subagent.identity.model)
                 .font(VyronTrackingStyle.caption)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .lineLimit(2)
                 .help(subagent.identity.model)
         }
@@ -119,7 +120,7 @@ struct VyronActivityPanel: View {
                                 .padding(.top, VyronTrackingStyle.compactSpacing)
                         }
                         .font(VyronTrackingStyle.caption)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                     }
                     if !activity.subagentActivities.isEmpty {
                         Button {
@@ -130,7 +131,7 @@ struct VyronActivityPanel: View {
                                 systemImage: VyronSymbols.subagents
                             )
                             .font(VyronTrackingStyle.activity)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                         }
                         .buttonStyle(.plain)
                     }
@@ -144,7 +145,7 @@ struct VyronActivityPanel: View {
                         VStack(alignment: .leading, spacing: VyronTrackingStyle.rowSpacing) {
                             Text(VyronTrackingText.result)
                                 .font(VyronTrackingStyle.title)
-                                .foregroundStyle(Palette.muted)
+                                .foregroundStyle(palette.muted)
                             MarkdownContent(content: summary)
                         }
                     }
@@ -179,9 +180,9 @@ struct VyronActivityPanel: View {
                     .font(VyronTrackingStyle.activity)
             }
             Text(presentation.phase).font(VyronTrackingStyle.caption)
-            Rectangle().fill(Palette.border).frame(height: VyronTrackingStyle.dividerWidth)
+            Rectangle().fill(palette.border).frame(height: VyronTrackingStyle.dividerWidth)
         }
-        .foregroundStyle(activity.state == .failed ? Palette.warning : Palette.muted)
+        .foregroundStyle(activity.state == .failed ? palette.warning : palette.muted)
     }
 
     private func subagentList(_ subagents: [VyronSubagentActivity]) -> some View {
@@ -202,29 +203,29 @@ struct VyronActivityPanel: View {
                             HStack(alignment: .top, spacing: VyronTrackingStyle.rowSpacing) {
                                 Image(systemName: VyronTrackingPresentation.stateSymbol(subagent.activity.state))
                                     .font(VyronTrackingStyle.icon)
-                                    .foregroundStyle(Palette.muted)
+                                    .foregroundStyle(palette.muted)
                                 VStack(alignment: .leading, spacing: VyronTrackingStyle.compactSpacing) {
                                     Text(verbatim: subagent.identity.name)
                                         .font(VyronTrackingStyle.title)
-                                        .foregroundStyle(Palette.text)
+                                        .foregroundStyle(palette.text)
                                     Text(VyronTrackingPresentation.status(subagent.activity.state))
                                         .font(VyronTrackingStyle.caption)
-                                        .foregroundStyle(Palette.muted)
+                                        .foregroundStyle(palette.muted)
                                     Text(verbatim: subagent.identity.prompt)
                                         .font(VyronTrackingStyle.caption)
-                                        .foregroundStyle(Palette.muted)
+                                        .foregroundStyle(palette.muted)
                                         .lineLimit(2)
                                 }
                                 Spacer(minLength: 0)
                                 Image(systemName: VyronSymbols.chevronRight)
                                     .font(VyronConversationStyle.disclosure)
-                                    .foregroundStyle(Palette.muted)
+                                    .foregroundStyle(palette.muted)
                             }
                             .padding(.vertical, VyronTrackingStyle.padding)
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
-                        Rectangle().fill(Palette.border).frame(height: VyronTrackingStyle.dividerWidth)
+                        Rectangle().fill(palette.border).frame(height: VyronTrackingStyle.dividerWidth)
                     }
                 }
                 .padding(.horizontal, VyronTrackingStyle.padding)
@@ -237,7 +238,7 @@ struct VyronActivityPanel: View {
             Image(systemName: symbol).font(VyronTrackingStyle.icon)
             Text(title).font(VyronTrackingStyle.caption).multilineTextAlignment(.center)
         }
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .padding(VyronTrackingStyle.padding)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

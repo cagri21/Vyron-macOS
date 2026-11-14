@@ -3,6 +3,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronOfficeSettingsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @AppStorage(VyronUserDefaultsKey.officePythonExecutable.rawValue) private var pythonExecutable = ""
     @State private var status: VyronOfficeRuntimeStatus?
@@ -16,12 +17,12 @@ struct VyronOfficeSettingsView: View {
             Text(VyronOfficeText.title).font(VyronSettingsStyle.sectionTitle)
             Text(VyronOfficeText.description)
                 .font(VyronSettingsStyle.detail)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
                 Text(pythonExecutable.isEmpty ? VyronOfficeText.automaticRuntime : pythonExecutable)
                     .font(VyronSettingsStyle.detail)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .lineLimit(2)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -35,7 +36,7 @@ struct VyronOfficeSettingsView: View {
             }
             Text(VyronOfficeText.setupHint)
                 .font(VyronSettingsStyle.detail)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
                 Button(VyronOfficeText.checkSetup) { checkSetup() }
@@ -45,7 +46,7 @@ struct VyronOfficeSettingsView: View {
                 if let status {
                     Text(status.isAvailable ? VyronOfficeText.ready : VyronOfficeText.setupRequired)
                         .font(VyronSettingsStyle.detail)
-                        .foregroundStyle(status.isAvailable ? Palette.success : Palette.warning)
+                        .foregroundStyle(status.isAvailable ? palette.success : palette.warning)
                 }
             }
             if let status {
@@ -65,7 +66,7 @@ struct VyronOfficeSettingsView: View {
             if let failure {
                 Text(verbatim: failure)
                     .font(VyronSettingsStyle.detail)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .textSelection(.enabled)
             }
         }

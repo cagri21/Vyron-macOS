@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronNotificationRow: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.calendar) private var calendar
     @Environment(\.openWindow) private var openWindow
@@ -38,7 +39,7 @@ struct VyronNotificationRow: View {
                 Text(item.id.target == .plugins && model.voice.isActive
                     ? VyronNotificationText.voiceBusy : VyronNotificationText.openBlocked)
                     .font(VyronNotificationStyle.preview)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, VyronNotificationStyle.rowHorizontalInset)
                     .padding(.bottom, VyronNotificationStyle.rowVerticalInset)
@@ -52,13 +53,13 @@ struct VyronNotificationRow: View {
             HStack(spacing: VyronNotificationStyle.titleSpacing) {
                 Text(verbatim: item.content.title)
                     .font(item.isUnread ? VyronNotificationStyle.unreadTitle : VyronNotificationStyle.title)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                     .lineLimit(1)
                     .layoutPriority(1)
                 if let projectName {
                     Text(verbatim: projectName)
                         .font(VyronNotificationStyle.title)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .lineLimit(1)
                         .frame(maxWidth: VyronNotificationStyle.projectMaximumWidth, alignment: .leading)
                 }
@@ -68,7 +69,7 @@ struct VyronNotificationRow: View {
             if !item.content.preview.isEmpty {
                 Text(verbatim: item.content.preview)
                     .font(VyronNotificationStyle.preview)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -79,7 +80,7 @@ struct VyronNotificationRow: View {
                     systemImage: VyronNotificationPresentation.symbol(item.kind)
                 )
                 .font(VyronNotificationStyle.status)
-                .foregroundStyle(VyronNotificationPresentation.color(item.kind))
+                .foregroundStyle(VyronNotificationPresentation.color(item.kind, palette: palette))
                 Spacer(minLength: 0)
                 if calendar.isDate(item.date, inSameDayAs: relativeTo) {
                     Text(item.date, style: .time)
@@ -88,7 +89,7 @@ struct VyronNotificationRow: View {
                 }
             }
             .font(VyronNotificationStyle.detail)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .lineLimit(1)
         }
     }
@@ -100,7 +101,7 @@ struct VyronNotificationRow: View {
                 .frame(width: VyronNotificationStyle.indicatorSize, height: VyronNotificationStyle.indicatorSize)
                 .accessibilityHidden(true)
         } else if item.isUnread {
-            Circle().fill(Palette.controlAccent)
+            Circle().fill(palette.controlAccent)
                 .frame(width: VyronNotificationStyle.rowUnreadSize, height: VyronNotificationStyle.rowUnreadSize)
                 .frame(width: VyronNotificationStyle.indicatorSize, height: VyronNotificationStyle.indicatorSize)
                 .accessibilityHidden(true)

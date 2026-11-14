@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronBillingConnectionCard: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var balances: VyronConnectionBalancesModel
     let profile: ModelConnectionProfile
@@ -18,17 +19,17 @@ struct VyronBillingConnectionCard: View {
                     .monospacedDigit()
                     .textSelection(.enabled)
                     if let snapshot = state.snapshot {
-                        Text(VyronConnectionBalancePresentation.scope(snapshot.scope)).foregroundStyle(Palette.muted)
+                        Text(VyronConnectionBalancePresentation.scope(snapshot.scope)).foregroundStyle(palette.muted)
                         HStack {
                             Text(VyronBalanceText.updated)
                             Text(snapshot.checkedAt, style: .date)
                             Text(snapshot.checkedAt, style: .time)
                         }
                         .font(VyronSettingsStyle.detail)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                     }
                     Text(VyronConnectionBalancePresentation.explanation(state))
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack(spacing: VyronBillingStyle.toolbarSpacing) {
                         Button { balances.refresh(profile.id) } label: {
@@ -40,10 +41,10 @@ struct VyronBillingConnectionCard: View {
                             Link(VyronBalanceText.openBilling, destination: url)
                         }
                     }
-                    .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                    .buttonStyle(QuietButtonStyle(foreground: palette.text))
                 }
                 .font(VyronSettingsStyle.body)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .padding(.vertical, VyronBillingStyle.cardPadding)
             }
         }

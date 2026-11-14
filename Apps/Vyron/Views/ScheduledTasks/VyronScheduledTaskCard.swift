@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronScheduledTaskCard: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     let task: VyronScheduledTask
     @ObservedObject var model: VyronScheduledTasksModel
@@ -27,23 +28,23 @@ struct VyronScheduledTaskCard: View {
                 VStack(alignment: .leading, spacing: VyronScheduledTaskStyle.compactSpacing) {
                     Text(verbatim: task.definition.title).font(VyronScheduledTaskStyle.title)
                     Text(verbatim: task.definition.prompt)
-                        .font(VyronScheduledTaskStyle.body).foregroundStyle(Palette.muted).lineLimit(3)
+                        .font(VyronScheduledTaskStyle.body).foregroundStyle(palette.muted).lineLimit(3)
                 }
                 Spacer()
                 if isActive {
                     ProgressView().controlSize(.small)
                 } else {
                     Text(status)
-                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                 }
             }
             HStack(spacing: VyronScheduledTaskStyle.rowSpacing) {
                 Text(VyronScheduledTaskLabels.recurrence(task.schedule.recurrence))
                 Text(VyronScheduledTaskLabels.mode(task.definition.context.mode))
                 Text(verbatim: task.schedule.timeZoneIdentifier)
-            }.font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+            }.font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
             if let path = task.definition.context.workspacePath {
-                Text(verbatim: path).font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+                Text(verbatim: path).font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                     .lineLimit(1).truncationMode(.middle).help(path)
             }
             LabeledContent(VyronScheduledTaskText.nextRun) {
@@ -53,15 +54,15 @@ struct VyronScheduledTaskCard: View {
                     Text(consumedOneTime || task.progress.isEnabled
                         ? VyronScheduledTaskText.noNextRun : VyronScheduledTaskText.paused)
                 }
-            }.font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+            }.font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
             if let run = task.progress.lastRun {
                 LabeledContent(VyronScheduledTaskText.lastRun) {
                     Text(VyronScheduledTaskLabels.state(run.state))
                     Text(verbatim: formatted(run.output.startedAt))
-                }.font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+                }.font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                 if let detail = run.output.detail, !detail.isEmpty {
                     Text(verbatim: detail).font(VyronScheduledTaskStyle.caption)
-                        .foregroundStyle(run.state == .failed ? Palette.warning : Palette.muted)
+                        .foregroundStyle(run.state == .failed ? palette.warning : palette.muted)
                         .lineLimit(3).textSelection(.enabled)
                 }
             }
@@ -86,8 +87,8 @@ struct VyronScheduledTaskCard: View {
             }.buttonStyle(QuietButtonStyle()).font(VyronScheduledTaskStyle.body)
         }
         .padding(VyronScheduledTaskStyle.cardPadding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius))
-        .overlay(RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius).stroke(Palette.border))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius).stroke(palette.border))
     }
 
     private func formatted(_ date: Date) -> String {

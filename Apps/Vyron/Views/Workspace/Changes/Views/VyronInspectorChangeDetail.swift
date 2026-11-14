@@ -3,6 +3,7 @@ import SwiftUI
 import VyronDevelopment
 
 struct VyronInspectorChangeDetail: View {
+    @Environment(\.vyronPalette) private var palette
     let change: DevelopmentChange
     @Binding var viewMode: VyronInspectorDiffMode
     let revertState: VyronInspectorRevertState
@@ -13,7 +14,7 @@ struct VyronInspectorChangeDetail: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            Rectangle().fill(Palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
+            Rectangle().fill(palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
             preview
                 .id(change.path)
         }
@@ -30,7 +31,7 @@ struct VyronInspectorChangeDetail: View {
         VStack(spacing: VyronWorkspaceStyle.compactSpacing) {
             HStack(spacing: VyronWorkspaceStyle.compactSpacing) {
                 Text(verbatim: change.path)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .help(change.path)
@@ -42,7 +43,7 @@ struct VyronInspectorChangeDetail: View {
                 if revertState != .hidden {
                     Button(VyronAppText.inspectorRevert, action: revert)
                         .buttonStyle(.plain)
-                        .foregroundStyle(Palette.warning)
+                        .foregroundStyle(palette.warning)
                         .disabled(revertState == .disabled)
                         .help(VyronAppText.inspectorChangesHint)
                 }
@@ -58,7 +59,7 @@ struct VyronInspectorChangeDetail: View {
         }
         .font(VyronWorkspaceStyle.controlFont)
         .padding(VyronWorkspaceStyle.controlSpacing)
-        .background(Palette.surface)
+        .background(palette.surface)
     }
 
     private var copyDiff: some View {
@@ -68,7 +69,7 @@ struct VyronInspectorChangeDetail: View {
             NSPasteboard.general.setString(diff.unifiedText, forType: .string)
         } label: {
             Image(systemName: VyronSymbols.copy)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
         }
         .buttonStyle(.plain)
         .disabled(diff == nil)
@@ -87,7 +88,7 @@ struct VyronInspectorChangeDetail: View {
                 Text(verbatim: viewMode == .before
                     ? (change.before ?? VyronAppText.inspectorFileDidNotExist) : change.after)
                     .font(VyronChangesStyle.codeFont)
-                    .foregroundStyle(Palette.codeText)
+                    .foregroundStyle(palette.codeText)
                     .textSelection(.enabled)
                     .fixedSize(horizontal: true, vertical: false)
                     .padding(VyronWorkspaceStyle.controlSpacing)

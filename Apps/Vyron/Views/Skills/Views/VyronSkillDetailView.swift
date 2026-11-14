@@ -3,6 +3,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronSkillDetailView: View {
+    @Environment(\.vyronPalette) private var palette
     let skill: VyronLocalSkill
     let back: () -> Void
 
@@ -13,7 +14,7 @@ struct VyronSkillDetailView: View {
             }
             .buttonStyle(.plain)
             .font(VyronPluginsStyle.action)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
 
             HStack(alignment: .top, spacing: VyronPluginsStyle.rowSpacing) {
                 VStack(alignment: .leading, spacing: VyronPluginsStyle.rowSpacing) {
@@ -23,7 +24,7 @@ struct VyronSkillDetailView: View {
                         Text(VyronSkillLabels.scope(skill.scope))
                     }
                     .font(VyronPluginsStyle.caption)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 }
                 Spacer(minLength: 0)
                 Button {
@@ -37,22 +38,22 @@ struct VyronSkillDetailView: View {
 
             Text(verbatim: skill.fileURL.path)
                 .font(VyronPluginsStyle.code)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .textSelection(.enabled)
             Text(VyronSkillText.browsingNote)
                 .font(VyronPluginsStyle.caption)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             if skill.isContentTruncated {
                 Label(VyronSkillText.truncated, systemImage: VyronSymbols.details)
                     .font(VyronPluginsStyle.caption)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
             }
             Text(verbatim: skill.content)
                 .font(VyronPluginsStyle.code)
                 .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(VyronPluginsStyle.cardPadding)
-                .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius))
         }
     }
 }

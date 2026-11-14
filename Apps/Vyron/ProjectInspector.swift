@@ -4,6 +4,7 @@ import VyronCore
 import VyronDevelopment
 
 struct ProjectInspector: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
 
@@ -31,18 +32,18 @@ struct ProjectInspector: View {
                 } label: {
                     Image(systemName: "arrow.clockwise").font(.system(size: 10))
                 }
-                .buttonStyle(.plain).foregroundStyle(Palette.muted).help(VyronAppText.inspectorRefresh)
+                .buttonStyle(.plain).foregroundStyle(palette.muted).help(VyronAppText.inspectorRefresh)
             }.padding(13)
-            Rectangle().fill(Palette.border).frame(height: 1)
+            Rectangle().fill(palette.border).frame(height: 1)
             if model.inspector.inspectorTab == .changes && model.inspector.responseChangeReview != nil {
                 VyronProjectChangesView()
             } else if model.workspaceState.workspaceURL == nil {
                 VStack(spacing: 12) {
                     Image(systemName: "folder").font(.system(size: 25, weight: .ultraLight)).foregroundStyle(
-                        Palette.muted
+                        palette.muted
                     )
                     Text(VyronAppText.inspectorOpenHint)
-                        .font(.system(size: 11)).foregroundStyle(Palette.muted).multilineTextAlignment(.center)
+                        .font(.system(size: 11)).foregroundStyle(palette.muted).multilineTextAlignment(.center)
                     Button(VyronAppText.inspectorOpenProject) { model.chooseWorkspace() }
                         .buttonStyle(AccentButtonStyle())
                 }.padding(25).frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -53,7 +54,7 @@ struct ProjectInspector: View {
                 case .activity: ProjectActivityView()
                 }
             }
-        }.background(Palette.sidebar.opacity(0.65))
+        }.background(palette.sidebar.opacity(0.65))
     }
 }
 
@@ -66,6 +67,7 @@ private func inspectorTabLabel(_ tab: ProjectInspectorTab) -> String {
 }
 
 private struct ProjectFilesView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
 
@@ -78,7 +80,7 @@ private struct ProjectFilesView: View {
                         model.inspector.selectedProjectFilePath = nil; model.inspector.projectFilePreview = ""
                     } label: {
                         Image(systemName: "chevron.left").font(.system(size: 10))
-                    }.buttonStyle(.plain).foregroundStyle(Palette.muted)
+                    }.buttonStyle(.plain).foregroundStyle(palette.muted)
                     Text(path).font(.system(size: 10, weight: .medium, design: .monospaced)).lineLimit(2)
                     Spacer(minLength: 0)
                     Button {
@@ -87,9 +89,9 @@ private struct ProjectFilesView: View {
                     } label: {
                         Image(systemName: "doc.on.doc").font(.system(size: 10))
                     }
-                    .buttonStyle(.plain).foregroundStyle(Palette.muted).help(VyronAppText.inspectorCopyPreview)
+                    .buttonStyle(.plain).foregroundStyle(palette.muted).help(VyronAppText.inspectorCopyPreview)
                 }.padding(13)
-                Rectangle().fill(Palette.border).frame(height: 1)
+                Rectangle().fill(palette.border).frame(height: 1)
                 ScrollView([.horizontal, .vertical]) {
                     Text(model.inspector.projectFilePreview)
                         .font(.system(size: 10, design: .monospaced)).lineSpacing(4)
@@ -97,7 +99,7 @@ private struct ProjectFilesView: View {
                         .frame(maxWidth: .infinity, alignment: .topLeading).padding(14)
                 }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 Text(VyronAppText.inspectorReadOnlyPreview)
-                    .font(.system(size: 9)).foregroundStyle(Palette.muted).padding(12)
+                    .font(.system(size: 9)).foregroundStyle(palette.muted).padding(12)
             } else {
                 TextField(
                     VyronAppText.inspectorFindFile,
@@ -113,7 +115,7 @@ private struct ProjectFilesView: View {
                     Spacer()
                     Text(VyronAppText.inspectorFilesCount(model.inspector.developmentFiles.count))
                         .font(.system(size: 9, design: .monospaced))
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }.padding(.horizontal, 15).padding(.bottom, 8)
                 ScrollView {
                     LazyVStack(spacing: 1) {
@@ -125,13 +127,13 @@ private struct ProjectFilesView: View {
                             } label: {
                                 HStack(alignment: .top, spacing: 8) {
                                     Image(systemName: fileIcon(file.name)).font(.system(size: 11)).foregroundStyle(
-                                        Palette.muted
+                                        palette.muted
                                     ).frame(width: 14).padding(.top, 1)
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(file.name).font(.system(size: 11)).lineLimit(1)
                                         if file.path != file.name {
                                             Text(file.path).font(.system(size: 8, design: .monospaced)).foregroundStyle(
-                                                Palette.muted
+                                                palette.muted
                                             ).lineLimit(1).truncationMode(.middle)
                                         }
                                     }
@@ -142,7 +144,7 @@ private struct ProjectFilesView: View {
                     }.padding(.vertical, 2)
                 }
                 Text(VyronAppText.inspectorFilesHint)
-                    .font(.system(size: 9)).foregroundStyle(Palette.muted).lineSpacing(3).padding(14)
+                    .font(.system(size: 9)).foregroundStyle(palette.muted).lineSpacing(3).padding(14)
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -156,6 +158,7 @@ private struct ProjectFilesView: View {
 }
 
 private struct ProjectActivityView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     var body: some View {
@@ -164,32 +167,32 @@ private struct ProjectActivityView: View {
             if model.inspector.developmentEvents.isEmpty {
                 VStack(spacing: 11) {
                     Image(systemName: "list.bullet.rectangle").font(.system(size: 24, weight: .ultraLight))
-                        .foregroundStyle(Palette.muted)
-                    Text(VyronAppText.inspectorActivityHint).font(.system(size: 11)).foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
+                    Text(VyronAppText.inspectorActivityHint).font(.system(size: 11)).foregroundStyle(palette.muted)
                 }.frame(maxWidth: .infinity).padding(.top, 60)
             } else {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(model.inspector.developmentEvents.filter { $0.kind != .commandOutput }) { event in
                         HStack(alignment: .top, spacing: 9) {
                             Image(systemName: icon(event.kind)).font(.system(size: 10)).foregroundStyle(
-                                Palette.accent.opacity(0.85)
+                                palette.accent.opacity(0.85)
                             ).frame(width: 14).padding(.top, 2)
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(event.localizedMessage).font(.system(size: 10)).lineSpacing(4).textSelection(.enabled)
                                 if let path = event.path {
                                     Text(path).font(.system(size: 8, design: .monospaced)).foregroundStyle(
-                                        Palette.muted
+                                        palette.muted
                                     ).lineLimit(2)
                                 }
                                 if let command = event.command {
                                     Text(command).font(.system(size: 9, design: .monospaced)).foregroundStyle(
-                                        Palette.muted
+                                        palette.muted
                                     ).lineLimit(3).textSelection(.enabled)
                                 }
                             }
                             Spacer(minLength: 0)
                         }.padding(.vertical, 13)
-                        Rectangle().fill(Palette.border).frame(height: 1)
+                        Rectangle().fill(palette.border).frame(height: 1)
                     }
                 }.padding(.horizontal, 14)
             }
@@ -209,27 +212,28 @@ private struct ProjectActivityView: View {
 }
 
 struct DevelopmentTerminal: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     var body: some View {
         let _ = localizationLocale
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                Image(systemName: "terminal").font(.system(size: 11)).foregroundStyle(Palette.accent)
+                Image(systemName: "terminal").font(.system(size: 11)).foregroundStyle(palette.accent)
                 Text(VyronAppText.inspectorTerminal).font(.system(size: 11, weight: .medium))
-                Text(VyronAppText.inspectorCommandOutput).font(.system(size: 9)).foregroundStyle(Palette.muted)
+                Text(VyronAppText.inspectorCommandOutput).font(.system(size: 9)).foregroundStyle(palette.muted)
                 Spacer()
                 Button(VyronAppText.inspectorClear) { model.inspector.terminalOutput = "" }
                     .font(.system(size: 9)).buttonStyle(.plain)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 Button {
                     model.inspector.showTerminal = false
                 } label: {
                     Image(systemName: "xmark").font(.system(size: 9))
                 }
-                .buttonStyle(.plain).foregroundStyle(Palette.muted)
+                .buttonStyle(.plain).foregroundStyle(palette.muted)
             }.padding(.horizontal, 16).padding(.vertical, 11)
-            Rectangle().fill(Palette.border).frame(height: 1)
+            Rectangle().fill(palette.border).frame(height: 1)
             ScrollViewReader { proxy in
                 ScrollView([.horizontal, .vertical]) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -239,7 +243,7 @@ struct DevelopmentTerminal: View {
                         )
                         .font(.system(size: 10, design: .monospaced)).lineSpacing(3)
                         .foregroundStyle(
-                            model.inspector.terminalOutput.isEmpty ? Palette.muted : Palette.text.opacity(0.9)
+                            model.inspector.terminalOutput.isEmpty ? palette.muted : palette.text.opacity(0.9)
                         )
                         .textSelection(.enabled).fixedSize(horizontal: true, vertical: false)
                         Color.clear.frame(height: 1).id("terminal-bottom")
@@ -249,6 +253,6 @@ struct DevelopmentTerminal: View {
                     proxy.scrollTo("terminal-bottom", anchor: .bottomLeading)
                 }
             }
-        }.background(Palette.terminal)
+        }.background(palette.terminal)
     }
 }

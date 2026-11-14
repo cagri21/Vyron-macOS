@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronUnifiedDiffRow: View {
+    @Environment(\.vyronPalette) private var palette
     let line: VyronUnifiedDiffLine
     let filename: String
     let canScrollHorizontally: Bool
@@ -9,15 +10,17 @@ struct VyronUnifiedDiffRow: View {
         HStack(spacing: 0) {
             if line.kind == .hunk || line.kind == .noNewline {
                 Text(verbatim: line.text)
-                    .foregroundStyle(line.kind == .hunk ? Palette.diffHunk : Palette.muted)
+                    .foregroundStyle(line.kind == .hunk ? palette.diffHunk : palette.muted)
                     .lineLimit(1)
                     .padding(.horizontal, VyronWorkspaceStyle.controlSpacing)
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 Rectangle().fill(lineColor).frame(width: VyronChangesStyle.indicatorWidth)
                 gutter
-                Text(VyronDiffSyntax.highlight(line.text.isEmpty ? " " : line.text, filename: filename))
-                    .foregroundStyle(Palette.codeText)
+                Text(VyronDiffSyntax.highlight(
+                    line.text.isEmpty ? " " : line.text, filename: filename, scheme: palette.scheme
+                ))
+                    .foregroundStyle(palette.codeText)
                     .lineLimit(1)
                     .fixedSize(horizontal: canScrollHorizontally, vertical: false)
                     .padding(.horizontal, VyronWorkspaceStyle.compactSpacing)
@@ -37,9 +40,9 @@ struct VyronUnifiedDiffRow: View {
                 .frame(width: VyronChangesStyle.markerWidth)
         }
         .monospacedDigit()
-        .foregroundStyle(lineColor == .clear ? Palette.muted : lineColor)
+        .foregroundStyle(lineColor == .clear ? palette.muted : lineColor)
         .frame(maxHeight: .infinity)
-        .background(Palette.canvas.opacity(VyronChangesStyle.gutterOpacity))
+        .background(palette.canvas.opacity(VyronChangesStyle.gutterOpacity))
     }
 
     private func number(_ value: Int?) -> some View {
@@ -58,18 +61,18 @@ struct VyronUnifiedDiffRow: View {
 
     private var lineColor: Color {
         switch line.kind {
-        case .added: Palette.diffAdded
-        case .removed: Palette.diffRemoved
+        case .added: palette.diffAdded
+        case .removed: palette.diffRemoved
         case .context, .hunk, .noNewline: .clear
         }
     }
 
     private var rowBackground: Color {
         switch line.kind {
-        case .added: Palette.diffAdded.opacity(VyronChangesStyle.addedBackgroundOpacity)
-        case .removed: Palette.diffRemoved.opacity(VyronChangesStyle.removedBackgroundOpacity)
-        case .hunk: Palette.field
-        case .context, .noNewline: Palette.canvas
+        case .added: palette.diffAdded.opacity(VyronChangesStyle.addedBackgroundOpacity)
+        case .removed: palette.diffRemoved.opacity(VyronChangesStyle.removedBackgroundOpacity)
+        case .hunk: palette.field
+        case .context, .noNewline: palette.canvas
         }
     }
 }

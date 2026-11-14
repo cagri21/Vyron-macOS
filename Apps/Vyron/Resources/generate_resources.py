@@ -50,6 +50,8 @@ NAMESPACES = (
     ("VyronControlText", "control"),
     ("VyronPrivacyText", "privacy"),
     ("VyronSettingsText", "settings"),
+    ("VyronPermissionsText", "permissions"),
+    ("VyronAppearanceText", "appearance"),
     ("VyronOfficeText", "office"),
 )
 SHARED_NAMESPACES = (

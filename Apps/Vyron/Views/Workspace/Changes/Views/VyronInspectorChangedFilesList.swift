@@ -3,6 +3,7 @@ import SwiftUI
 import VyronDevelopment
 
 struct VyronInspectorChangedFilesList: View {
+    @Environment(\.vyronPalette) private var palette
     let changes: [DevelopmentChange]
     let selectedPath: String
     @Binding var filter: String
@@ -12,10 +13,10 @@ struct VyronInspectorChangedFilesList: View {
         VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
             HStack {
                 Text(VyronStatusText.changedFilesHeading)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 Spacer(minLength: 0)
                 Text(changes.count, format: .number)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .monospacedDigit()
             }
             .padding(.horizontal, VyronWorkspaceStyle.controlSpacing)
@@ -38,7 +39,7 @@ struct VyronInspectorChangedFilesList: View {
         }
         .font(VyronWorkspaceStyle.controlFont)
         .padding(.top, VyronWorkspaceStyle.compactSpacing)
-        .background(Palette.canvas)
+        .background(palette.canvas)
     }
 
     private var filteredChanges: [DevelopmentChange] {

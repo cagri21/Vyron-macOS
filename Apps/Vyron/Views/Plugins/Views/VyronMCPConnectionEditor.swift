@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronMCPConnectionEditor: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @ObservedObject var connections: MCPConnectionsModel
@@ -38,7 +39,7 @@ struct VyronMCPConnectionEditor: View {
                 }.buttonStyle(QuietButtonStyle())
                     .accessibilityLabel(VyronPluginText.close)
             }.padding(VyronMCPStyle.editorPadding)
-            Divider().overlay(Palette.border)
+            Divider().overlay(palette.border)
             ScrollView {
                 VStack(alignment: .leading, spacing: VyronMCPStyle.editorSectionSpacing) {
                     Toggle(
@@ -47,7 +48,7 @@ struct VyronMCPConnectionEditor: View {
                     ).font(VyronMCPStyle.field)
                     if jsonMode {
                         Text(VyronPluginText.editorJSONHint)
-                            .font(VyronMCPStyle.helper).foregroundStyle(Palette.muted)
+                            .font(VyronMCPStyle.helper).foregroundStyle(palette.muted)
                         jsonEditor(
                             VyronPluginText.editorConnectionJSON,
                             text: $configurationJSON,
@@ -71,7 +72,7 @@ struct VyronMCPConnectionEditor: View {
                                     .textFieldStyle(.roundedBorder)
                             }
                             Text(VyronPluginText.editorTokenURLHint)
-                                .font(VyronMCPStyle.helper).foregroundStyle(Palette.muted)
+                                .font(VyronMCPStyle.helper).foregroundStyle(palette.muted)
                         } else {
                             LabeledContent(VyronPluginText.editorExecutable) {
                                 TextField(VyronPluginText.editorExecutablePlaceholder, text: $profile.command)
@@ -83,7 +84,7 @@ struct VyronMCPConnectionEditor: View {
                                 height: VyronMCPStyle.credentialEditorHeight
                             )
                             Text(VyronPluginText.editorCommandHint)
-                                .font(VyronMCPStyle.helper).foregroundStyle(Palette.muted)
+                                .font(VyronMCPStyle.helper).foregroundStyle(palette.muted)
                                 .lineSpacing(VyronMCPStyle.commandHintLineSpacing)
                         }
                         Picker(VyronPluginText.editorToolAccess, selection: $profile.permission) {
@@ -118,14 +119,14 @@ struct VyronMCPConnectionEditor: View {
                         }.padding(.top, VyronMCPStyle.credentialsSpacing)
                     }
                     Text(VyronPluginText.editorPermissionsHint)
-                        .font(VyronMCPStyle.helper).foregroundStyle(Palette.muted)
+                        .font(VyronMCPStyle.helper).foregroundStyle(palette.muted)
                         .lineSpacing(VyronMCPStyle.permissionsHintLineSpacing)
                     if let error {
-                        Text(error).foregroundStyle(Palette.warning).font(VyronMCPStyle.field).textSelection(.enabled)
+                        Text(error).foregroundStyle(palette.warning).font(VyronMCPStyle.field).textSelection(.enabled)
                     }
                 }.font(VyronMCPStyle.field).padding(VyronMCPStyle.editorPadding)
             }
-            Divider().overlay(Palette.border)
+            Divider().overlay(palette.border)
             HStack {
                 Spacer()
                 Button(VyronPluginText.cancel) { dismiss() }.buttonStyle(QuietButtonStyle())
@@ -137,7 +138,7 @@ struct VyronMCPConnectionEditor: View {
             width: VyronMCPStyle.editorSize.width,
             height: VyronMCPStyle.editorSize.height
         )
-        .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
+        .background(palette.canvas).foregroundStyle(palette.text).tint(palette.controlAccent)
         .onAppear { loadCredentials() }
         .onChange(of: profile) { _, value in
             if !jsonMode { clearCredentialsIfDestinationChanged(value) }
@@ -152,11 +153,11 @@ struct VyronMCPConnectionEditor: View {
 
     private func jsonEditor(_ title: String, text: Binding<String>, height: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: VyronMCPStyle.jsonFieldSpacing) {
-            Text(title).font(VyronMCPStyle.helper).foregroundStyle(Palette.muted)
+            Text(title).font(VyronMCPStyle.helper).foregroundStyle(palette.muted)
             TextEditor(text: text).font(VyronMCPStyle.code).scrollContentBackground(.hidden)
                 .padding(VyronMCPStyle.jsonFieldPadding).frame(height: height)
-                .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronMCPStyle.jsonFieldRadius))
-                .overlay(RoundedRectangle(cornerRadius: VyronMCPStyle.jsonFieldRadius).stroke(Palette.border))
+                .background(palette.field, in: RoundedRectangle(cornerRadius: VyronMCPStyle.jsonFieldRadius))
+                .overlay(RoundedRectangle(cornerRadius: VyronMCPStyle.jsonFieldRadius).stroke(palette.border))
                 .accessibilityLabel(title)
         }
     }

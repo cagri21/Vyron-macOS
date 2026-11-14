@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronCustomizeSidebar: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @ObservedObject var connections: MCPConnectionsModel
@@ -29,7 +30,7 @@ struct VyronCustomizeSidebar: View {
             VStack(alignment: .leading, spacing: VyronPluginsStyle.rowSpacing) {
                 Text(VyronPluginText.installed)
                     .font(VyronPluginsStyle.caption)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .padding(.horizontal, VyronPluginsStyle.compactSpacing)
 
                 ScrollView {
@@ -43,7 +44,7 @@ struct VyronCustomizeSidebar: View {
                                     Text(verbatim: profile.name).lineLimit(1)
                                     Spacer(minLength: 0)
                                     if connections.isConnected(profile.id) {
-                                        Circle().fill(Palette.success)
+                                        Circle().fill(palette.success)
                                             .frame(
                                                 width: VyronPluginsStyle.statusSize,
                                                 height: VyronPluginsStyle.statusSize
@@ -54,7 +55,7 @@ struct VyronCustomizeSidebar: View {
                                 .padding(VyronPluginsStyle.compactSpacing)
                                 .background(
                                     presentation.section == .plugins && presentation.selectedConnectionID == profile.id
-                                        ? Palette.selection : .clear,
+                                        ? palette.selection : .clear,
                                     in: RoundedRectangle(cornerRadius: VyronPluginsStyle.rowRadius)
                                 )
                                 .contentShape(Rectangle())
@@ -72,12 +73,12 @@ struct VyronCustomizeSidebar: View {
                     .font(VyronPluginsStyle.caption)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
         }
         .padding(.horizontal, VyronPluginsStyle.sidebarPadding)
         .padding(.top, VyronPluginsStyle.headerTopPadding)
         .padding(.bottom, VyronPluginsStyle.sidebarPadding)
-        .background(Palette.sidebar)
+        .background(palette.sidebar)
     }
 
     private func sectionButton(
@@ -90,11 +91,11 @@ struct VyronCustomizeSidebar: View {
         return Button(action: action) {
             Label(title, systemImage: symbol)
                 .font(VyronPluginsStyle.body)
-                .foregroundStyle(selected ? Palette.text : Palette.muted)
+                .foregroundStyle(selected ? palette.text : palette.muted)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(VyronPluginsStyle.rowSpacing)
                 .background(
-                    selected ? Palette.selection : .clear,
+                    selected ? palette.selection : .clear,
                     in: RoundedRectangle(cornerRadius: VyronPluginsStyle.rowRadius)
                 )
                 .contentShape(Rectangle())

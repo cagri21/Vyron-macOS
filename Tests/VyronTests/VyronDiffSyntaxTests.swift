@@ -4,6 +4,13 @@ import XCTest
 
 @MainActor
 final class VyronDiffSyntaxTests: XCTestCase {
+    func testLightThemeUsesReadableTokenColors() {
+        let highlighted = VyronDiffSyntax.highlight("let enabled = true", filename: "Example.swift", scheme: .light)
+
+        XCTAssertEqual(color(for: "let", in: highlighted), VyronColors.appearanceLightDiffSyntaxKeyword)
+        XCTAssertEqual(color(for: "true", in: highlighted), VyronColors.appearanceLightDiffSyntaxLiteral)
+    }
+
     func testSwiftColorsCommonTokensAndPreservesSource() {
         let source = "    let café: Bool = true // review me"
         let highlighted = VyronDiffSyntax.highlight(source, filename: "Sources/Example.swift")

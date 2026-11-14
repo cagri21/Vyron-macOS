@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronMacControlSettingsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var model: AppModel
@@ -22,9 +23,9 @@ struct VyronMacControlSettingsView: View {
             }
             Text(VyronSettingsText.macControlHint)
                 .font(VyronSettingsStyle.detail)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
     }
 }

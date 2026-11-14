@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronResponseActivityView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     let activity: ResponseActivity
@@ -41,7 +42,7 @@ struct VyronResponseActivityView: View {
                 Button { openTracking() } label: {
                     Text(tracking.inlinePhase)
                         .font(VyronConversationStyle.activity)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .modifier(VyronActivityShimmerModifier(isActive: true))
                         .contentShape(Rectangle())
                 }
@@ -53,7 +54,7 @@ struct VyronResponseActivityView: View {
             if presentation.showsDetailsLink {
                 Button(VyronTrackingText.viewActivity) { openTracking() }
                     .font(VyronConversationStyle.activity)
-                    .foregroundStyle(Palette.accent)
+                    .foregroundStyle(palette.accent)
                     .buttonStyle(.plain)
             }
         }
@@ -78,13 +79,13 @@ struct VyronResponseActivityView: View {
                     Spacer(minLength: 0)
                 }
                 .font(VyronConversationStyle.activity)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .help(isTimelineExpanded ? VyronTrackingText.hideTimeline : VyronTrackingText.showTimeline)
             .accessibilityHint(isTimelineExpanded ? VyronTrackingText.hideTimeline : VyronTrackingText.showTimeline)
-            Rectangle().fill(Palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
+            Rectangle().fill(palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
         }
     }
 
@@ -109,7 +110,7 @@ struct VyronResponseActivityView: View {
                 }
             }
         }
-        .foregroundStyle(activity.state == .failed ? Palette.warning : Palette.muted)
+        .foregroundStyle(activity.state == .failed ? palette.warning : palette.muted)
         .padding(.vertical, VyronConversationStyle.statusVerticalPadding)
         .accessibilityElement(children: .combine)
     }

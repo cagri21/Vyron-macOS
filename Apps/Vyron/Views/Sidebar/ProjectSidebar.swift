@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct ProjectSidebar: View {
+    @Environment(\.vyronPalette) var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject var model: AppModel
     @State var nameRequest: VyronSidebarNameRequest?
@@ -43,7 +44,7 @@ struct ProjectSidebar: View {
             scheduledTasks
             engineStatus
         }
-        .background(VyronSidebarStyle.background)
+        .background(palette.surface)
         .onChange(of: showsNotifications) { _, isPresented in
             if isPresented { searchFocused = false }
         }
@@ -86,11 +87,11 @@ struct ProjectSidebar: View {
                     Image(systemName: VyronSymbols.chevronDown)
                         .font(VyronSidebarStyle.headerDisclosureFont)
                 }
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
-            .tint(Palette.text)
+            .tint(palette.text)
             .font(VyronSidebarStyle.brandFont)
             .fixedSize()
 
@@ -101,11 +102,11 @@ struct ProjectSidebar: View {
             } label: {
                 Image(systemName: VyronSymbols.plus)
                     .font(VyronSidebarStyle.headerActionFont)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
-            .tint(Palette.text)
+            .tint(palette.text)
             .font(VyronSidebarStyle.headerActionFont)
             .fixedSize()
             .help(VyronSidebarText.addToSidebar)
@@ -174,7 +175,7 @@ struct ProjectSidebar: View {
 
     private var searchField: some View {
         HStack(spacing: VyronSidebarStyle.controlSpacing) {
-            Image(systemName: VyronSymbols.search).foregroundStyle(Palette.muted)
+            Image(systemName: VyronSymbols.search).foregroundStyle(palette.muted)
             TextField(
                 VyronSidebarText.searchPlaceholder,
                 text: Binding(
@@ -193,7 +194,7 @@ struct ProjectSidebar: View {
                 model.sidebarState.sidebarSearchText = ""
                 showsSearch = false
             } label: {
-                Image(systemName: VyronSymbols.searchClear).foregroundStyle(Palette.muted)
+                Image(systemName: VyronSymbols.searchClear).foregroundStyle(palette.muted)
             }
             .buttonStyle(.plain)
             .help(VyronSidebarText.clearSearch)
@@ -201,7 +202,7 @@ struct ProjectSidebar: View {
         }
         .font(VyronSidebarStyle.detailFont)
         .padding(VyronSidebarStyle.rowInset)
-        .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
+        .background(palette.field, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
         .padding(.horizontal, VyronSidebarStyle.listInset)
         .padding(.bottom, VyronSidebarStyle.controlSpacing)
     }
@@ -234,7 +235,7 @@ struct ProjectSidebar: View {
             model.appNavigation.showSetup = true
         } label: {
             HStack(spacing: VyronSidebarStyle.rowContentSpacing) {
-                Circle().fill(model.modelSelection.isConnected ? Palette.success : Palette.warning)
+                Circle().fill(model.modelSelection.isConnected ? palette.success : palette.warning)
                     .frame(width: VyronSidebarStyle.statusSize, height: VyronSidebarStyle.statusSize)
                 VStack(alignment: .leading, spacing: VyronSidebarStyle.rowSpacing) {
                     Text(model.modelSelection.connectionLabel).font(VyronSidebarStyle.detailFont)
@@ -244,7 +245,7 @@ struct ProjectSidebar: View {
                             : "\(model.modelSelection.activeConnectionName) · \(model.modelSelection.inferenceLocationLabel)"
                     )
                     .font(VyronSidebarStyle.captionFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .lineLimit(1)
                 }
                 Spacer(minLength: 0)
@@ -256,7 +257,7 @@ struct ProjectSidebar: View {
         .buttonStyle(.plain)
         .help(VyronSidebarText.manageModels)
         .overlay(alignment: .top) {
-            Rectangle().fill(Palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
+            Rectangle().fill(palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
         }
     }
 }

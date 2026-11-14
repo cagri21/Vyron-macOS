@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronSettingsRow<Control: View>: View {
+    @Environment(\.vyronPalette) private var palette
     private let title: String
     private let detail: String
     private let control: Control
@@ -16,10 +17,10 @@ struct VyronSettingsRow<Control: View>: View {
             VStack(alignment: .leading, spacing: VyronSettingsStyle.textSpacing) {
                 Text(verbatim: title)
                     .font(VyronSettingsStyle.body)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                 Text(verbatim: detail)
                     .font(VyronSettingsStyle.detail)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

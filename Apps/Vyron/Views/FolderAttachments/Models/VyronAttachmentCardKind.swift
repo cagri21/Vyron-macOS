@@ -11,10 +11,10 @@ enum VyronAttachmentCardKind {
         }
     }
 
-    var tint: Color {
+    func tint(in palette: VyronAppearancePalette) -> Color {
         switch self {
-        case .pdf: Palette.diffRemoved
-        case .image: Palette.controlAccent
+        case .pdf: palette.diffRemoved
+        case .image: palette.controlAccent
         }
     }
 

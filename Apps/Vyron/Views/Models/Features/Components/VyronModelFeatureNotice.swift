@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronModelFeatureNotice: View {
+    @Environment(\.vyronPalette) private var palette
     let report: VyronModelFeatureReport
     @Environment(\.locale) private var locale
     @State private var isExpanded = false
@@ -15,20 +16,20 @@ struct VyronModelFeatureNotice: View {
         } label: {
             Label(VyronAppText.modelFeaturesTitle, systemImage: VyronSymbols.model)
                 .font(VyronWorkspaceStyle.captionFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
                 .onTapGesture { isExpanded.toggle() }
         }
         .font(VyronWorkspaceStyle.captionFont)
-        .tint(Palette.muted)
+        .tint(palette.muted)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, VyronWorkspaceStyle.composerPadding)
         .padding(.vertical, isExpanded ? VyronWorkspaceStyle.composerPadding : VyronWorkspaceStyle.compactSpacing)
         .background {
             if isExpanded {
                 RoundedRectangle(cornerRadius: VyronSettingsStyle.rowRadius)
-                    .fill(Palette.surface)
+                    .fill(palette.surface)
             }
         }
         .help(VyronAppText.modelFeaturesDetails)
@@ -39,17 +40,17 @@ struct VyronModelFeatureNotice: View {
         VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
             if !report.unavailableFeatures.isEmpty {
                 Text(VyronAppText.modelFeaturesUnavailableList(names(report.unavailableFeatures)))
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
             }
             let unverified = report.features.filter { $0.status == .unverified }
             if !unverified.isEmpty {
                 Text(VyronAppText.modelFeaturesUnverifiedList(names(unverified)))
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
             let available = report.features.filter { $0.status == .available }
             if !available.isEmpty {
                 Text(VyronAppText.modelFeaturesAvailableList(names(available)))
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
             ForEach(report.features, id: \.feature) { availability in
                 VStack(alignment: .leading, spacing: VyronSettingsStyle.textSpacing) {
@@ -57,14 +58,14 @@ struct VyronModelFeatureNotice: View {
                         Text(VyronModelFeaturePresentation.title(availability.feature))
                         Spacer(minLength: VyronWorkspaceStyle.compactSpacing)
                         Text(VyronModelFeaturePresentation.status(availability.status))
-                            .foregroundStyle(availability.status == .unavailable ? Palette.warning : Palette.muted)
+                            .foregroundStyle(availability.status == .unavailable ? palette.warning : palette.muted)
                     }
                     if let reason = VyronModelFeaturePresentation.reason(availability.reason) {
-                        Text(verbatim: reason).foregroundStyle(Palette.muted)
+                        Text(verbatim: reason).foregroundStyle(palette.muted)
                     }
                 }
             }
-            Text(VyronAppText.modelFeaturesBudgetHint).foregroundStyle(Palette.muted)
+            Text(VyronAppText.modelFeaturesBudgetHint).foregroundStyle(palette.muted)
         }
     }
 

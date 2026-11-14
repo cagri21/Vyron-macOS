@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronConversationTaskTimestamp: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var locale
     @Environment(\.timeZone) private var timeZone
     let date: Date
@@ -14,7 +15,7 @@ struct VyronConversationTaskTimestamp: View {
                 timeZone: timeZone
             ))
             .font(VyronWorkspaceStyle.captionFont)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .frame(maxWidth: .infinity, alignment: .center)
         }
     }

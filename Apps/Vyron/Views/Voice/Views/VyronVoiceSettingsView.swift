@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronVoiceSettingsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var voice: VyronVoiceModel
 
@@ -9,10 +10,10 @@ struct VyronVoiceSettingsView: View {
         VStack(alignment: .leading, spacing: VyronVoiceStyle.padding) {
             Label(VyronVoiceText.title, systemImage: VyronSymbols.liveVoice)
                 .font(VyronVoiceStyle.title)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
             Text(VyronVoiceText.description)
                 .font(VyronVoiceStyle.body)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             HStack(spacing: VyronVoiceStyle.padding) {
                 Picker(VyronVoiceText.voice, selection: $voice.selectedVoiceID) {
                     Text(VyronVoiceText.systemDefault).tag("")
@@ -38,16 +39,16 @@ struct VyronVoiceSettingsView: View {
             }
             .font(VyronVoiceStyle.body)
             if voice.voices.isEmpty {
-                Text(VyronVoiceText.noVoices).foregroundStyle(Palette.warning)
+                Text(VyronVoiceText.noVoices).foregroundStyle(palette.warning)
             }
             Text(VyronVoiceText.voiceHint)
             Text(VyronVoiceText.recognitionLanguage)
             Text(VyronVoiceText.privacy)
         }
         .font(VyronVoiceStyle.caption)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .padding(VyronVoiceStyle.padding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronVoiceStyle.radius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronVoiceStyle.radius))
         .onDisappear {
             if isPreviewing { voice.end() }
         }

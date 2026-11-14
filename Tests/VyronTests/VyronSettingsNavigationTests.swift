@@ -57,10 +57,12 @@ final class VyronSettingsNavigationTests: XCTestCase {
 
         test.model.openSettings(.models)
         test.model.openSettings(.general)
+        test.model.appNavigation.settingsSection = .permissions
+        XCTAssertEqual(test.model.appNavigation.destination, .settings)
         test.model.returnToWorkspace()
 
         XCTAssertEqual(test.model.appNavigation.destination, .workspace)
-        XCTAssertEqual(test.model.appNavigation.settingsSection, .general)
+        XCTAssertEqual(test.model.appNavigation.settingsSection, .permissions)
         XCTAssertEqual(test.model.composer.draft, "An unfinished request.")
         XCTAssertEqual(test.model.workspaceState.workspaceURL, workspace)
         XCTAssertEqual(test.model.selectedConversationID, conversation.id)

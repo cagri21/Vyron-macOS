@@ -2,6 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct VyronDevelopmentTaskAttachmentView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @State private var isPreviewPresented = false
     @State private var isExportPresented = false
@@ -21,11 +22,11 @@ struct VyronDevelopmentTaskAttachmentView: View {
             Label {
                 Text(verbatim: filename)
             } icon: {
-                Image(systemName: VyronSymbols.files).foregroundStyle(Palette.accent)
+                Image(systemName: VyronSymbols.files).foregroundStyle(palette.accent)
             }
             .font(VyronWorkspaceStyle.controlFont)
             .padding(VyronWorkspaceStyle.compactSpacing)
-            .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $isPreviewPresented) { preview }
@@ -52,13 +53,13 @@ struct VyronDevelopmentTaskAttachmentView: View {
             if let exportError {
                 Text(verbatim: exportError)
                     .font(VyronWorkspaceStyle.captionFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .textSelection(.enabled)
             }
         }
         .padding(VyronWorkspaceStyle.outerPadding)
         .frame(width: VyronWorkspaceStyle.contentWidth, height: Self.previewHeight)
-        .background(Palette.canvas)
+        .background(palette.canvas)
         .fileExporter(
             isPresented: $isExportPresented,
             document: VyronDevelopmentTaskTextDocument(content: content),

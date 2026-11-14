@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronComposerDropTarget: ViewModifier {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var model: AppModel
     @State private var isTargeted = false
 
@@ -13,7 +14,7 @@ struct VyronComposerDropTarget: ViewModifier {
             .overlay {
                 if isTargeted && model.canAcceptComposerDrop {
                     RoundedRectangle(cornerRadius: VyronWorkspaceStyle.composerRadius)
-                        .stroke(Palette.accent, lineWidth: VyronWorkspaceStyle.dividerWidth)
+                        .stroke(palette.accent, lineWidth: VyronWorkspaceStyle.dividerWidth)
                         .allowsHitTesting(false)
                 }
             }

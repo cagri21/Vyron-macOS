@@ -3,6 +3,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronScreenshotPreview: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.dismiss) private var dismiss
     @StateObject private var model: VyronScreenshotPreviewModel
 
@@ -29,13 +30,13 @@ struct VyronScreenshotPreview: View {
             if let error = model.error {
                 Text(verbatim: error)
                     .font(VyronWorkspaceStyle.captionFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .textSelection(.enabled)
             }
         }
         .padding(VyronScreenshotStyle.previewPadding)
         .frame(width: VyronScreenshotStyle.previewWidth, height: VyronScreenshotStyle.previewHeight)
-        .background(Palette.canvas)
+        .background(palette.canvas)
     }
 
 }

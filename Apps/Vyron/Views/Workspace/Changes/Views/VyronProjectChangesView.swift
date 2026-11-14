@@ -3,6 +3,7 @@ import SwiftUI
 import VyronDevelopment
 
 struct VyronProjectChangesView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @State private var viewMode = VyronInspectorDiffMode.diff
@@ -32,7 +33,7 @@ struct VyronProjectChangesView: View {
                 } else {
                     Text(VyronAppText.inspectorResponseChanges)
                         .font(VyronWorkspaceStyle.controlFont)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .help(review.workspacePath)
                         .padding(VyronWorkspaceStyle.controlSpacing)
@@ -48,7 +49,7 @@ struct VyronProjectChangesView: View {
             viewMode = .diff
             filter = ""
         }
-        .background(Palette.canvas)
+        .background(palette.canvas)
     }
 
     private func reviewLayout(change: DevelopmentChange) -> some View {
@@ -111,12 +112,12 @@ struct VyronProjectChangesView: View {
         VStack(spacing: VyronWorkspaceStyle.controlSpacing) {
             Image(systemName: VyronSymbols.changes)
                 .font(VyronWorkspaceStyle.heading)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             Text(VyronAppText.inspectorNoChanges)
                 .font(VyronWorkspaceStyle.controlFont.weight(.medium))
             Text(VyronAppText.inspectorCompletedEditsHint)
                 .font(VyronWorkspaceStyle.captionFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .multilineTextAlignment(.center)
         }
         .padding(VyronWorkspaceStyle.outerPadding)
@@ -124,6 +125,6 @@ struct VyronProjectChangesView: View {
     }
 
     private var border: some View {
-        Rectangle().fill(Palette.border)
+        Rectangle().fill(palette.border)
     }
 }

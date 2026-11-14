@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronActivityShimmerModifier: ViewModifier {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let isActive: Bool
 
@@ -11,9 +12,9 @@ struct VyronActivityShimmerModifier: ViewModifier {
                     let bandWidth = geometry.size.width * VyronActivityMotionStyle.shimmerBandWidth
                     LinearGradient(
                         colors: [
-                            Palette.text.opacity(0),
-                            Palette.text.opacity(VyronActivityMotionStyle.shimmerHighlightOpacity),
-                            Palette.text.opacity(0)
+                            palette.text.opacity(0),
+                            palette.text.opacity(VyronActivityMotionStyle.shimmerHighlightOpacity),
+                            palette.text.opacity(0)
                         ],
                         startPoint: .leading,
                         endPoint: .trailing

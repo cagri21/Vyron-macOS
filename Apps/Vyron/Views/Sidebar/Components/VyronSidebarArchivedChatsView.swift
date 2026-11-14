@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronSidebarArchivedChatsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var model: AppModel
@@ -31,22 +32,22 @@ struct VyronSidebarArchivedChatsView: View {
             }
             Text(VyronSidebarText.archivedChatsHint)
                 .font(VyronSidebarStyle.detailFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: VyronSidebarStyle.rowContentSpacing) {
                 Image(systemName: VyronSymbols.search)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 TextField(VyronSidebarText.searchArchivedChats, text: $search)
                     .textFieldStyle(.plain)
                     .accessibilityLabel(VyronSidebarText.searchArchivedChats)
             }
             .font(VyronSidebarStyle.rowFont)
             .padding(VyronSidebarStyle.rowInset)
-            .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
+            .background(palette.field, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
             if let error {
                 Text(verbatim: error)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if matchingConversations.isEmpty {
@@ -63,9 +64,9 @@ struct VyronSidebarArchivedChatsView: View {
         }
         .padding(VyronSidebarStyle.editorPadding)
         .frame(width: VyronSidebarStyle.archiveSheetWidth, height: VyronSidebarStyle.archiveSheetHeight)
-        .background(Palette.canvas)
-        .foregroundStyle(Palette.text)
-        .tint(Palette.controlAccent)
+        .background(palette.canvas)
+        .foregroundStyle(palette.text)
+        .tint(palette.controlAccent)
     }
 
     private var emptyState: some View {
@@ -79,7 +80,7 @@ struct VyronSidebarArchivedChatsView: View {
             .font(VyronSidebarStyle.rowFont)
             .multilineTextAlignment(.center)
         }
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -92,7 +93,7 @@ struct VyronSidebarArchivedChatsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(conversation.updatedAt, format: .dateTime.month(.abbreviated).day())
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
             if let path = conversation.sidebarProjectPath {
                 Label {
@@ -103,7 +104,7 @@ struct VyronSidebarArchivedChatsView: View {
                     Image(systemName: VyronSymbols.folder)
                 }
                 .font(VyronSidebarStyle.detailFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .help(path)
             }
             HStack(spacing: VyronSidebarStyle.rowContentSpacing) {
@@ -114,7 +115,7 @@ struct VyronSidebarArchivedChatsView: View {
             .font(VyronSidebarStyle.detailFont)
         }
         .padding(VyronSidebarStyle.archiveRowPadding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
     }
 
     private func restore(_ conversation: Conversation, open: Bool) {

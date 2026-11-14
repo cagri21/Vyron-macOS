@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct VyronAttachmentPreviewCard<Preview: View>: View {
+    @Environment(\.vyronPalette) private var palette
     let details: VyronAttachmentCardDetails
     let imageData: Data?
     let remove: (() -> Void)?
@@ -17,12 +18,12 @@ struct VyronAttachmentPreviewCard<Preview: View>: View {
                 Button(action: remove) {
                     Image(systemName: VyronSymbols.close)
                         .font(VyronWorkspaceStyle.captionFont.weight(.semibold))
-                        .foregroundStyle(Palette.text)
+                        .foregroundStyle(palette.text)
                         .frame(
                             width: VyronScreenshotStyle.removeButtonSize,
                             height: VyronScreenshotStyle.removeButtonSize
                         )
-                        .background(Palette.canvas, in: Circle())
+                        .background(palette.canvas, in: Circle())
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -31,7 +32,7 @@ struct VyronAttachmentPreviewCard<Preview: View>: View {
                 .padding(VyronWorkspaceStyle.compactSpacing)
             }
         }
-        .overlay { shape.strokeBorder(Palette.border).allowsHitTesting(false).accessibilityHidden(true) }
+        .overlay { shape.strokeBorder(palette.border).allowsHitTesting(false).accessibilityHidden(true) }
         .sheet(isPresented: $showsPreview, content: preview)
     }
 
@@ -42,7 +43,7 @@ struct VyronAttachmentPreviewCard<Preview: View>: View {
                 footer
             }
             .frame(width: VyronScreenshotStyle.thumbnailWidth)
-            .background(Palette.canvas)
+            .background(palette.canvas)
             .clipShape(shape)
             .contentShape(shape)
         }
@@ -61,12 +62,12 @@ struct VyronAttachmentPreviewCard<Preview: View>: View {
             } else {
                 Image(systemName: details.kind.symbol)
                     .font(VyronWorkspaceStyle.inputFont)
-                    .foregroundStyle(details.kind.tint)
+                    .foregroundStyle(details.kind.tint(in: palette))
             }
         }
         .frame(width: VyronScreenshotStyle.thumbnailWidth, height: VyronScreenshotStyle.thumbnailHeight, alignment: .top)
         .clipped()
-        .background(Palette.surface)
+        .background(palette.surface)
         .accessibilityHidden(true)
     }
 
@@ -80,10 +81,10 @@ struct VyronAttachmentPreviewCard<Preview: View>: View {
     private var footer: some View {
         HStack(spacing: VyronWorkspaceStyle.compactSpacing) {
             Image(systemName: details.kind.symbol)
-                .foregroundStyle(details.kind.tint)
+                .foregroundStyle(details.kind.tint(in: palette))
             Text(verbatim: details.kind.typeLabel)
                 .font(VyronWorkspaceStyle.captionFont.weight(.semibold))
-                .foregroundStyle(details.kind.tint)
+                .foregroundStyle(details.kind.tint(in: palette))
                 .lineLimit(1)
                 .frame(maxWidth: VyronScreenshotStyle.typeBadgeTextMaximumWidth)
                 .fixedSize(horizontal: true, vertical: false)
@@ -92,7 +93,7 @@ struct VyronAttachmentPreviewCard<Preview: View>: View {
                 .truncationMode(.middle)
         }
         .font(VyronWorkspaceStyle.controlFont)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .padding(VyronWorkspaceStyle.compactSpacing)
         .frame(maxWidth: .infinity, alignment: .leading)
     }

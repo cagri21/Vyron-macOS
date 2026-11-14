@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronWorkspaceChatMenu: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     let conversationID: UUID?
@@ -29,14 +30,14 @@ struct VyronWorkspaceChatMenu: View {
         } label: {
             Image(systemName: VyronSymbols.chatActions)
                 .font(VyronWorkspaceHeaderStyle.icon)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .frame(width: VyronWorkspaceHeaderStyle.controlSize, height: VyronWorkspaceHeaderStyle.controlSize)
                 .contentShape(Rectangle())
                 .opacity(availability == nil ? VyronWorkspaceHeaderStyle.disabledOpacity : 1)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
-        .tint(Palette.text)
+        .tint(palette.text)
         .fixedSize()
         .disabled(availability == nil)
         .help(VyronHeaderText.actions)

@@ -4,6 +4,7 @@ import SwiftUI
 import VyronCore
 
 struct ContentView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @State private var sidebar = VyronWorkspaceSidebarPresentation()
@@ -17,8 +18,8 @@ struct ContentView: View {
             mainLayout(windowWidth: geometry.size.width)
         }
         .frame(minWidth: minimumWidth)
-        .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
-        .toolbarBackground(VyronSidebarStyle.railBackground, for: .windowToolbar)
+        .background(palette.canvas).foregroundStyle(palette.text).tint(palette.controlAccent)
+        .toolbarBackground(palette.raised, for: .windowToolbar)
         .toolbarBackground(.visible, for: .windowToolbar)
         .sheet(isPresented: Binding(
             get: { model.appNavigation.showSetup }, set: { model.appNavigation.showSetup = $0 }
@@ -159,7 +160,7 @@ struct ContentView: View {
             if model.appNavigation.destination == .plugins {
                 VyronCustomizeSidebar(connections: model.mcpConnections, presentation: plugins)
                     .frame(width: VyronPluginsStyle.sidebarWidth)
-                Rectangle().fill(Palette.border).frame(width: VyronWorkspaceStyle.dividerWidth)
+                Rectangle().fill(palette.border).frame(width: VyronWorkspaceStyle.dividerWidth)
             }
             if model.appNavigation.destination == .plugins {
                 if plugins.section == .skills {
@@ -182,7 +183,7 @@ struct ContentView: View {
 
     private var minimumWidth: CGFloat {
         if model.appNavigation.destination == .settings {
-            return VyronSidebarStyle.railWidth + VyronSettingsStyle.minimumWidth
+            return VyronSidebarStyle.railWidth + VyronSettingsStyle.collapsedMinimumWidth
         }
         if model.appNavigation.destination == .plugins {
             return VyronSidebarStyle.railWidth + VyronPluginsStyle.sidebarWidth + VyronPluginsStyle.minimumPageWidth

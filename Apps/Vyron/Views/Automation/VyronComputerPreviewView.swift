@@ -3,6 +3,7 @@ import SwiftUI
 import VyronAutomation
 
 struct VyronComputerPreviewView: View {
+    @Environment(\.vyronPalette) private var palette
     @ObservedObject var model: AutomationModel
 
     var body: some View {
@@ -12,7 +13,7 @@ struct VyronComputerPreviewView: View {
                 Text(VyronControlText.livePreview)
                 Spacer(minLength: 0)
                 if let app = model.selectedApplication {
-                    Text(app.name).foregroundStyle(Palette.muted).lineLimit(1)
+                    Text(app.name).foregroundStyle(palette.muted).lineLimit(1)
                 }
                 if model.isFollowingTask || model.isPlanning || model.isExecuting {
                     Button(VyronAppText.automationStopTask, role: .destructive) {
@@ -29,14 +30,14 @@ struct VyronComputerPreviewView: View {
                         .buttonStyle(AccentButtonStyle())
                 }
                 .font(VyronComputerPreviewStyle.caption)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else if let preview = model.controlPreview, let image = NSImage(data: preview.imageData) {
                 previewImage(image, preview: preview)
             } else {
                 Text(model.controlPreviewMessage ?? VyronControlText.previewWaiting)
                     .font(VyronComputerPreviewStyle.caption)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(maxWidth: .infinity, minHeight: VyronComputerPreviewStyle.height, alignment: .center)
             }
             TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -45,17 +46,17 @@ struct VyronComputerPreviewView: View {
                     context.date.timeIntervalSince(feedback.sentAt)
                         < VyronComputerPreviewStyle.actionVisibilitySeconds {
                     Label(feedback.title, systemImage: VyronSymbols.checkmark)
-                        .foregroundStyle(Palette.success)
+                        .foregroundStyle(palette.success)
                 } else {
-                    Text(VyronControlText.previewLocal).foregroundStyle(Palette.muted)
+                    Text(VyronControlText.previewLocal).foregroundStyle(palette.muted)
                 }
             }
             .font(VyronComputerPreviewStyle.caption)
         }
         .padding(VyronComputerPreviewStyle.padding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius))
         .overlay {
-            RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius).stroke(Palette.border)
+            RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.radius).stroke(palette.border)
         }
     }
 
@@ -77,7 +78,7 @@ struct VyronComputerPreviewView: View {
                         let unitFrame = preview.unitRect(for: target) {
                         ZStack(alignment: .topLeading) {
                             RoundedRectangle(cornerRadius: VyronComputerPreviewStyle.highlightRadius)
-                                .strokeBorder(Palette.controlAccent, lineWidth: VyronComputerPreviewStyle.highlightWidth)
+                                .strokeBorder(palette.controlAccent, lineWidth: VyronComputerPreviewStyle.highlightWidth)
                                 .frame(width: unitFrame.width * frame.width, height: unitFrame.height * frame.height)
                                 .offset(
                                     x: frame.minX + unitFrame.minX * frame.width,

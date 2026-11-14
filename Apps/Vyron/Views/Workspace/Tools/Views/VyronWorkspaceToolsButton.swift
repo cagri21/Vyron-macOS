@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceToolsButton: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var library: VyronWorkspaceLibraryModel
     @EnvironmentObject private var presentation: VyronWorkspaceTabsPresentation
     @State private var isPresented = false
@@ -32,8 +33,8 @@ struct VyronWorkspaceToolsButton: View {
                 }
             }
             .frame(width: VyronWorkspaceToolsStyle.contentWidth, height: VyronWorkspaceToolsStyle.panelHeight)
-            .background(Palette.canvas)
-            .foregroundStyle(Palette.text)
+            .background(palette.canvas)
+            .foregroundStyle(palette.text)
             .environmentObject(library)
             .environmentObject(presentation)
         }

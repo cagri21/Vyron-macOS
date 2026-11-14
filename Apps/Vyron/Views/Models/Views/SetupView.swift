@@ -3,6 +3,7 @@ import VyronCore
 import VyronRuntime
 
 struct SetupView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @ObservedObject private var downloads: VyronModelDownloads
@@ -22,7 +23,7 @@ struct SetupView: View {
         VStack(alignment: .leading, spacing: 0) {
             if showsHeader {
                 VyronModelManagerHeader()
-                Rectangle().fill(Palette.border).frame(height: VyronSettingsStyle.dividerWidth)
+                Rectangle().fill(palette.border).frame(height: VyronSettingsStyle.dividerWidth)
             }
             if let transfer = downloads.active, case .precisionReplacement(let change) = transfer.kind {
                 VyronModelPrecisionProgress(downloads: downloads, transfer: transfer, change: change)
@@ -62,7 +63,7 @@ struct SetupView: View {
                                 Eyebrow(text: VyronAppText.settingsCodingOptions)
                                 Spacer()
                                 Text(VyronAppText.settingsOneDownload)
-                                    .font(.system(size: 9)).foregroundStyle(Palette.muted)
+                                    .font(.system(size: 9)).foregroundStyle(palette.muted)
                             }
                             ForEach(ModelCatalog.all.filter { $0.role == .coding }) { descriptor in
                                 modelCard(descriptor)
@@ -81,16 +82,16 @@ struct SetupView: View {
                         HStack(alignment: .top, spacing: 7) {
                             Image(systemName: VyronSymbols.warning)
                             Text(error).textSelection(.enabled)
-                        }.font(.system(size: 11)).foregroundStyle(Palette.warning)
+                        }.font(.system(size: 11)).foregroundStyle(palette.warning)
                     }
                     Text(
                         VyronAppText.settingsMemoryExplanation
                     )
-                    .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(4)
+                    .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(4)
                 }.padding(showsHeader ? VyronSettingsStyle.modelManagerInset : 0)
             }
             if showsHeader {
-                Rectangle().fill(Palette.border).frame(height: VyronSettingsStyle.dividerWidth)
+                Rectangle().fill(palette.border).frame(height: VyronSettingsStyle.dividerWidth)
                 HStack {
                     Label(
                         selection.isBuiltinConnection
@@ -100,10 +101,10 @@ struct SetupView: View {
                     ).font(.system(size: 9))
                     Spacer()
                     Text(selection.activeConnectionName).font(.system(size: 9)).lineLimit(1)
-                }.foregroundStyle(Palette.muted).padding(.horizontal, 25).padding(.vertical, 14)
+                }.foregroundStyle(palette.muted).padding(.horizontal, 25).padding(.vertical, 14)
             }
         }
-        .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
+        .background(palette.canvas).foregroundStyle(palette.text).tint(palette.controlAccent)
         .task { await model.refreshModels(quiet: true) }
         .sheet(item: $precisionModel) { installed in
             VyronModelPrecisionSheet(installed: installed)
@@ -115,19 +116,19 @@ struct SetupView: View {
             HStack(spacing: 12) {
                 Image(systemName: VyronSymbols.cpu)
                     .font(.system(size: 23, weight: .ultraLight))
-                    .foregroundStyle(Palette.accent)
+                    .foregroundStyle(palette.accent)
                     .frame(width: 40, height: 40).background(
-                        Palette.accent.opacity(0.07),
+                        palette.accent.opacity(0.07),
                         in: RoundedRectangle(cornerRadius: 8)
                     )
                 VStack(alignment: .leading, spacing: 5) {
                     Text(VyronAppText.settingsOllama).font(.system(size: 13, weight: .medium))
                     HStack(spacing: 5) {
-                        Circle().fill(selection.isConnected ? Palette.success : Palette.warning).frame(
+                        Circle().fill(selection.isConnected ? palette.success : palette.warning).frame(
                             width: 4,
                             height: 4
                         )
-                        Text(selection.connectionLabel).font(.system(size: 10)).foregroundStyle(Palette.muted)
+                        Text(selection.connectionLabel).font(.system(size: 10)).foregroundStyle(palette.muted)
                     }
                 }
                 Spacer()
@@ -146,7 +147,7 @@ struct SetupView: View {
                         .disabled(downloads.isChangingPrecision)
                 } else {
                     Link(VyronAppText.settingsGetOllama, destination: URL(string: "https://ollama.com/download/mac")!)
-                        .font(.system(size: 11)).foregroundStyle(Palette.accent)
+                        .font(.system(size: 11)).foregroundStyle(palette.accent)
                 }
             }
             HStack(spacing: 18) {
@@ -157,47 +158,47 @@ struct SetupView: View {
                 if let free = downloads.availableStorageBytes {
                     Label(VyronAppText.settingsFreeStorage(free.fileSizeLabel), systemImage: VyronSymbols.internalDrive)
                 }
-            }.font(.system(size: 9)).foregroundStyle(Palette.muted)
+            }.font(.system(size: 9)).foregroundStyle(palette.muted)
             if !selection.isConnected {
                 Text(
                     LocalRuntimeManager.executableURL == nil
                         ? VyronAppText.settingsInstallOllama
                         : VyronAppText.settingsStartEngineHint
                 )
-                .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
                 if LocalRuntimeManager.executableURL == nil {
                     Button(VyronAppText.settingsCheckAgain) { Task { await model.startEngine() } }
-                        .font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(Palette.accent)
+                        .font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(palette.accent)
                 }
             }
-        }.padding(16).background(Palette.surface, in: RoundedRectangle(cornerRadius: 10))
+        }.padding(16).background(palette.surface, in: RoundedRectangle(cornerRadius: 10))
     }
 
     private var selectionSection: some View {
         HStack(alignment: .top, spacing: 11) {
             Image(systemName: VyronSymbols.sparkles)
                 .font(.system(size: 17))
-                .foregroundStyle(Palette.accent)
+                .foregroundStyle(palette.accent)
                 .padding(.top, 2)
             VStack(alignment: .leading, spacing: 6) {
                 Text(VyronAppText.settingsAutomaticSelection).font(.system(size: 12, weight: .medium))
                 Text(
                     VyronAppText.settingsAutomaticDescription
                 )
-                .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
                 Text(VyronModelRankingText.basis)
-                    .font(VyronWorkspaceStyle.captionFont).foregroundStyle(Palette.muted)
+                    .font(VyronWorkspaceStyle.captionFont).foregroundStyle(palette.muted)
             }
             Spacer(minLength: 8)
             if selection.automaticModelSelection {
-                badge(VyronAppText.settingsSelected, color: Palette.accent)
+                badge(VyronAppText.settingsSelected, color: palette.accent)
             } else {
                 Button(VyronAppText.settingsUseAuto) { model.useAutomaticModels() }
-                    .font(.system(size: 11, weight: .medium)).buttonStyle(.plain).foregroundStyle(Palette.accent)
+                    .font(.system(size: 11, weight: .medium)).buttonStyle(.plain).foregroundStyle(palette.accent)
                     .disabled(!model.canManageModelSelection)
             }
-        }.padding(15).background(Palette.accent.opacity(0.045), in: RoundedRectangle(cornerRadius: 9))
-            .overlay(RoundedRectangle(cornerRadius: 9).stroke(Palette.accent.opacity(0.16)))
+        }.padding(15).background(palette.accent.opacity(0.045), in: RoundedRectangle(cornerRadius: 9))
+            .overlay(RoundedRectangle(cornerRadius: 9).stroke(palette.accent.opacity(0.16)))
     }
 
     private func modelCard(_ descriptor: ModelDescriptor) -> some View {
@@ -211,20 +212,20 @@ struct SetupView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(descriptor.displayName).font(.system(size: 15, weight: .medium))
                     Text(VyronModelDescription.summary(descriptor))
-                        .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+                        .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
                     if let installed, let score = model.modelRanking.score(for: installed.name) {
                         VyronModelScoreLabel(score: score)
                     }
                 }
                 Spacer(minLength: 0)
                 if selected {
-                    badge(VyronAppText.settingsSelected, color: Palette.accent)
+                    badge(VyronAppText.settingsSelected, color: palette.accent)
                 } else if heavy {
-                    badge(VyronAppText.settingsManualOnly, color: Palette.warning)
+                    badge(VyronAppText.settingsManualOnly, color: palette.warning)
                 } else if descriptor.tag == ModelCatalog.recommendedCodingTag {
-                    badge(VyronAppText.settingsRecommended, color: Palette.accent)
+                    badge(VyronAppText.settingsRecommended, color: palette.accent)
                 } else if descriptor.role == .helper {
-                    badge(VyronAppText.settingsChatHelper, color: Palette.muted)
+                    badge(VyronAppText.settingsChatHelper, color: palette.muted)
                 }
             }
             HStack(spacing: 13) {
@@ -240,27 +241,27 @@ struct SetupView: View {
                 }
                 Text(VyronAppText.settingsSuggestedContext(descriptor.recommendedContextTokens / 1_024))
                     .fontDesign(.monospaced)
-            }.font(.system(size: 9)).foregroundStyle(Palette.muted)
+            }.font(.system(size: 9)).foregroundStyle(palette.muted)
             Text(installed?.name ?? descriptor.tag).font(.system(size: 9, design: .monospaced)).foregroundStyle(
-                Palette.muted
+                palette.muted
             )
             Text(VyronModelDescription.memoryNote(descriptor)).font(.system(size: 10)).foregroundStyle(
-                heavy ? Palette.warning.opacity(0.9) : Palette.muted
+                heavy ? palette.warning.opacity(0.9) : palette.muted
             ).lineSpacing(3)
-            Rectangle().fill(Palette.border).frame(height: 1)
+            Rectangle().fill(palette.border).frame(height: 1)
             if active {
                 downloadProgress(tag: descriptor.tag)
             } else {
                 HStack(spacing: 9) {
                     Link(VyronAppText.settingsModelDetails, destination: descriptor.documentationURL)
-                        .font(.system(size: 9)).foregroundStyle(Palette.muted)
+                        .font(.system(size: 9)).foregroundStyle(palette.muted)
                     Spacer()
                     if let installed {
                         VyronChangeModelPrecisionButton(installed: installed) { precisionModel = $0 }
                         if selected {
                             Label(VyronAppText.settingsInUse, systemImage: VyronSymbols.selected)
                                 .font(.system(size: 10))
-                                .foregroundStyle(Palette.accent)
+                                .foregroundStyle(palette.accent)
                         } else {
                             Button(
                                 descriptor.role == .helper
@@ -271,7 +272,7 @@ struct SetupView: View {
                         }
                     } else {
                         if paused {
-                            Text(VyronAppText.settingsPaused).font(.system(size: 9)).foregroundStyle(Palette.muted)
+                            Text(VyronAppText.settingsPaused).font(.system(size: 9)).foregroundStyle(palette.muted)
                         }
                         Button(paused ? VyronAppText.settingsResume : VyronAppText.settingsDownload) {
                             model.downloadModel(descriptor.tag)
@@ -285,10 +286,10 @@ struct SetupView: View {
                 }
             }
         }
-        .padding(16).background(Palette.surface, in: RoundedRectangle(cornerRadius: 10))
+        .padding(16).background(palette.surface, in: RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10).stroke(
-                selected ? Palette.accent.opacity(0.4) : heavy ? Palette.warning.opacity(0.2) : Palette.border
+                selected ? palette.accent.opacity(0.4) : heavy ? palette.warning.opacity(0.2) : palette.border
             )
         )
     }
@@ -308,7 +309,7 @@ struct SetupView: View {
             Text(
                 VyronAppText.settingsOllamaTagHint
             )
-            .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+            .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
             HStack(spacing: 9) {
                 TextField(VyronAppText.settingsOllamaTagPlaceholder, text: $customModelTag)
                     .textFieldStyle(.roundedBorder).font(.system(size: 11, design: .monospaced))
@@ -328,7 +329,7 @@ struct SetupView: View {
                     Text(tag).font(.system(size: 10, design: .monospaced)).lineLimit(1)
                     Spacer()
                     Button(VyronAppText.settingsResume) { model.downloadModel(tag) }
-                        .font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(Palette.accent)
+                        .font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(palette.accent)
                         .disabled(!selection.isConnected || downloads.isActive || !model.canManageModelSelection)
                 }
             }
@@ -346,9 +347,9 @@ struct SetupView: View {
     }
 
     private func notice(_ text: String, icon: String) -> some View {
-        Label(text, systemImage: icon).font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
+        Label(text, systemImage: icon).font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
             .padding(12).frame(maxWidth: .infinity, alignment: .leading)
-            .background(Palette.raised.opacity(0.45), in: RoundedRectangle(cornerRadius: 8))
+            .background(palette.raised.opacity(0.45), in: RoundedRectangle(cornerRadius: 8))
     }
 
     private func memorySize(_ bytes: Int64) -> String {

@@ -13,7 +13,7 @@ enum VyronColorAssets {
             let description = String(describing: error)
             logger.error("Could not load color asset \(name, privacy: .public): \(description, privacy: .public)")
             // Keep resource failures visible without crashing the app.
-            return Palette.danger
+            return .red
         }
     }
 

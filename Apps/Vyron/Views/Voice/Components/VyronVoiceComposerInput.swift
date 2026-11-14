@@ -3,6 +3,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct VyronVoiceComposerInput: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var model: AppModel
     @ObservedObject var voice: VyronVoiceModel
@@ -31,7 +32,7 @@ struct VyronVoiceComposerInput: View {
                     if model.composer.draft.isEmpty {
                         Text(verbatim: suggestion?.text ?? placeholder)
                             .font(VyronWorkspaceStyle.inputFont)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                             .lineLimit(VyronWorkspaceStyle.composerHintLineLimit)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .allowsHitTesting(false)
@@ -101,11 +102,11 @@ struct VyronVoiceComposerInput: View {
                 } label: {
                     Image(systemName: VyronSymbols.acceptSuggestion)
                         .font(VyronWorkspaceStyle.composerHintKeyFont)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .padding(.horizontal, VyronWorkspaceStyle.composerHintKeyHorizontalPadding)
                         .padding(.vertical, VyronWorkspaceStyle.composerHintKeyVerticalPadding)
                         .background(
-                            Palette.surface,
+                            palette.surface,
                             in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.composerHintKeyRadius)
                         )
                 }

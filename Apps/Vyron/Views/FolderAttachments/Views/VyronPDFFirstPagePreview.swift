@@ -3,6 +3,7 @@ import SwiftUI
 import VyronModelDomain
 
 struct VyronPDFFirstPagePreview: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.dismiss) private var dismiss
     let attachment: VyronPDFPreview
 
@@ -30,6 +31,6 @@ struct VyronPDFFirstPagePreview: View {
         }
         .padding(VyronScreenshotStyle.previewPadding)
         .frame(width: VyronScreenshotStyle.previewWidth, height: VyronScreenshotStyle.previewHeight)
-        .background(Palette.canvas)
+        .background(palette.canvas)
     }
 }

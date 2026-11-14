@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronSidebarProjectEditor: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var model: AppModel
@@ -26,7 +27,7 @@ struct VyronSidebarProjectEditor: View {
             header
             HStack(spacing: VyronSidebarStyle.projectEditorFieldSpacing) {
                 Image(systemName: VyronSymbols.folder)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 TextField(VyronSidebarText.projectName, text: $name)
                     .textFieldStyle(.plain)
                     .focused($nameFocused)
@@ -36,11 +37,11 @@ struct VyronSidebarProjectEditor: View {
             .font(VyronSidebarStyle.projectEditorNameFont)
             .padding(.horizontal, VyronSidebarStyle.projectEditorFieldPadding)
             .frame(height: VyronSidebarStyle.projectEditorFieldHeight)
-            .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
+            .background(palette.field, in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
             .overlay {
                 RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius)
                     .stroke(
-                        nameFocused ? Palette.controlAccent : Palette.border,
+                        nameFocused ? palette.controlAccent : palette.border,
                         lineWidth: VyronSidebarStyle.projectEditorBorderWidth
                     )
                     .allowsHitTesting(false)
@@ -49,7 +50,7 @@ struct VyronSidebarProjectEditor: View {
             if let error {
                 Text(verbatim: error)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Divider()
@@ -57,9 +58,9 @@ struct VyronSidebarProjectEditor: View {
         }
         .padding(VyronSidebarStyle.editorPadding)
         .frame(width: VyronSidebarStyle.projectEditorWidth)
-        .background(Palette.canvas)
-        .foregroundStyle(Palette.text)
-        .tint(Palette.controlAccent)
+        .background(palette.canvas)
+        .foregroundStyle(palette.text)
+        .tint(palette.controlAccent)
         .onAppear {
             if !hasLoadedProject {
                 name = model.sidebarProjectName(projectPath)
@@ -81,7 +82,7 @@ struct VyronSidebarProjectEditor: View {
             Button { dismiss() } label: {
                 Image(systemName: VyronSymbols.close)
                     .font(VyronSidebarStyle.iconFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(
                         width: VyronSidebarStyle.projectEditorCloseSize,
                         height: VyronSidebarStyle.projectEditorCloseSize
@@ -105,7 +106,7 @@ struct VyronSidebarProjectEditor: View {
                             ForEach(sourceFolders, id: \.self) { path in
                                 sourceFolderRow(path)
                                 Rectangle()
-                                    .fill(Palette.border)
+                                    .fill(palette.border)
                                     .frame(height: VyronSidebarStyle.projectEditorBorderWidth)
                             }
                         }
@@ -121,26 +122,26 @@ struct VyronSidebarProjectEditor: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(canEditFolders ? Palette.text : Palette.muted)
+                .foregroundStyle(canEditFolders ? palette.text : palette.muted)
                 .disabled(!canEditFolders)
             }
-            .background(Palette.surface)
+            .background(palette.surface)
             .clipShape(RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius))
             .overlay {
                 RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius)
-                    .stroke(Palette.border, lineWidth: VyronSidebarStyle.projectEditorBorderWidth)
+                    .stroke(palette.border, lineWidth: VyronSidebarStyle.projectEditorBorderWidth)
                     .allowsHitTesting(false)
             }
             if sourceFolders.isEmpty {
                 Text(VyronSidebarText.sourceFolderRequired)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if !model.canEditSidebarProjectFolders(projectPath) {
                 Text(VyronSidebarText.sourceFoldersBusy)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -157,7 +158,7 @@ struct VyronSidebarProjectEditor: View {
     private func sourceFolderRow(_ path: String) -> some View {
         HStack(spacing: VyronSidebarStyle.projectEditorFieldSpacing) {
             Image(systemName: VyronSymbols.folder)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             VStack(alignment: .leading, spacing: VyronSidebarStyle.rowSpacing) {
                 Text(verbatim: URL(fileURLWithPath: path).lastPathComponent)
                     .font(VyronSidebarStyle.rowFont)
@@ -165,7 +166,7 @@ struct VyronSidebarProjectEditor: View {
                     .truncationMode(.middle)
                 Text(verbatim: (path as NSString).abbreviatingWithTildeInPath)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
@@ -176,7 +177,7 @@ struct VyronSidebarProjectEditor: View {
             } label: {
                 Image(systemName: VyronSymbols.close)
                     .font(VyronSidebarStyle.iconFont)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(
                         width: VyronSidebarStyle.projectEditorCloseSize,
                         height: VyronSidebarStyle.projectEditorCloseSize
@@ -197,11 +198,11 @@ struct VyronSidebarProjectEditor: View {
             Button(role: .destructive, action: removeProject) {
                 Text(VyronSidebarText.removeLocalProject)
                     .font(VyronSidebarStyle.detailFont)
-                    .foregroundStyle(Palette.danger)
+                    .foregroundStyle(palette.danger)
                     .padding(.horizontal, VyronSidebarStyle.projectEditorButtonInset)
                     .frame(height: VyronSidebarStyle.projectEditorButtonHeight)
                     .background(
-                        Palette.danger.opacity(VyronSidebarStyle.projectEditorDestructiveOpacity),
+                        palette.danger.opacity(VyronSidebarStyle.projectEditorDestructiveOpacity),
                         in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius)
                     )
             }
@@ -219,8 +220,8 @@ struct VyronSidebarProjectEditor: View {
             Button(VyronSidebarText.save, action: save)
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .tint(Palette.text)
-                .foregroundStyle(Palette.canvas)
+                .tint(palette.text)
+                .foregroundStyle(palette.canvas)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canSave)
         }

@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronComposer: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var model: AppModel
@@ -63,7 +64,7 @@ struct VyronComposer: View {
             if model.composer.isEditingQueuedMessage {
                 Text(VyronQueueText.editTitle)
                     .font(VyronFollowUpStyle.caption)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
             if model.isChatWorkspace {
                 HStack(spacing: VyronWorkspaceStyle.controlSpacing) {
@@ -89,7 +90,7 @@ struct VyronComposer: View {
         .padding(.horizontal, VyronWorkspaceStyle.composerPadding)
         .padding(.vertical, model.isChatWorkspace
             ? VyronWorkspaceStyle.chatComposerVerticalPadding : VyronWorkspaceStyle.composerPadding)
-        .background(Palette.raised, in: RoundedRectangle(
+        .background(palette.raised, in: RoundedRectangle(
             cornerRadius: model.isChatWorkspace
                 ? VyronWorkspaceStyle.chatComposerRadius : VyronWorkspaceStyle.composerRadius
         ))
@@ -172,12 +173,12 @@ struct VyronComposer: View {
         } label: {
             Image(systemName: VyronSymbols.plus)
                 .font(VyronWorkspaceStyle.inputFont)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .tint(Palette.text)
+        .tint(palette.text)
         .help(VyronWorkspaceText.addActions)
         .accessibilityLabel(VyronWorkspaceText.addActions)
     }
@@ -195,7 +196,7 @@ struct VyronComposer: View {
             } label: {
                 Label(VyronWorkspaceText.files, systemImage: VyronSymbols.files)
             }
-            .foregroundStyle(model.appNavigation.showWorkspace ? Palette.text : Palette.muted)
+            .foregroundStyle(model.appNavigation.showWorkspace ? palette.text : palette.muted)
             Button {
                 model.openPlugins()
             } label: {
@@ -206,17 +207,17 @@ struct VyronComposer: View {
                 model.inspector.showTerminal.toggle()
             } label: {
                 Image(systemName: VyronSymbols.terminal)
-                    .foregroundStyle(model.inspector.showTerminal ? Palette.text : Palette.muted)
+                    .foregroundStyle(model.inspector.showTerminal ? palette.text : palette.muted)
             }
             .help(VyronWorkspaceText.toggleTerminal)
             .accessibilityLabel(VyronWorkspaceText.toggleTerminal)
         }
         .font(VyronWorkspaceStyle.controlFont)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .buttonStyle(.plain)
         .padding(.horizontal, VyronWorkspaceStyle.composerPadding)
         .frame(height: VyronWorkspaceStyle.contextHeight)
-        .background(Palette.surface, in: UnevenRoundedRectangle(
+        .background(palette.surface, in: UnevenRoundedRectangle(
             bottomLeadingRadius: VyronWorkspaceStyle.contextRadius,
             bottomTrailingRadius: VyronWorkspaceStyle.contextRadius
         ))
@@ -225,7 +226,7 @@ struct VyronComposer: View {
 
     private func errorNotice(_ error: VyronWorkspaceError) -> some View {
         HStack(alignment: .top, spacing: VyronWorkspaceStyle.compactSpacing) {
-            Image(systemName: VyronSymbols.warning).foregroundStyle(Palette.warning)
+            Image(systemName: VyronSymbols.warning).foregroundStyle(palette.warning)
             VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
                 Text(verbatim: error.message).textSelection(.enabled)
                 if error.showsLocalContextBudgetHelp, model.modelSelection.isBuiltinConnection {
@@ -233,11 +234,11 @@ struct VyronComposer: View {
                         VyronAppText.settingsContextBudget,
                         VyronAppText.settingsLocalModelSettings
                     ))
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     Button(VyronWorkspaceText.manageModels) {
                         model.appNavigation.showSetup = true
                     }
-                    .buttonStyle(QuietButtonStyle(foreground: Palette.controlAccent))
+                    .buttonStyle(QuietButtonStyle(foreground: palette.controlAccent))
                 }
             }
             Spacer(minLength: 0)
@@ -252,7 +253,7 @@ struct VyronComposer: View {
         }
         .font(VyronWorkspaceStyle.captionFont)
         .padding(VyronWorkspaceStyle.composerPadding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
     }
 
     private var placeholder: String {

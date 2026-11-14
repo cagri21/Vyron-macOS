@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct VyronSideChatComposer: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var model: AppModel
     @ObservedObject var session: VyronSideChatSession
     @FocusState private var inputFocused: Bool
@@ -11,7 +12,7 @@ struct VyronSideChatComposer: View {
             if let error = session.errorMessage {
                 Text(verbatim: error)
                     .font(VyronConversationWindowStyle.detail)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
                     .textSelection(.enabled)
                 if let answer = session.unsavedAnswer {
                     Button(VyronGeneralText.copyResponse) {
@@ -19,7 +20,7 @@ struct VyronSideChatComposer: View {
                         NSPasteboard.general.setString(answer, forType: .string)
                     }
                     .font(VyronConversationWindowStyle.action)
-                    .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                    .buttonStyle(QuietButtonStyle(foreground: palette.text))
                 }
             }
             HStack(alignment: .bottom, spacing: VyronConversationWindowStyle.composerSpacing) {
@@ -52,7 +53,7 @@ struct VyronSideChatComposer: View {
                             )
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                     .help(VyronWorkspaceText.stopTask)
                     .accessibilityLabel(VyronWorkspaceText.stopTask)
                 } else {
@@ -62,10 +63,10 @@ struct VyronSideChatComposer: View {
                                 width: VyronConversationWindowStyle.actionSize,
                                 height: VyronConversationWindowStyle.actionSize
                             )
-                            .background(Palette.controlAccent, in: Circle())
+                            .background(palette.controlAccent, in: Circle())
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                     .disabled(!session.canSend)
                     .keyboardShortcut(.return, modifiers: .command)
                     .help(VyronQueueText.sendNow)
@@ -73,10 +74,10 @@ struct VyronSideChatComposer: View {
                 }
             }
             .padding(VyronConversationWindowStyle.headerInset)
-            .background(Palette.raised, in: RoundedRectangle(cornerRadius: VyronConversationWindowStyle.composerRadius))
+            .background(palette.raised, in: RoundedRectangle(cornerRadius: VyronConversationWindowStyle.composerRadius))
             Text(verbatim: "\(session.configuration.connection.name) · \(session.configuration.model)")
                 .font(VyronConversationWindowStyle.detail)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
         }
     }
 }

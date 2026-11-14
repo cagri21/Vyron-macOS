@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronComposerSkillPicker: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var skills: VyronComposerSkillsModel
     @Binding var draft: String
@@ -17,11 +18,11 @@ struct VyronComposerSkillPicker: View {
                     content
                     Text(VyronSkillText.pickerKeyboardHint)
                         .font(VyronComposerSkillStyle.caption)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }
                 .padding(VyronComposerSkillStyle.padding)
-                .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronComposerSkillStyle.radius))
-                .overlay(RoundedRectangle(cornerRadius: VyronComposerSkillStyle.radius).stroke(Palette.border))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronComposerSkillStyle.radius))
+                .overlay(RoundedRectangle(cornerRadius: VyronComposerSkillStyle.radius).stroke(palette.border))
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(VyronSkillText.title)
             }
@@ -52,7 +53,7 @@ struct VyronComposerSkillPicker: View {
             .accessibilityLabel(VyronWorkspaceText.dismissError)
         }
         .font(VyronComposerSkillStyle.caption)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .buttonStyle(.plain)
     }
 
@@ -66,7 +67,7 @@ struct VyronComposerSkillPicker: View {
                     .buttonStyle(.plain)
             }
             .font(VyronComposerSkillStyle.caption)
-            .foregroundStyle(Palette.warning)
+            .foregroundStyle(palette.warning)
         }
         if skills.visibleCommands.isEmpty {
             if skills.isLoading {
@@ -75,7 +76,7 @@ struct VyronComposerSkillPicker: View {
                 Text(skills.inventory?.skills.isEmpty != false
                     ? VyronSkillText.emptyTitle : VyronSkillText.noResults)
                     .font(VyronComposerSkillStyle.body)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
         } else {
             commandList
@@ -83,11 +84,11 @@ struct VyronComposerSkillPicker: View {
         if skills.inventory?.didReachLimit == true {
             Text(VyronSkillText.scanLimit)
                 .font(VyronComposerSkillStyle.caption)
-                .foregroundStyle(Palette.warning)
+                .foregroundStyle(palette.warning)
         } else if skills.inventory?.issues.isEmpty == false {
             Text(VyronSkillText.scanWarning)
                 .font(VyronComposerSkillStyle.caption)
-                .foregroundStyle(Palette.warning)
+                .foregroundStyle(palette.warning)
         }
     }
 

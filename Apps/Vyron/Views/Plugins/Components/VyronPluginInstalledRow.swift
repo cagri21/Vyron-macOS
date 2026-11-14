@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronPluginInstalledRow: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var connections: MCPConnectionsModel
     @ObservedObject var presentation: VyronPluginsPresentation
@@ -23,9 +24,9 @@ struct VyronPluginInstalledRow: View {
                     VyronPluginAvatar(isPenpot: item.isPenpot)
                     VStack(alignment: .leading, spacing: VyronPluginsStyle.compactSpacing) {
                         Text(verbatim: profile.name).font(VyronPluginsStyle.sectionTitle)
-                            .foregroundStyle(Palette.text).lineLimit(1)
+                            .foregroundStyle(palette.text).lineLimit(1)
                         Text(verbatim: status).font(VyronPluginsStyle.body)
-                            .foregroundStyle(Palette.muted).lineLimit(1)
+                            .foregroundStyle(palette.muted).lineLimit(1)
                     }
                     Spacer(minLength: 0)
                 }
@@ -65,7 +66,7 @@ struct VyronPluginInstalledRow: View {
                 .frame(width: VyronPluginsStyle.toolbarControlSize, height: VyronPluginsStyle.toolbarControlSize)
         }
         .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-        .foregroundStyle(Palette.text).disabled(isLocked)
+        .foregroundStyle(palette.text).disabled(isLocked)
         .help(VyronPluginText.details).accessibilityLabel(VyronPluginText.details)
     }
 }

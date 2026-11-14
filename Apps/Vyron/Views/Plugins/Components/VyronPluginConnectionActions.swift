@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronPluginConnectionActions: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var connections: MCPConnectionsModel
     @ObservedObject var presentation: VyronPluginsPresentation
@@ -14,13 +15,13 @@ struct VyronPluginConnectionActions: View {
             if connections.busy.contains(profile.id) {
                 ProgressView().controlSize(.small)
                 Button(VyronPluginText.cancel) { connections.disconnect(profile.id) }
-                    .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                    .buttonStyle(QuietButtonStyle(foreground: palette.text))
             } else if connections.isConnected(profile.id) {
                 Button(VyronPluginText.disconnect) { connections.disconnect(profile.id) }
-                    .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                    .buttonStyle(QuietButtonStyle(foreground: palette.text))
             } else {
                 Button(VyronPluginText.connect) { connections.connect(profile) }
-                    .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                    .buttonStyle(QuietButtonStyle(foreground: palette.text))
                     .disabled(!profile.enabled)
             }
 
@@ -36,11 +37,11 @@ struct VyronPluginConnectionActions: View {
             } label: {
                 Image(systemName: VyronSymbols.ellipsis)
                     .font(VyronPluginsStyle.emphasizedActionGlyph)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                     .padding(VyronPluginsStyle.compactSpacing)
             }
             .menuStyle(.borderlessButton)
-            .tint(Palette.text)
+            .tint(palette.text)
             .font(VyronPluginsStyle.emphasizedAction)
             .fixedSize()
             .help(VyronPluginText.details)

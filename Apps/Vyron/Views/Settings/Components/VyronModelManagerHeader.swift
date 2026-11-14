@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronModelManagerHeader: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var localizationLocale
 
@@ -10,7 +11,7 @@ struct VyronModelManagerHeader: View {
             VStack(alignment: .leading, spacing: VyronSettingsStyle.textSpacing) {
                 Text(VyronSettingsText.models).font(VyronSettingsStyle.title)
                 Text(VyronSettingsText.modelsDescription)
-                    .font(VyronSettingsStyle.detail).foregroundStyle(Palette.muted)
+                    .font(VyronSettingsStyle.detail).foregroundStyle(palette.muted)
             }
             Spacer()
             Button {

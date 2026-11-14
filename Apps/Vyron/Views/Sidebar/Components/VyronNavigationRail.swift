@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronNavigationRail: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     let showsNewTask: Bool
@@ -57,7 +58,7 @@ struct VyronNavigationRail: View {
         .padding(.top, VyronSidebarStyle.railTopInset)
         .padding(.bottom, VyronSidebarStyle.railBottomInset)
         .frame(width: VyronSidebarStyle.railWidth)
-        .background(VyronSidebarStyle.railBackground)
+        .background(palette.raised)
     }
 
     private func railButton(
@@ -69,10 +70,10 @@ struct VyronNavigationRail: View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(VyronSidebarStyle.railIconFont)
-                .foregroundStyle(selected ? Palette.text : Palette.text.opacity(0.7))
+                .foregroundStyle(selected ? palette.text : palette.text.opacity(0.7))
                 .frame(width: VyronSidebarStyle.railButtonSize, height: VyronSidebarStyle.railButtonSize)
                 .background(
-                    selected ? Palette.selection : Color.clear,
+                    selected ? palette.selection : Color.clear,
                     in: RoundedRectangle(cornerRadius: VyronSidebarStyle.rowRadius)
                 )
                 .contentShape(Rectangle())
@@ -92,13 +93,13 @@ struct VyronNavigationRail: View {
         } label: {
             Image(systemName: VyronSymbols.ellipsis)
                 .font(VyronSidebarStyle.railMenuFont)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .frame(width: VyronSidebarStyle.railButtonSize, height: VyronSidebarStyle.railButtonSize)
                 .contentShape(Rectangle())
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
-        .tint(Palette.text)
+        .tint(palette.text)
         .font(VyronSidebarStyle.railMenuFont)
         .fixedSize()
         .modifier(VyronSidebarRowBackground())

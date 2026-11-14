@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronNotificationsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
 
@@ -33,11 +34,11 @@ struct VyronNotificationsView: View {
             }
             .buttonStyle(.plain)
             .disabled(!canMarkAllRead)
-            .foregroundStyle(canMarkAllRead ? Palette.text : Palette.muted)
+            .foregroundStyle(canMarkAllRead ? palette.text : palette.muted)
             .help(VyronNotificationText.markAllRead)
             .accessibilityLabel(VyronNotificationText.markAllRead)
         }
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .padding(.horizontal, VyronNotificationStyle.headerInset)
         .padding(.vertical, VyronNotificationStyle.headerVerticalInset)
     }
@@ -50,13 +51,13 @@ struct VyronNotificationsView: View {
         VStack(alignment: .leading, spacing: VyronNotificationStyle.headerSpacing) {
             Label { Text(verbatim: error) } icon: { Image(systemName: VyronSymbols.warning) }
                 .font(VyronNotificationStyle.preview)
-                .foregroundStyle(Palette.warning)
+                .foregroundStyle(palette.warning)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityElement(children: .combine)
             Button { model.reloadNotificationReadState() } label: {
                 Label(VyronNotificationText.retry, systemImage: VyronSymbols.refresh)
                     .font(VyronNotificationStyle.action)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(VyronNotificationText.retry)
@@ -74,7 +75,7 @@ struct VyronNotificationsView: View {
             Text(VyronNotificationText.emptyDetail)
                 .font(VyronNotificationStyle.preview)
         }
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .multilineTextAlignment(.center)
         .padding(VyronNotificationStyle.emptyInset)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -88,7 +89,7 @@ struct VyronNotificationsView: View {
                     VStack(alignment: .leading, spacing: VyronNotificationStyle.rowSpacing) {
                         Text(VyronNotificationPresentation.title(group.id))
                             .font(VyronNotificationStyle.section)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                             .padding(.horizontal, VyronNotificationStyle.sectionHeaderInset)
                             .padding(.bottom, VyronNotificationStyle.sectionHeaderBottomInset)
                             .accessibilityAddTraits(.isHeader)

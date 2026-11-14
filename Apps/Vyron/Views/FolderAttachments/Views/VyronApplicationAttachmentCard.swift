@@ -3,6 +3,7 @@ import SwiftUI
 import VyronModelDomain
 
 struct VyronApplicationAttachmentCard: View {
+    @Environment(\.vyronPalette) private var palette
     let attachment: VyronApplicationAttachment
     let remove: ((UUID) -> Void)?
 
@@ -14,14 +15,14 @@ struct VyronApplicationAttachmentCard: View {
             Button(action: open) {
                 HStack(spacing: VyronWorkspaceStyle.compactSpacing) {
                     Image(systemName: VyronSymbols.computerPreview)
-                        .foregroundStyle(Palette.accent)
+                        .foregroundStyle(palette.accent)
                         .accessibilityHidden(true)
                     Text(verbatim: attachment.name)
-                        .foregroundStyle(Palette.text)
+                        .foregroundStyle(palette.text)
                         .lineLimit(1)
                         .truncationMode(.middle)
                     Image(systemName: VyronSymbols.externalOpen)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .accessibilityHidden(true)
                 }
                 .contentShape(Rectangle())
@@ -36,7 +37,7 @@ struct VyronApplicationAttachmentCard: View {
                     Image(systemName: VyronSymbols.close)
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .help(VyronFolderAttachmentText.remove(attachment.name))
                 .accessibilityLabel(VyronFolderAttachmentText.remove(attachment.name))
             }
@@ -44,7 +45,7 @@ struct VyronApplicationAttachmentCard: View {
         .font(VyronWorkspaceStyle.controlFont)
         .padding(VyronWorkspaceStyle.compactSpacing)
         .frame(maxWidth: VyronFileAttachmentStyle.maximumCardWidth, alignment: .leading)
-        .background(Palette.canvas, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
+        .background(palette.canvas, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
         .alert(VyronToolsText.openFailed, isPresented: $showsOpenError) {}
     }
 

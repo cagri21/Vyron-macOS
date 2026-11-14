@@ -60,11 +60,11 @@ enum VyronWorkspaceStyle {
     static let modelLabelWidth: CGFloat = 220
     static let modelSubtitleSpacing: CGFloat = 2
     static let projectLabelWidth: CGFloat = 190
-    static let heading = Font.system(size: 28, weight: .regular)
-    static let modeFont = Font.system(size: 13)
-    static let controlFont = Font.system(size: 12)
-    static let inputFont = Font.system(size: 14)
+    static let heading = VyronAppearanceTypography(size: 28, weight: .regular)
+    static let modeFont = VyronAppearanceTypography(size: 13)
+    static let controlFont = VyronAppearanceTypography(size: 12)
+    static let inputFont = VyronAppearanceTypography(size: 14)
     static let composerHintKeyFont = Font.system(size: 10)
-    static let captionFont = Font.system(size: 11)
+    static let captionFont = VyronAppearanceTypography(size: 11)
     static let actionFont = Font.system(size: 13, weight: .semibold)
 }

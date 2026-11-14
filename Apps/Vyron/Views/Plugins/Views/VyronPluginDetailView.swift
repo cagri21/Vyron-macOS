@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronPluginDetailView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @ObservedObject var connections: MCPConnectionsModel
@@ -21,14 +22,14 @@ struct VyronPluginDetailView: View {
             }
             .buttonStyle(.plain)
             .font(VyronPluginsStyle.action)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
 
             HStack(spacing: VyronPluginsStyle.rowSpacing) {
                 VyronPluginAvatar(isPenpot: item.isPenpot)
                 VStack(alignment: .leading, spacing: VyronPluginsStyle.compactSpacing) {
                     Text(verbatim: profile.name).font(VyronPluginsStyle.title)
                     Text(verbatim: connections.statuses[profile.id] ?? VyronPluginText.ready)
-                        .font(VyronPluginsStyle.body).foregroundStyle(Palette.muted)
+                        .font(VyronPluginsStyle.body).foregroundStyle(palette.muted)
                 }
                 Spacer()
                 VyronPluginConnectionActions(
@@ -56,33 +57,33 @@ struct VyronPluginDetailView: View {
                     .disabled(isLocked || connections.busy.contains(profile.id))
                 }
                 Label(item.permissionTitle, systemImage: VyronSymbols.hand)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 Button(VyronPluginText.edit) { presentation.editingProfile = profile }
                     .buttonStyle(QuietButtonStyle())
                     .disabled(isLocked || connections.busy.contains(profile.id))
             }
             .font(VyronPluginsStyle.body)
             .padding(VyronPluginsStyle.cardPadding)
-            .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronPluginsStyle.cardRadius))
 
             VStack(alignment: .leading, spacing: VyronPluginsStyle.rowSpacing) {
                 Text(VyronPluginText.toolsTitle).font(VyronPluginsStyle.sectionTitle)
                 if let tools = connections.tools[profile.id], !tools.isEmpty {
                     ForEach(tools) { tool in
                         VyronPluginToolRow(tool: tool, canReviewWrites: item.canReviewWrites)
-                        Divider().overlay(Palette.border)
+                        Divider().overlay(palette.border)
                     }
                 } else {
                     Text(VyronPluginText.noTools)
-                        .font(VyronPluginsStyle.body).foregroundStyle(Palette.muted)
+                        .font(VyronPluginsStyle.body).foregroundStyle(palette.muted)
                 }
             }
             if item.isPenpot {
                 VStack(alignment: .leading, spacing: VyronPluginsStyle.rowSpacing) {
-                    Text(VyronPluginText.penpotHelp).font(VyronPluginsStyle.body).foregroundStyle(Palette.muted)
+                    Text(VyronPluginText.penpotHelp).font(VyronPluginsStyle.body).foregroundStyle(palette.muted)
                     if let url = VyronPluginItem.documentationURL {
                         Link(VyronPluginText.penpotDocs, destination: url)
-                            .font(VyronPluginsStyle.action).foregroundStyle(Palette.accent)
+                            .font(VyronPluginsStyle.action).foregroundStyle(palette.accent)
                     }
                 }
             }

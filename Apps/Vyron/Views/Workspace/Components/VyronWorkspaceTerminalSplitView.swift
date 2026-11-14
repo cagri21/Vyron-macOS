@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct VyronWorkspaceTerminalSplitView<Panel: View, Content: View>: View {
+    @Environment(\.vyronPalette) private var palette
     @State private var preferredPanelHeight = VyronWorkspaceStyle.terminalHeight
     @GestureState private var resizeStartHeight: CGFloat?
     @State private var isHoveringDivider = false
@@ -46,7 +47,7 @@ struct VyronWorkspaceTerminalSplitView<Panel: View, Content: View>: View {
 
     private func divider(height: CGFloat, availableHeight: CGFloat) -> some View {
         Rectangle()
-            .fill(Palette.border)
+            .fill(palette.border)
             .frame(height: VyronWorkspaceStyle.dividerWidth)
             .overlay {
                 Color.clear

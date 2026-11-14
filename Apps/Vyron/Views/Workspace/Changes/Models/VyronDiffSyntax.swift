@@ -15,7 +15,7 @@ enum VyronDiffSyntax {
     private static let literals: Set<String> = ["true", "false", "nil", "null", "undefined", "True", "False", "None"]
     private static let declarationKeywords: Set<String> = ["let", "var", "const", "func", "function", "def"]
 
-    static func highlight(_ code: String, filename: String) -> AttributedString {
+    static func highlight(_ code: String, filename: String, scheme: ColorScheme = .dark) -> AttributedString {
         guard code.utf8.count <= maximumHighlightedLineBytes,
             let language = VyronDiffSyntaxLanguage(filename: filename)
         else { return AttributedString(code) }
@@ -27,11 +27,12 @@ enum VyronDiffSyntax {
             let token = match.output
             result += AttributedString(code[end..<match.range.lowerBound])
             if (language == .python && token == "#") || (language != .python && token == "//") {
-                result += styled(code[match.range.lowerBound...], color: Palette.diffSyntaxComment)
+                result += styled(code[match.range.lowerBound...], color: VyronDiffSyntaxRole.comment.color(for: scheme))
                 return result
             }
             let next = code[match.range.upperBound...].first { !$0.isWhitespace }
-            result += styled(token, color: color(token, language: language, previous: previousToken, next: next))
+            let role = role(token, language: language, previous: previousToken, next: next)
+            result += styled(token, color: role?.color(for: scheme))
             end = match.range.upperBound
             previousToken = token
         }
@@ -39,22 +40,22 @@ enum VyronDiffSyntax {
         return result
     }
 
-    private static func color(
+    private static func role(
         _ token: Substring,
         language: VyronDiffSyntaxLanguage,
         previous: Substring,
         next: Character?
-    ) -> Color? {
+    ) -> VyronDiffSyntaxRole? {
         guard let first = token.first else { return nil }
-        if token.hasPrefix("/*"), language != .python { return Palette.diffSyntaxComment }
+        if token.hasPrefix("/*"), language != .python { return .comment }
         if first == "\"" || first == "'" || first == "`" || first.isNumber || literals.contains(String(token)) {
-            return Palette.diffSyntaxLiteral
+            return .literal
         }
-        if language.keywords.contains(String(token)) { return Palette.diffSyntaxKeyword }
-        if first.isUppercase || first == "@" { return Palette.diffSyntaxType }
+        if language.keywords.contains(String(token)) { return .keyword }
+        if first.isUppercase || first == "@" { return .type }
         let isName = first.isLetter || first == "_"
         if isName, next == "(" || next == ":" || declarationKeywords.contains(String(previous)) {
-            return Palette.diffSyntaxName
+            return .name
         }
         return nil
     }

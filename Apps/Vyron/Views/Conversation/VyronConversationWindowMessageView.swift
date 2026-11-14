@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronConversationWindowMessageView: View {
+    @Environment(\.vyronPalette) private var palette
     let message: ChatMessage
     let isStreaming: Bool
     let clarificationAnswers: [VyronClarificationAnswer]
@@ -23,21 +24,21 @@ struct VyronConversationWindowMessageView: View {
                         Text(tracking.elapsedTitle(at: context.date)).monospacedDigit()
                     }
                     .font(VyronConversationWindowStyle.detail)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                 } else {
                     Text(tracking.elapsedTitle(at: activity.finishedAt ?? activity.latestRecordedAt))
                         .monospacedDigit()
                         .font(VyronConversationWindowStyle.detail)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }
                 if let entry = activity.entries.last, isStreaming || activity.state != .completed {
                     Text(verbatim: entry.title)
                         .font(VyronConversationWindowStyle.detail)
-                        .foregroundStyle(activity.state == .failed ? Palette.warning : Palette.muted)
+                        .foregroundStyle(activity.state == .failed ? palette.warning : palette.muted)
                     if let detail = entry.detail, activity.state == .failed || activity.state == .stopped {
                         Text(verbatim: detail)
                             .font(VyronConversationWindowStyle.detail)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                             .textSelection(.enabled)
                     }
                 }

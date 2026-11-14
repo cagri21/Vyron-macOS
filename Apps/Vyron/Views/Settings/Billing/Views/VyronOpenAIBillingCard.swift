@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronOpenAIBillingCard: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     let open: () -> Void
 
@@ -11,22 +12,22 @@ struct VyronOpenAIBillingCard: View {
                 Label(VyronBillingText.openAI, systemImage: VyronSymbols.balance)
                     .font(VyronBillingStyle.heading)
                 Text(VyronBillingText.apiCreditBalance)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                 Text(VyronBillingText.openAIDescription)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: VyronBillingStyle.toolbarSpacing) {
                     Button(VyronBillingText.viewBalance, action: open)
-                        .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                        .buttonStyle(QuietButtonStyle(foreground: palette.text))
                     if let url = VyronBillingDashboard.openAI {
                         Link(VyronBillingText.openBrowser, destination: url)
-                            .foregroundStyle(Palette.text)
+                            .foregroundStyle(palette.text)
                     }
                 }
                 .padding(.top, VyronBillingStyle.detailSpacing)
             }
             .font(VyronSettingsStyle.body)
-            .foregroundStyle(Palette.text)
+            .foregroundStyle(palette.text)
             .padding(.vertical, VyronBillingStyle.cardPadding)
         }
     }

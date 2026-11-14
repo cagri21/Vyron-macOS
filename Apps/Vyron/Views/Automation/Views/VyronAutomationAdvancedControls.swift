@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronAutomationAdvancedControls: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var model: AutomationModel
 
@@ -18,7 +19,7 @@ struct VyronAutomationAdvancedControls: View {
             Eyebrow(text: VyronAppText.automationManualControls)
             Text(VyronAppText.automationElementHint)
                 .font(VyronAutomationTypography.caption)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .lineSpacing(VyronAutomationAdvancedControlsStyle.hintLineSpacing)
             HStack(spacing: VyronAutomationAdvancedControlsStyle.controlSpacing) {
                 TextField(VyronAppText.automationElementID, text: $model.elementID)
@@ -92,7 +93,7 @@ struct VyronAutomationAdvancedControls: View {
             }
             Text(VyronAppText.automationBrowserHint)
                 .font(VyronAutomationTypography.smallCaption)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .lineSpacing(VyronAutomationAdvancedControlsStyle.hintLineSpacing)
         }
         .disabled(model.isExecuting || model.isPlanning || model.isFollowingTask)
@@ -133,13 +134,13 @@ struct VyronAutomationAdvancedControls: View {
             }
             Text(VyronAppText.automationMonitorHint)
                 .font(VyronAutomationTypography.caption)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .lineSpacing(VyronAutomationAdvancedControlsStyle.hintLineSpacing)
             if model.events.isEmpty {
                 Text(VyronAppText.automationChangesHint)
                     .font(VyronAutomationTypography.caption)
                     .foregroundStyle(
-                        Palette.muted.opacity(VyronAutomationAdvancedControlsStyle.monitorEmptyHintOpacity)
+                        palette.muted.opacity(VyronAutomationAdvancedControlsStyle.monitorEmptyHintOpacity)
                     )
                     .padding(.vertical, VyronAutomationAdvancedControlsStyle.monitorEmptyHintPadding)
             } else {
@@ -147,7 +148,7 @@ struct VyronAutomationAdvancedControls: View {
                 Button(VyronAppText.automationClearEvents) { model.events = [] }
                     .font(VyronAutomationTypography.caption)
                     .buttonStyle(.plain)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
             }
         }
     }
@@ -158,7 +159,7 @@ struct VyronAutomationAdvancedControls: View {
                 HStack(alignment: .top, spacing: VyronAutomationAdvancedControlsStyle.monitorEventSpacing) {
                     Text(event.date, style: .time)
                         .font(VyronAutomationTypography.monospacedSmallCaption)
-                        .foregroundStyle(Palette.accent)
+                        .foregroundStyle(palette.accent)
                         .frame(width: VyronAutomationAdvancedControlsStyle.monitorEventTimeWidth, alignment: .leading)
                     Text(event.summary)
                         .font(VyronAutomationTypography.monospacedCaption)
@@ -168,14 +169,14 @@ struct VyronAutomationAdvancedControls: View {
                 .padding(.vertical, VyronAutomationAdvancedControlsStyle.monitorEventVerticalPadding)
                 if event.id != model.events.last?.id {
                     Rectangle()
-                        .fill(Palette.border)
+                        .fill(palette.border)
                         .frame(height: VyronAutomationAdvancedControlsStyle.monitorEventDividerHeight)
                 }
             }
         }
         .padding(.horizontal, VyronAutomationAdvancedControlsStyle.monitorEventListInset)
         .background(
-            Palette.surface,
+            palette.surface,
             in: RoundedRectangle(cornerRadius: VyronAutomationAdvancedControlsStyle.monitorEventListRadius)
         )
     }

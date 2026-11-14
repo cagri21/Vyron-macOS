@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronProjectAccessMenu: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @State private var showsApprovalChoices = false
@@ -16,10 +17,10 @@ struct VyronProjectAccessMenu: View {
                 Text(VyronProjectApprovalPresentation.title(model.interactions.projectApprovalMode))
             }
             .font(VyronWorkspaceStyle.controlFont)
-            .foregroundStyle(model.interactions.projectApprovalMode == .fullAccess ? Palette.warning : Palette.muted)
+            .foregroundStyle(model.interactions.projectApprovalMode == .fullAccess ? palette.warning : palette.muted)
             .padding(.horizontal, VyronWorkspaceStyle.approvalControlHorizontalPadding)
             .padding(.vertical, VyronWorkspaceStyle.approvalControlVerticalPadding)
-            .background(showsApprovalChoices ? Palette.field : Color.clear, in: Capsule())
+            .background(showsApprovalChoices ? palette.field : Color.clear, in: Capsule())
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)

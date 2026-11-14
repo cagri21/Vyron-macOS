@@ -167,9 +167,7 @@ public final class MacController {
     }
 
     public func openPrivacySettings() {
-        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
-        else { return }
-        NSWorkspace.shared.open(url)
+        VyronMacPrivacyPane.accessibility.openSettings()
     }
 
     public func applications() -> [DesktopApplication] {

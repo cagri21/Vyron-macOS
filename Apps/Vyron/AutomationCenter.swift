@@ -3,6 +3,7 @@ import VyronAutomation
 import VyronCore
 
 struct AutomationCenter: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var chat: AppModel
     @Environment(\.dismiss) private var dismiss
@@ -18,7 +19,7 @@ struct AutomationCenter: View {
                     Text(VyronAppText.automationTitle)
                         .font(VyronAutomationTypography.title)
                     Text(VyronAppText.automationDescription)
-                        .font(VyronAutomationTypography.body).foregroundStyle(Palette.muted)
+                        .font(VyronAutomationTypography.body).foregroundStyle(palette.muted)
                 }
                 Spacer()
                 Button {
@@ -33,10 +34,10 @@ struct AutomationCenter: View {
             performance
                 .padding(.horizontal, VyronAutomationCenterStyle.windowInset)
                 .padding(.bottom, VyronAutomationCenterStyle.performanceBottomInset)
-            Rectangle().fill(Palette.border).frame(height: VyronAutomationCenterStyle.dividerThickness)
+            Rectangle().fill(palette.border).frame(height: VyronAutomationCenterStyle.dividerThickness)
             HStack(alignment: .top, spacing: VyronAutomationCenterStyle.flushSpacing) {
                 applicationPanel.frame(width: VyronAutomationCenterStyle.applicationPanelWidth)
-                Rectangle().fill(Palette.border).frame(width: VyronAutomationCenterStyle.dividerThickness)
+                Rectangle().fill(palette.border).frame(width: VyronAutomationCenterStyle.dividerThickness)
                 ScrollView {
                     VStack(alignment: .leading, spacing: VyronAutomationCenterStyle.sectionSpacing) {
                         if let error = model.error {
@@ -44,11 +45,11 @@ struct AutomationCenter: View {
                                 Image(systemName: VyronSymbols.warning)
                                 Text(error).textSelection(.enabled)
                             }
-                            .font(VyronAutomationTypography.body).foregroundStyle(Palette.warning)
+                            .font(VyronAutomationTypography.body).foregroundStyle(palette.warning)
                             .padding(VyronAutomationCenterStyle.warningInset)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
-                                Palette.warning.opacity(VyronAutomationCenterStyle.warningOpacity),
+                                palette.warning.opacity(VyronAutomationCenterStyle.warningOpacity),
                                 in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius)
                             )
                         }
@@ -59,14 +60,14 @@ struct AutomationCenter: View {
                             VyronAutomationAdvancedControls(model: model)
                                 .padding(.top, VyronAutomationCenterStyle.advancedTopInset)
                         }
-                        .font(VyronAutomationTypography.body).foregroundStyle(Palette.muted)
+                        .font(VyronAutomationTypography.body).foregroundStyle(palette.muted)
                     }
                     .padding(VyronAutomationCenterStyle.contentInset)
                 }
             }
-            Rectangle().fill(Palette.border).frame(height: VyronAutomationCenterStyle.dividerThickness)
+            Rectangle().fill(palette.border).frame(height: VyronAutomationCenterStyle.dividerThickness)
             HStack(spacing: VyronAutomationCenterStyle.statusIconSpacing) {
-                Image(systemName: VyronSymbols.access).foregroundStyle(Palette.accent)
+                Image(systemName: VyronSymbols.access).foregroundStyle(palette.accent)
                 Text(
                     model.status
                         ?? VyronAppText.automationReviewHint
@@ -74,13 +75,13 @@ struct AutomationCenter: View {
                 .lineLimit(VyronAutomationCenterStyle.footerLineLimit)
                 Spacer(minLength: VyronAutomationCenterStyle.flushSpacing)
             }
-            .font(VyronAutomationTypography.caption).foregroundStyle(Palette.muted)
+            .font(VyronAutomationTypography.caption).foregroundStyle(palette.muted)
             .padding(.horizontal, VyronAutomationCenterStyle.windowInset)
             .padding(.vertical, VyronAutomationCenterStyle.footerVerticalInset)
         }
-        .background(Palette.canvas)
-        .foregroundStyle(Palette.text)
-        .tint(Palette.controlAccent)
+        .background(palette.canvas)
+        .foregroundStyle(palette.text)
+        .tint(palette.controlAccent)
         .frame(width: VyronAutomationCenterStyle.windowWidth, height: VyronAutomationCenterStyle.windowHeight)
         .onAppear { model.configure(chat: chat) }
         .onChange(of: chat.computerWork.pendingAgentGoal?.id) { _, _ in
@@ -130,16 +131,16 @@ struct AutomationCenter: View {
 
     private func metric(_ title: String, value: String, icon: String) -> some View {
         HStack(spacing: VyronAutomationCenterStyle.metricSpacing) {
-            Image(systemName: icon).foregroundStyle(Palette.muted).font(VyronAutomationTypography.body)
+            Image(systemName: icon).foregroundStyle(palette.muted).font(VyronAutomationTypography.body)
             VStack(alignment: .leading, spacing: VyronAutomationCenterStyle.metricLabelSpacing) {
-                Text(title).font(VyronAutomationTypography.tinyCaption).foregroundStyle(Palette.muted)
+                Text(title).font(VyronAutomationTypography.tinyCaption).foregroundStyle(palette.muted)
                 Text(value).font(VyronAutomationTypography.monospacedMetric)
             }
             Spacer(minLength: VyronAutomationCenterStyle.flushSpacing)
         }
         .padding(VyronAutomationCenterStyle.metricInset).frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            Palette.surface.opacity(VyronAutomationCenterStyle.subtleSurfaceOpacity),
+            palette.surface.opacity(VyronAutomationCenterStyle.subtleSurfaceOpacity),
             in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.tileRadius)
         )
     }
@@ -156,7 +157,7 @@ struct AutomationCenter: View {
                 } label: {
                     Image(systemName: VyronSymbols.refresh).font(VyronAutomationTypography.caption)
                 }
-                .buttonStyle(.plain).foregroundStyle(Palette.muted).help(VyronAppText.automationRefreshApps)
+                .buttonStyle(.plain).foregroundStyle(palette.muted).help(VyronAppText.automationRefreshApps)
             }
             ScrollView {
                 VStack(spacing: VyronAutomationCenterStyle.applicationListSpacing) {
@@ -166,7 +167,7 @@ struct AutomationCenter: View {
                         } label: {
                             HStack(spacing: VyronAutomationCenterStyle.applicationRowSpacing) {
                                 Image(systemName: VyronSymbols.openWindow).foregroundStyle(
-                                    model.selectedApplicationID == app.id ? Palette.accent : Palette.muted
+                                    model.selectedApplicationID == app.id ? palette.accent : palette.muted
                                 )
                                 VStack(
                                     alignment: .leading, spacing: VyronAutomationCenterStyle.applicationLabelSpacing
@@ -176,12 +177,12 @@ struct AutomationCenter: View {
                                         .lineLimit(VyronAutomationCenterStyle.applicationNameLineLimit)
                                     if app.processIdentifier == 0 {
                                         Text(VyronAppText.automationInstalledNotOpen)
-                                            .font(VyronAutomationTypography.tinyCaption).foregroundStyle(Palette.muted)
+                                            .font(VyronAutomationTypography.tinyCaption).foregroundStyle(palette.muted)
                                     }
                                 }
                                 Spacer(minLength: VyronAutomationCenterStyle.flushSpacing)
                                 if model.selectedApplicationID == app.id {
-                                    Circle().fill(Palette.accent)
+                                    Circle().fill(palette.accent)
                                         .frame(
                                             width: VyronAutomationCenterStyle.selectionIndicatorSize,
                                             height: VyronAutomationCenterStyle.selectionIndicatorSize
@@ -191,7 +192,7 @@ struct AutomationCenter: View {
                             .padding(VyronAutomationCenterStyle.applicationRowInset)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
-                                model.selectedApplicationID == app.id ? Palette.raised : Color.clear,
+                                model.selectedApplicationID == app.id ? palette.raised : Color.clear,
                                 in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.tileRadius)
                             )
                             .contentShape(Rectangle())
@@ -202,23 +203,23 @@ struct AutomationCenter: View {
                 }
             }
             Spacer(minLength: VyronAutomationCenterStyle.flushSpacing)
-            Rectangle().fill(Palette.border).frame(height: VyronAutomationCenterStyle.dividerThickness)
+            Rectangle().fill(palette.border).frame(height: VyronAutomationCenterStyle.dividerThickness)
             permissionRow(VyronAppText.automationMacControl, granted: model.accessibilityGranted)
             Text(VyronAppText.automationControlRequired)
-                .font(VyronAutomationTypography.caption).foregroundStyle(Palette.muted)
+                .font(VyronAutomationTypography.caption).foregroundStyle(palette.muted)
                 .lineSpacing(VyronAutomationCenterStyle.explanationLineSpacing)
             if !model.accessibilityGranted {
                 Button(VyronAppText.automationAllowControl) { model.requestAccessibility() }
                     .buttonStyle(AccentButtonStyle())
                 Text(model.permissionLocation)
-                    .font(VyronAutomationTypography.smallCaption).foregroundStyle(Palette.muted)
+                    .font(VyronAutomationTypography.smallCaption).foregroundStyle(palette.muted)
                     .lineSpacing(VyronAutomationCenterStyle.explanationLineSpacing)
             }
             Button(VyronAppText.automationPrivacySettings) { model.openPrivacySettings() }
-                .font(VyronAutomationTypography.caption).buttonStyle(.plain).foregroundStyle(Palette.muted)
+                .font(VyronAutomationTypography.caption).buttonStyle(.plain).foregroundStyle(palette.muted)
         }
         .padding(VyronAutomationCenterStyle.applicationPanelInset)
-        .background(Palette.sidebar)
+        .background(palette.sidebar)
     }
 
     private func permissionRow(_ title: String, granted: Bool) -> some View {
@@ -226,7 +227,7 @@ struct AutomationCenter: View {
             Text(title).font(VyronAutomationTypography.emphasizedCaption)
             Spacer()
             Image(systemName: granted ? VyronSymbols.selected : VyronSymbols.dashedCircle)
-                .font(VyronAutomationTypography.body).foregroundStyle(granted ? Palette.success : Palette.muted)
+                .font(VyronAutomationTypography.body).foregroundStyle(granted ? palette.success : palette.muted)
         }
     }
 
@@ -236,10 +237,10 @@ struct AutomationCenter: View {
                 Eyebrow(text: VyronAppText.automationCurrentAppState)
                 Spacer()
                 if let app = model.selectedApplication {
-                    Text(app.name).font(VyronAutomationTypography.emphasizedCaption).foregroundStyle(Palette.accent)
+                    Text(app.name).font(VyronAutomationTypography.emphasizedCaption).foregroundStyle(palette.accent)
                 }
                 Button(VyronAppText.automationActivate) { model.reviewActivate() }
-                    .font(VyronAutomationTypography.caption).buttonStyle(.plain).foregroundStyle(Palette.muted)
+                    .font(VyronAutomationTypography.caption).buttonStyle(.plain).foregroundStyle(palette.muted)
                     .disabled(
                         model.selectedApplication == nil || model.selectedApplication?.processIdentifier == 0
                             || model.isExecuting || model.isPlanning || model.isFollowingTask
@@ -262,8 +263,8 @@ struct AutomationCenter: View {
                         .padding(VyronAutomationCenterStyle.snapshotInset)
                 }
                 .frame(height: VyronAutomationCenterStyle.snapshotHeight)
-                .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius))
-                .overlay(RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius).stroke(Palette.border))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius))
+                .overlay(RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius).stroke(palette.border))
                 HStack {
                     TimelineView(
                         .periodic(from: .now, by: VyronAutomationDisplayTiming.clockRefreshInterval)
@@ -277,28 +278,28 @@ struct AutomationCenter: View {
                             )
                         )
                         .font(VyronAutomationTypography.smallCaption)
-                        .foregroundStyle(isFresh ? Palette.muted : Palette.warning)
+                        .foregroundStyle(isFresh ? palette.muted : palette.warning)
                     }
                     Spacer()
                     Button(VyronAppText.automationDiscussSnapshot) { chat.discussSnapshot(snapshot) }
                         .font(VyronAutomationTypography.emphasizedCaption).buttonStyle(.plain)
-                        .foregroundStyle(Palette.accent)
+                        .foregroundStyle(palette.accent)
                         .disabled(model.isPlanning || model.isFollowingTask || chat.foregroundRun.isGenerating)
                 }
             } else {
                 VStack(spacing: VyronAutomationCenterStyle.emptySnapshotSpacing) {
                     Image(systemName: VyronSymbols.viewfinder)
                         .font(VyronAutomationTypography.emptySnapshotIcon)
-                        .foregroundStyle(Palette.accent)
+                        .foregroundStyle(palette.accent)
                     Text(VyronAppText.automationSeeExposed)
-                        .font(VyronAutomationTypography.body).foregroundStyle(Palette.muted)
+                        .font(VyronAutomationTypography.body).foregroundStyle(palette.muted)
                     Text(VyronAppText.automationSnapshotDescription)
                         .font(VyronAutomationTypography.smallCaption)
-                        .foregroundStyle(Palette.muted.opacity(VyronAutomationCenterStyle.emptySnapshotHintOpacity))
+                        .foregroundStyle(palette.muted.opacity(VyronAutomationCenterStyle.emptySnapshotHintOpacity))
                 }
                 .frame(maxWidth: .infinity).frame(height: VyronAutomationCenterStyle.emptySnapshotHeight)
                 .background(
-                    Palette.surface.opacity(VyronAutomationCenterStyle.subtleSurfaceOpacity),
+                    palette.surface.opacity(VyronAutomationCenterStyle.subtleSurfaceOpacity),
                     in: RoundedRectangle(cornerRadius: VyronAutomationCenterStyle.cardRadius)
                 )
             }

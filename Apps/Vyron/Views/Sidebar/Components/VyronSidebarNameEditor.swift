@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronSidebarNameEditor: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.dismiss) private var dismiss
     @State private var name: String
@@ -26,9 +27,9 @@ struct VyronSidebarNameEditor: View {
                 .onSubmit(save)
             Text(VyronSidebarText.savedNote)
                 .font(VyronSidebarStyle.captionFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
             if let error {
-                Text(error).font(VyronSidebarStyle.detailFont).foregroundStyle(Palette.warning)
+                Text(error).font(VyronSidebarStyle.detailFont).foregroundStyle(palette.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
             HStack {
@@ -40,9 +41,9 @@ struct VyronSidebarNameEditor: View {
         }
         .padding(VyronSidebarStyle.editorPadding)
         .frame(width: VyronSidebarStyle.editorWidth)
-        .background(Palette.canvas)
-        .foregroundStyle(Palette.text)
-        .tint(Palette.controlAccent)
+        .background(palette.canvas)
+        .foregroundStyle(palette.text)
+        .tint(palette.controlAccent)
         .onAppear { nameFocused = true }
     }
 

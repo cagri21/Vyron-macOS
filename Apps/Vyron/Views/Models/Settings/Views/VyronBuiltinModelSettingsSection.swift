@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronBuiltinModelSettingsSection: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @State private var draft = VyronModelSettingsDraft(ModelSettings())
@@ -16,7 +17,7 @@ struct VyronBuiltinModelSettingsSection: View {
                     draft: $draft,
                     thinkingSupport: model.modelThinkingSupport
                 )
-                if let error { Text(error).font(.system(size: 10)).foregroundStyle(Palette.warning) }
+                if let error { Text(error).font(.system(size: 10)).foregroundStyle(palette.warning) }
                 HStack {
                     Button(VyronAppText.settingsUseDefaults) {
                         draft = VyronModelSettingsDraft(ModelSettings()); save()
@@ -31,7 +32,7 @@ struct VyronBuiltinModelSettingsSection: View {
             }.padding(.top, 13)
         }
         .font(.system(size: 12, weight: .medium))
-        .padding(16).background(Palette.surface, in: RoundedRectangle(cornerRadius: 10))
+        .padding(16).background(palette.surface, in: RoundedRectangle(cornerRadius: 10))
         .onAppear { loadDraft(model.modelSelection.builtinModelSettings) }
         .onChange(of: model.modelSelection.builtinModelSettings) { _, value in loadDraft(value) }
     }

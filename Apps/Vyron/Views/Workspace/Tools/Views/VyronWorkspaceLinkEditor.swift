@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceLinkEditor: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var library: VyronWorkspaceLibraryModel
     @State private var title = ""
@@ -13,7 +14,7 @@ struct VyronWorkspaceLinkEditor: View {
             TextField(VyronToolsText.linkAddress, text: $address)
                 .onSubmit(save)
             if let error = library.errorMessage {
-                Text(error).font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(Palette.muted)
+                Text(error).font(VyronWorkspaceToolsStyle.captionFont).foregroundStyle(palette.muted)
                     .textSelection(.enabled)
             }
             HStack {
@@ -28,7 +29,7 @@ struct VyronWorkspaceLinkEditor: View {
         .textFieldStyle(.roundedBorder)
         .padding(VyronWorkspaceToolsStyle.sectionSpacing)
         .frame(width: VyronWorkspaceToolsStyle.linkEditorWidth)
-        .background(Palette.canvas).foregroundStyle(Palette.text)
+        .background(palette.canvas).foregroundStyle(palette.text)
     }
 
     private func save() {

@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronProjectAccessChoices: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     private let dismiss: () -> Void
@@ -15,7 +16,7 @@ struct VyronProjectAccessChoices: View {
         VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
             Text(VyronWorkspaceText.approvalQuestion)
                 .font(VyronWorkspaceStyle.controlFont)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .padding(.horizontal, VyronWorkspaceStyle.approvalRowPadding)
             ForEach(
                 [VyronProjectApprovalMode.askForApproval, .approveForMe, .fullAccess],
@@ -28,7 +29,7 @@ struct VyronProjectAccessChoices: View {
         }
         .padding(VyronWorkspaceStyle.approvalPopoverPadding)
         .frame(width: VyronWorkspaceStyle.approvalPopoverWidth)
-        .background(Palette.field)
+        .background(palette.field)
     }
 
     private var scope: some View {
@@ -45,13 +46,13 @@ struct VyronProjectAccessChoices: View {
             }
         }
         .font(VyronWorkspaceStyle.captionFont)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .padding(.horizontal, VyronWorkspaceStyle.approvalRowPadding)
     }
 
     private func approvalRow(_ mode: VyronProjectApprovalMode) -> some View {
         let selected = model.interactions.projectApprovalMode == mode
-        let foreground = selected && mode == .fullAccess ? Palette.warning : Palette.text
+        let foreground = selected && mode == .fullAccess ? palette.warning : palette.text
         return Button {
             model.selectProjectApprovalMode(mode)
             dismiss()
@@ -64,7 +65,7 @@ struct VyronProjectAccessChoices: View {
                         .font(VyronWorkspaceStyle.controlFont)
                     Text(VyronProjectApprovalPresentation.description(mode))
                         .font(VyronWorkspaceStyle.captionFont)
-                        .foregroundStyle(selected && mode == .fullAccess ? Palette.warning : Palette.muted)
+                        .foregroundStyle(selected && mode == .fullAccess ? palette.warning : palette.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: VyronWorkspaceStyle.compactSpacing)

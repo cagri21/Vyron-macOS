@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronEffortPopover: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var model: AppModel
@@ -19,7 +20,7 @@ struct VyronEffortPopover: View {
         }
         .padding(VyronEffortStyle.popoverPadding)
         .frame(width: VyronEffortStyle.popoverWidth)
-        .background(Palette.field, in: RoundedRectangle(cornerRadius: VyronEffortStyle.popoverRadius))
+        .background(palette.field, in: RoundedRectangle(cornerRadius: VyronEffortStyle.popoverRadius))
     }
 
     private var header: some View {
@@ -42,7 +43,7 @@ struct VyronEffortPopover: View {
                     model.selectDevelopmentEffort(.automatic)
                 } label: {
                     Image(systemName: VyronSymbols.effortReset)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .frame(width: VyronEffortStyle.headerIconSize, height: VyronEffortStyle.headerHeight)
                 }
                 .buttonStyle(.plain)

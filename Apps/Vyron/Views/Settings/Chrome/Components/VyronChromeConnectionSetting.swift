@@ -2,6 +2,7 @@ import SwiftUI
 import VyronAutomation
 
 struct VyronChromeConnectionSetting: View {
+    @Environment(\.vyronPalette) private var palette
     @StateObject private var model: VyronChromeConnectionModel
 
     init(client: VyronChromeBridgeClient) {
@@ -14,7 +15,7 @@ struct VyronChromeConnectionSetting: View {
                 Text(VyronChromeText.title).font(VyronSettingsStyle.body)
                 Text(VyronChromeText.setup)
                     .font(VyronSettingsStyle.detail)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
                 TextField(VyronChromeText.extensionID, text: $model.extensionID)
                     .textFieldStyle(.roundedBorder)
@@ -25,7 +26,7 @@ struct VyronChromeConnectionSetting: View {
                     Spacer()
                     Text(VyronChromeText.sessions(model.sessionCount))
                         .font(VyronSettingsStyle.detail)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                     Button(VyronChromeText.refresh) {
                         Task { await model.refresh() }
                     }
@@ -33,12 +34,12 @@ struct VyronChromeConnectionSetting: View {
                 }
                 Text(VyronChromeText.workHint)
                     .font(VyronSettingsStyle.detail)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
                 if let message = model.error ?? model.status {
                     Text(message)
                         .font(VyronSettingsStyle.detail)
-                        .foregroundStyle(model.error == nil ? Palette.muted : Palette.warning)
+                        .foregroundStyle(model.error == nil ? palette.muted : palette.warning)
                         .textSelection(.enabled)
                 }
             }

@@ -1,5 +1,7 @@
 enum VyronSettingsSection: String, CaseIterable, Identifiable {
     case general
+    case appearance
+    case permissions
     case voice
     case models
     case billing
@@ -11,6 +13,8 @@ enum VyronSettingsSection: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .general: VyronSettingsText.general
+        case .appearance: VyronAppearanceText.title
+        case .permissions: VyronPermissionsText.title
         case .voice: VyronSettingsText.voice
         case .models: VyronSettingsText.models
         case .billing: VyronBillingText.title
@@ -22,6 +26,8 @@ enum VyronSettingsSection: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .general: VyronSymbols.settings
+        case .appearance: VyronSymbols.appearance
+        case .permissions: VyronSymbols.access
         case .voice: VyronSymbols.liveVoice
         case .models: VyronSymbols.model
         case .billing: VyronSymbols.balance
@@ -35,6 +41,12 @@ enum VyronSettingsSection: String, CaseIterable, Identifiable {
         case .general:
             [title, VyronLanguageText.title, VyronQueueText.followUpBehavior,
              VyronWorkspaceText.files, VyronWorkspaceText.toggleTerminal]
+        case .appearance:
+            [title, VyronAppearanceText.theme, VyronAppearanceText.accent, VyronAppearanceText.background,
+             VyronAppearanceText.foreground, VyronAppearanceText.font, VyronAppearanceText.light, VyronAppearanceText.dark]
+        case .permissions:
+            [title, VyronPermissionsText.accessibility, VyronPermissionsText.deviceControl,
+             VyronPermissionsText.screenRecording, VyronPermissionsText.microphone, VyronPermissionsText.speechRecognition]
         case .voice:
             [title, VyronVoiceText.title, VyronVoiceText.voice, VyronVoiceText.startDictation]
         case .models:

@@ -3,6 +3,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronSkillsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var presentation: VyronSkillsPresentation
     let projectDirectory: URL?
@@ -15,7 +16,7 @@ struct VyronSkillsView: View {
                 if presentation.hasLoadError {
                     HStack(spacing: VyronPluginsStyle.rowSpacing) {
                         Label(VyronSkillText.loadFailed, systemImage: VyronSymbols.warning)
-                            .foregroundStyle(Palette.warning)
+                            .foregroundStyle(palette.warning)
                         Button(VyronSkillText.retry) { presentation.refresh() }
                             .buttonStyle(.plain)
                     }
@@ -32,7 +33,7 @@ struct VyronSkillsView: View {
             .padding(.bottom, VyronPluginsStyle.contentPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Palette.canvas)
+        .background(palette.canvas)
         .task(id: VyronSkillLoadRequest(projectDirectory: projectDirectory, refreshID: presentation.refreshID)) {
             await presentation.load(projectDirectory: projectDirectory)
         }
@@ -56,13 +57,13 @@ struct VyronSkillsView: View {
             }
             Text(VyronSkillText.subtitle)
                 .font(VyronPluginsStyle.body)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
         }
     }
 
     private var searchField: some View {
         HStack(spacing: VyronPluginsStyle.compactSpacing) {
-            Image(systemName: VyronSymbols.search).foregroundStyle(Palette.muted)
+            Image(systemName: VyronSymbols.search).foregroundStyle(palette.muted)
             TextField(VyronSkillText.search, text: $presentation.searchQuery)
                 .textFieldStyle(.plain)
                 .accessibilityLabel(VyronSkillText.search)
@@ -79,7 +80,7 @@ struct VyronSkillsView: View {
         .padding(.horizontal, VyronPluginsStyle.rowSpacing)
         .padding(.vertical, VyronPluginsStyle.compactSpacing)
         .frame(maxWidth: VyronPluginsStyle.searchWidth)
-        .overlay(Capsule().stroke(Palette.border))
+        .overlay(Capsule().stroke(palette.border))
     }
 
     private var foldersMenu: some View {
@@ -110,10 +111,10 @@ struct VyronSkillsView: View {
                         Text(filter.title)
                             .font(VyronPluginsStyle.action)
                             .padding(VyronPluginsStyle.rowSpacing)
-                            .background(presentation.filter == filter ? Palette.surface : .clear, in: Capsule())
+                            .background(presentation.filter == filter ? palette.surface : .clear, in: Capsule())
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(presentation.filter == filter ? Palette.text : Palette.muted)
+                    .foregroundStyle(presentation.filter == filter ? palette.text : palette.muted)
                     .accessibilityAddTraits(presentation.filter == filter ? .isSelected : [])
                 }
                 Spacer(minLength: 0)
@@ -124,12 +125,12 @@ struct VyronSkillsView: View {
             if presentation.inventory?.issues.isEmpty == false {
                 Label(VyronSkillText.scanWarning, systemImage: VyronSymbols.warning)
                     .font(VyronPluginsStyle.caption)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
             }
             if presentation.inventory?.didReachLimit == true {
                 Label(VyronSkillText.scanLimit, systemImage: VyronSymbols.details)
                     .font(VyronPluginsStyle.caption)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
             }
             if presentation.visibleSkills.isEmpty {
                 if !presentation.hasLoadError || presentation.inventory != nil {
@@ -152,7 +153,7 @@ struct VyronSkillsView: View {
             }
             Text(VyronSkillText.browsingNote)
                 .font(VyronPluginsStyle.caption)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
         }
     }
 
@@ -162,7 +163,7 @@ struct VyronSkillsView: View {
                 Text(VyronSkillText.loading)
             } else if presentation.inventory?.skills.isEmpty != false {
                 Text(VyronSkillText.emptyTitle).font(VyronPluginsStyle.sectionTitle)
-                Text(VyronSkillText.emptyBody).foregroundStyle(Palette.muted)
+                Text(VyronSkillText.emptyBody).foregroundStyle(palette.muted)
             } else {
                 Text(VyronSkillText.noResults).font(VyronPluginsStyle.sectionTitle)
             }

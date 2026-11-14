@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronNotificationBell: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @Binding var isPresented: Bool
@@ -10,24 +11,24 @@ struct VyronNotificationBell: View {
         Button { isPresented.toggle() } label: {
             Image(systemName: VyronSymbols.notifications)
                 .font(VyronNotificationStyle.bell)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .frame(width: VyronNotificationStyle.bellSize, height: VyronNotificationStyle.bellSize)
-                .background(isPresented ? Palette.selection : Color.clear, in: RoundedRectangle(
+                .background(isPresented ? palette.selection : Color.clear, in: RoundedRectangle(
                     cornerRadius: VyronNotificationStyle.bellRadius
                 ))
                 .overlay(RoundedRectangle(cornerRadius: VyronNotificationStyle.bellRadius).stroke(
-                    isPresented ? Palette.controlAccent : Color.clear,
+                    isPresented ? palette.controlAccent : Color.clear,
                     lineWidth: VyronNotificationStyle.bellBorderWidth
                 ))
                 .overlay(alignment: .topTrailing) {
                     if model.unreadNotificationCount > 0 {
-                        Circle().fill(Palette.controlAccent)
+                        Circle().fill(palette.controlAccent)
                             .frame(
                                 width: VyronNotificationStyle.bellUnreadSize,
                                 height: VyronNotificationStyle.bellUnreadSize
                             )
                             .overlay(Circle().stroke(
-                                VyronSidebarStyle.background,
+                                palette.surface,
                                 lineWidth: VyronNotificationStyle.unreadBorderWidth
                             ))
                             .padding(VyronNotificationStyle.bellUnreadInset)

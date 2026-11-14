@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceHeader: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
 
@@ -11,7 +12,7 @@ struct VyronWorkspaceHeader: View {
             modeButton(VyronWorkspaceText.work, mode: .agent)
         }
         .padding(VyronWorkspaceStyle.modeInset)
-        .background(Palette.surface, in: Capsule())
+        .background(palette.surface, in: Capsule())
         .frame(maxWidth: .infinity)
         .frame(height: VyronWorkspaceHeaderStyle.height)
     }
@@ -23,10 +24,10 @@ struct VyronWorkspaceHeader: View {
         } label: {
             Text(title)
                 .font(VyronWorkspaceStyle.modeFont)
-                .foregroundStyle(selected ? Palette.text : Palette.muted)
+                .foregroundStyle(selected ? palette.text : palette.muted)
                 .frame(width: VyronWorkspaceStyle.modeWidth, height: VyronWorkspaceStyle.modeHeight)
-                .background(selected ? Palette.field : Color.clear, in: Capsule())
-                .overlay(Capsule().stroke(selected ? Palette.border : Color.clear))
+                .background(selected ? palette.field : Color.clear, in: Capsule())
+                .overlay(Capsule().stroke(selected ? palette.border : Color.clear))
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)

@@ -17,11 +17,14 @@ enum VyronConversationStyle {
     static let clarificationPairSpacing: CGFloat = 12
     static let copyTopPadding: CGFloat = 4
     static let copyFeedbackDuration: Duration = .milliseconds(1_500)
-    static let prose = Font.system(size: 14)
-    static let activity = Font.system(size: 13)
-    static let detailTitle = Font.system(size: 12)
+    static let prose = VyronAppearanceTypography(size: 14)
+    static let markdownHeading = VyronAppearanceTypography(size: 17, weight: .semibold)
+    static let markdownSubheading = VyronAppearanceTypography(size: 15, weight: .semibold)
+    static let markdownSmallHeading = VyronAppearanceTypography(size: 13, weight: .semibold)
+    static let activity = VyronAppearanceTypography(size: 13)
+    static let detailTitle = VyronAppearanceTypography(size: 12)
     static let detail = Font.system(size: 11, design: .monospaced)
     static let icon = Font.system(size: 12)
     static let disclosure = Font.system(size: 9, weight: .medium)
-    static let elapsed = Font.system(size: 11)
+    static let elapsed = VyronAppearanceTypography(size: 11)
 }

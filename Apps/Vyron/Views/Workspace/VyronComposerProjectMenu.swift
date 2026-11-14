@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronComposerProjectMenu: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
 
@@ -35,7 +36,7 @@ struct VyronComposerProjectMenu: View {
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
-        .tint(Palette.text)
+        .tint(palette.text)
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: VyronWorkspaceStyle.projectLabelWidth, alignment: .leading)
         .fixedSize(horizontal: true, vertical: false)

@@ -2,13 +2,12 @@ import AppKit
 import CoreGraphics
 import Foundation
 import ScreenCaptureKit
+import VyronAutomation
 
 @MainActor
 final class VyronMacScreenshotCapture: VyronScreenshotCapturing {
     private static let maximumDimension: CGFloat = 2_048
     private static let minimumWindowDimension: CGFloat = 100
-    private static let settingsURL =
-        "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
 
     func sources() async throws -> [VyronScreenshotSource] {
         let content = try await shareableContent()
@@ -65,8 +64,7 @@ final class VyronMacScreenshotCapture: VyronScreenshotCapturing {
     }
 
     func openPermissionSettings() -> Bool {
-        guard let url = URL(string: Self.settingsURL) else { return false }
-        return NSWorkspace.shared.open(url)
+        VyronMacPrivacyPane.screenRecording.openSettings()
     }
 
     private func shareableContent() async throws -> SCShareableContent {

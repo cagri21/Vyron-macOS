@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceTabBar: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var presentation: VyronWorkspaceTabsPresentation
 
     var body: some View {
@@ -38,7 +39,7 @@ struct VyronWorkspaceTabBar: View {
             .frame(height: VyronWorkspaceTabsStyle.tabBarHeight)
         }
         .frame(height: VyronWorkspaceTabsStyle.tabBarHeight)
-        .background(Palette.sidebar)
+        .background(palette.sidebar)
     }
 
     private func strip(width: CGFloat) -> some View {

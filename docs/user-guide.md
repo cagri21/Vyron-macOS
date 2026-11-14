@@ -574,11 +574,25 @@ replace a draft, and stay hidden during voice input or queue editing. Suggestion
 are saved with the answer. This optional background model request stops after
 12 seconds and is canceled when you send another request or leave the chat.
 
+## Appearance
+
+Open **Vyron → Settings… → Appearance** (**Command–Comma**). Under **Mode**,
+choose **System** to follow macOS, or select **Light** or **Dark**. The mode
+works with any theme. The default **Vyron** theme preserves the original look.
+**Theme** also includes **ChatGPT**, **Codex**, and presets such as **Catppuccin**,
+**Dracula**, **Everforest**, and **GitHub**.
+
+Use **Accent**, **Background**, and **Foreground** to pick colors or enter a
+six-digit hex code. Choose an installed font for the interface and conversation
+text. **Advanced** lets you edit the other mode’s colors. Changes apply
+immediately and are saved locally. Use **Copy theme** or **Paste theme** to
+move a Vyron theme between Macs. **Reset to default** restores the original
+appearance.
+
 ## Interface language
 
 Open Settings from the navigation rail's gear or **Vyron → Settings…**
-(**Command–Comma**). A searchable category sidebar separates **General**,
-**Voice**, **Models**, **Plugins**, and **Mac & browser**. General contains
+(**Command–Comma**). Use the searchable sidebar to find **General**, which contains
 language, follow-up message queuing, and workspace panel controls. Select **General → Language**:
 **System Default**, **English**, **Türkçe**, or **Українська**. The selection
 is saved and updates the interface immediately while preserving drafts, active

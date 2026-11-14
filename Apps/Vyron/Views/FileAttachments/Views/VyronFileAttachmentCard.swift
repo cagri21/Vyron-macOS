@@ -2,6 +2,7 @@ import SwiftUI
 import VyronModelDomain
 
 struct VyronFileAttachmentCard: View {
+    @Environment(\.vyronPalette) private var palette
     let info: VyronFileAttachmentInfo
     var helpText: String?
     var remove: ((UUID) -> Void)?
@@ -16,10 +17,10 @@ struct VyronFileAttachmentCard: View {
             }
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
-            .foregroundStyle(info.kind == .audio ? Palette.effortAccent : Palette.diffAdded)
+            .foregroundStyle(info.kind == .audio ? Palette.effortAccent : palette.diffAdded)
             .accessibilityHidden(true)
             Text(verbatim: info.name)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .layoutPriority(1)
@@ -29,7 +30,7 @@ struct VyronFileAttachmentCard: View {
                     Image(systemName: VyronSymbols.close)
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .help(VyronFolderAttachmentText.remove(info.name))
                 .accessibilityLabel(VyronFolderAttachmentText.remove(info.name))
             }
@@ -37,7 +38,7 @@ struct VyronFileAttachmentCard: View {
         .font(VyronWorkspaceStyle.controlFont)
         .padding(VyronWorkspaceStyle.compactSpacing)
         .frame(maxWidth: VyronFileAttachmentStyle.maximumCardWidth, alignment: .leading)
-        .background(Palette.canvas, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
+        .background(palette.canvas, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
         .help(details)
     }
 

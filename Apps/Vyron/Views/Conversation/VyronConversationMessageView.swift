@@ -3,6 +3,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronConversationMessageView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     let message: ChatMessage
     let isStreaming: Bool
@@ -108,7 +109,7 @@ struct VyronConversationMessageView: View {
                     ProgressView().controlSize(.mini)
                     Text(VyronGeneralText.loadingContext)
                         .font(VyronConversationStyle.activity)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }
             } else if !displayContent.isEmpty {
                 MarkdownContent(content: displayContent)
@@ -133,7 +134,7 @@ struct VyronConversationMessageView: View {
         } label: {
             Image(systemName: copied ? VyronSymbols.checkmark : VyronSymbols.copy)
                 .font(VyronConversationStyle.icon)
-                .foregroundStyle(copied ? Palette.success : Palette.muted)
+                .foregroundStyle(copied ? palette.success : palette.muted)
                 .padding(.top, VyronConversationStyle.copyTopPadding)
         }
         .buttonStyle(.plain)

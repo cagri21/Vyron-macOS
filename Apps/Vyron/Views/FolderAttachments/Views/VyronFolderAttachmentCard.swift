@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronFolderAttachmentCard: View {
+    @Environment(\.vyronPalette) private var palette
     let folder: VyronFolderAttachment
     let privacyHint: String
     let remove: (UUID) -> Void
@@ -8,10 +9,10 @@ struct VyronFolderAttachmentCard: View {
     var body: some View {
         HStack(spacing: VyronWorkspaceStyle.compactSpacing) {
             Image(systemName: VyronSymbols.folder)
-                .foregroundStyle(Palette.accent)
+                .foregroundStyle(palette.accent)
                 .accessibilityHidden(true)
             Text(verbatim: folder.name)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(maxWidth: VyronWorkspaceStyle.projectLabelWidth, alignment: .leading)
@@ -20,13 +21,13 @@ struct VyronFolderAttachmentCard: View {
                 Image(systemName: VyronSymbols.close)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .help(VyronFolderAttachmentText.remove(folder.name))
             .accessibilityLabel(VyronFolderAttachmentText.remove(folder.name))
         }
         .font(VyronWorkspaceStyle.controlFont)
         .padding(VyronWorkspaceStyle.compactSpacing)
-        .background(Palette.canvas, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
+        .background(palette.canvas, in: RoundedRectangle(cornerRadius: VyronWorkspaceStyle.errorRadius))
     }
 
     private var details: String {

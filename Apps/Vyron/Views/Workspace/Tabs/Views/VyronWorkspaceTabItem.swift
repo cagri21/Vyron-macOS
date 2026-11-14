@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronWorkspaceTabItem: View {
+    @Environment(\.vyronPalette) private var palette
     @EnvironmentObject private var presentation: VyronWorkspaceTabsPresentation
     let tab: VyronWorkspaceTab
     var width = VyronWorkspaceTabsStyle.tabWidth
@@ -29,10 +30,10 @@ struct VyronWorkspaceTabItem: View {
         .font(VyronWorkspaceTabsStyle.titleFont)
         .buttonStyle(.plain)
         .frame(width: width, height: VyronWorkspaceTabsStyle.tabHeight)
-        .background(isSelected ? Palette.field : Color.clear,
+        .background(isSelected ? palette.field : Color.clear,
                     in: RoundedRectangle(cornerRadius: VyronWorkspaceTabsStyle.radius))
         .overlay(RoundedRectangle(cornerRadius: VyronWorkspaceTabsStyle.radius)
-            .stroke(isSelected ? Palette.border : Color.clear))
+            .stroke(isSelected ? palette.border : Color.clear))
         .help(tab.title)
     }
 

@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronComposerSkillRow: View {
+    @Environment(\.vyronPalette) private var palette
     let command: VyronComposerCommand
     let isSelected: Bool
     let select: () -> Void
@@ -16,18 +17,18 @@ struct VyronComposerSkillRow: View {
                     Spacer(minLength: 0)
                     Text(verbatim: command.scopeLabel)
                         .font(VyronComposerSkillStyle.caption)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                 }
                 Text(verbatim: command.description)
                     .font(VyronComposerSkillStyle.caption)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .foregroundStyle(Palette.text)
+            .foregroundStyle(palette.text)
             .padding(.horizontal, VyronComposerSkillStyle.rowPadding)
             .frame(height: VyronComposerSkillStyle.rowHeight - VyronComposerSkillStyle.rowSpacing)
-            .background(isSelected ? Palette.raised : .clear,
+            .background(isSelected ? palette.raised : .clear,
                 in: RoundedRectangle(cornerRadius: VyronComposerSkillStyle.rowRadius))
             .contentShape(Rectangle())
         }

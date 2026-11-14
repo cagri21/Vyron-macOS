@@ -28,10 +28,10 @@ enum VyronNotificationPresentation {
         }
     }
 
-    static func color(_ kind: VyronNotificationKind) -> Color {
+    static func color(_ kind: VyronNotificationKind, palette: VyronAppearancePalette) -> Color {
         switch kind {
-        case .working, .completed: Palette.muted
-        case .failed, .attention: Palette.warning
+        case .working, .completed: palette.muted
+        case .failed, .attention: palette.warning
         }
     }
 }

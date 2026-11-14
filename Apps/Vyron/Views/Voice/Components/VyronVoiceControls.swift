@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronVoiceControls: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var voice: VyronVoiceModel
     let canStart: Bool
@@ -24,9 +25,9 @@ struct VyronVoiceControls: View {
                     voice.toggleLiveConversation()
                 } label: {
                     Image(systemName: voice.isLiveConversation ? VyronSymbols.endVoice : VyronSymbols.liveVoice)
-                        .foregroundStyle(Palette.text)
+                        .foregroundStyle(palette.text)
                         .frame(width: VyronWorkspaceStyle.actionSize, height: VyronWorkspaceStyle.actionSize)
-                        .background(Palette.controlAccent, in: Circle())
+                        .background(palette.controlAccent, in: Circle())
                 }
                 .help(voice.isLiveConversation ? VyronVoiceText.endLive : VyronVoiceText.startLive)
                 .accessibilityLabel(voice.isLiveConversation ? VyronVoiceText.endLive : VyronVoiceText.startLive)
@@ -34,7 +35,7 @@ struct VyronVoiceControls: View {
             }
         }
         .font(VyronVoiceStyle.icon)
-        .foregroundStyle(voice.isActive ? Palette.accent : Palette.text)
+        .foregroundStyle(voice.isActive ? palette.accent : palette.text)
         .buttonStyle(.plain)
     }
 

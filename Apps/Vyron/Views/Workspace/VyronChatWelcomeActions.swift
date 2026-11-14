@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronChatWelcomeActions: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
 
@@ -19,7 +20,7 @@ struct VyronChatWelcomeActions: View {
             }
         }
         .font(VyronWorkspaceStyle.inputFont)
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, VyronWorkspaceStyle.composerPadding)

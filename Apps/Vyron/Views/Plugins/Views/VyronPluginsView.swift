@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronPluginsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
     @ObservedObject var connections: MCPConnectionsModel
@@ -39,14 +40,14 @@ struct VyronPluginsView: View {
                 }
                 Spacer(minLength: VyronPluginsStyle.sectionSpacing)
                 Text(VyronPluginText.securityNote)
-                    .font(VyronPluginsStyle.caption).foregroundStyle(Palette.muted)
+                    .font(VyronPluginsStyle.caption).foregroundStyle(palette.muted)
             }
             .padding(.horizontal, VyronPluginsStyle.contentPadding)
             .padding(.top, VyronPluginsStyle.headerTopPadding)
             .padding(.bottom, VyronPluginsStyle.contentPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Palette.canvas)
+        .background(palette.canvas)
         .sheet(item: $presentation.editingProfile) { profile in
             VyronMCPConnectionEditor(connections: connections, initial: profile).environmentObject(model)
         }
@@ -90,7 +91,7 @@ struct VyronPluginsView: View {
                     toolbar
                 }
             }
-            Text(VyronPluginText.subtitle).font(VyronPluginsStyle.body).foregroundStyle(Palette.muted)
+            Text(VyronPluginText.subtitle).font(VyronPluginsStyle.body).foregroundStyle(palette.muted)
         }
     }
 
@@ -104,14 +105,14 @@ struct VyronPluginsView: View {
                 Image(systemName: VyronSymbols.refresh)
                     .frame(width: VyronPluginsStyle.toolbarControlSize, height: VyronPluginsStyle.toolbarControlSize)
             }
-            .buttonStyle(.plain).foregroundStyle(Palette.muted)
+            .buttonStyle(.plain).foregroundStyle(palette.muted)
             .help(VyronPluginText.refresh).accessibilityLabel(VyronPluginText.refresh)
             .disabled(isLocked)
             Button { model.openSettings(.plugins) } label: {
                 Image(systemName: VyronSymbols.settings)
                     .frame(width: VyronPluginsStyle.toolbarControlSize, height: VyronPluginsStyle.toolbarControlSize)
             }
-            .buttonStyle(.plain).foregroundStyle(Palette.muted)
+            .buttonStyle(.plain).foregroundStyle(palette.muted)
             .help(VyronPluginText.settings).accessibilityLabel(VyronPluginText.settings)
             addMenu
         }
@@ -120,7 +121,7 @@ struct VyronPluginsView: View {
 
     private var searchField: some View {
         HStack(spacing: VyronPluginsStyle.compactSpacing) {
-            Image(systemName: VyronSymbols.search).foregroundStyle(Palette.muted)
+            Image(systemName: VyronSymbols.search).foregroundStyle(palette.muted)
             TextField(VyronPluginText.search, text: $presentation.searchQuery)
                 .textFieldStyle(.plain)
                 .accessibilityLabel(VyronPluginText.search)
@@ -128,13 +129,13 @@ struct VyronPluginsView: View {
                 Button { presentation.searchQuery = "" } label: {
                     Image(systemName: VyronSymbols.close)
                 }
-                .buttonStyle(.plain).foregroundStyle(Palette.muted)
+                .buttonStyle(.plain).foregroundStyle(palette.muted)
                 .help(VyronPluginText.clearSearch).accessibilityLabel(VyronPluginText.clearSearch)
             }
         }
         .padding(.horizontal, VyronPluginsStyle.rowSpacing)
         .frame(width: VyronPluginsStyle.searchWidth, height: VyronPluginsStyle.searchHeight)
-        .overlay(Capsule().stroke(Palette.border))
+        .overlay(Capsule().stroke(palette.border))
     }
 
     private var addMenu: some View {
@@ -155,10 +156,10 @@ struct VyronPluginsView: View {
             .font(VyronPluginsStyle.emphasizedAction)
             .padding(.horizontal, VyronPluginsStyle.rowSpacing)
             .frame(height: VyronPluginsStyle.searchHeight)
-            .foregroundStyle(Palette.text)
+            .foregroundStyle(palette.text)
         }
         .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-        .tint(Palette.text)
+        .tint(palette.text)
         .font(VyronPluginsStyle.emphasizedAction)
         .disabled(isLocked)
     }
@@ -167,7 +168,7 @@ struct VyronPluginsView: View {
     private var notices: some View {
         if isLocked {
             Label(VyronPluginText.reviewNote, systemImage: VyronSymbols.hand)
-                .font(VyronPluginsStyle.caption).foregroundStyle(Palette.muted)
+                .font(VyronPluginsStyle.caption).foregroundStyle(palette.muted)
         }
         if let error = presentation.catalogError ?? connections.error {
             Label {
@@ -175,7 +176,7 @@ struct VyronPluginsView: View {
             } icon: {
                 Image(systemName: VyronSymbols.warning)
             }
-            .font(VyronPluginsStyle.body).foregroundStyle(Palette.warning)
+            .font(VyronPluginsStyle.body).foregroundStyle(palette.warning)
         }
     }
 
@@ -193,7 +194,7 @@ struct VyronPluginsView: View {
                             set: { presentation.filter = $0 ? .connected : .installed }
                         )
                     )
-                    .toggleStyle(.checkbox).font(VyronPluginsStyle.action).foregroundStyle(Palette.muted)
+                    .toggleStyle(.checkbox).font(VyronPluginsStyle.action).foregroundStyle(palette.muted)
                 }
             }
             if !profiles.isEmpty {
@@ -222,9 +223,9 @@ struct VyronPluginsView: View {
             Text(verbatim: title).font(VyronPluginsStyle.action)
                 .padding(.horizontal, VyronPluginsStyle.tabHorizontalPadding)
                 .padding(.vertical, VyronPluginsStyle.tabVerticalPadding)
-                .background(selected ? Palette.raised : .clear, in: Capsule())
+                .background(selected ? palette.raised : .clear, in: Capsule())
         }
-        .buttonStyle(.plain).foregroundStyle(selected ? Palette.text : Palette.muted)
+        .buttonStyle(.plain).foregroundStyle(selected ? palette.text : palette.muted)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
@@ -234,7 +235,7 @@ struct VyronPluginsView: View {
                 ? VyronPluginText.emptyTitle : VyronPluginText.noResults)
                 .font(VyronPluginsStyle.sectionTitle)
             if connections.profiles.isEmpty && presentation.searchQuery.isEmpty {
-                Text(VyronPluginText.emptyBody).font(VyronPluginsStyle.body).foregroundStyle(Palette.muted)
+                Text(VyronPluginText.emptyBody).font(VyronPluginsStyle.body).foregroundStyle(palette.muted)
             }
         }
         .padding(.vertical, VyronPluginsStyle.cardPadding)

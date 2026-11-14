@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronActivityTrailView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var locale
     @Environment(\.timeZone) private var timeZone
     let activity: ResponseActivity
@@ -29,7 +30,7 @@ struct VyronActivityTrailView: View {
                     Text(VyronTaskDatePresentation.eventTime(for: entry.date, locale: locale, timeZone: timeZone))
                         .font(VyronTrackingStyle.caption)
                         .monospacedDigit()
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                     if entry.kind == .explanation {
                         MarkdownContent(content: entry.detail ?? entry.title)
                             .padding(.vertical, VyronTrackingStyle.rowVerticalPadding)
@@ -90,7 +91,7 @@ struct VyronActivityTrailView: View {
                 }
             }
         }
-        .foregroundStyle(Palette.muted)
+        .foregroundStyle(palette.muted)
         .padding(.vertical, VyronTrackingStyle.rowVerticalPadding)
     }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 import VyronDevelopment
 
 struct VyronConversationChangesCard: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @State private var previews: [UUID: VyronUnifiedDiff] = [:]
 
@@ -15,7 +16,7 @@ struct VyronConversationChangesCard: View {
             let shape = RoundedRectangle(cornerRadius: VyronConversationChangesStyle.cardRadius)
             VStack(alignment: .leading, spacing: 0) {
                 header
-                Rectangle().fill(Palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
+                Rectangle().fill(palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
                 ForEach(changes) { change in
                     VyronConversationChangedFileRow(
                         change: change,
@@ -26,8 +27,8 @@ struct VyronConversationChangesCard: View {
                     }
                 }
             }
-            .background(Palette.canvas, in: shape)
-            .overlay { shape.strokeBorder(Palette.border).allowsHitTesting(false) }
+            .background(palette.canvas, in: shape)
+            .overlay { shape.strokeBorder(palette.border).allowsHitTesting(false) }
             .task(id: changes.map(\.id)) { await preparePreviews() }
         }
     }
@@ -45,7 +46,7 @@ struct VyronConversationChangesCard: View {
             }
         }
         .padding(VyronConversationChangesStyle.headerInset)
-        .background(Palette.surface, in: UnevenRoundedRectangle(
+        .background(palette.surface, in: UnevenRoundedRectangle(
             topLeadingRadius: VyronConversationChangesStyle.cardRadius,
             topTrailingRadius: VyronConversationChangesStyle.cardRadius
         ))
@@ -58,27 +59,27 @@ struct VyronConversationChangesCard: View {
                 Image(systemName: VyronSymbols.minus)
             }
             .font(VyronConversationChangesStyle.changeGlyphFont)
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .frame(
                 width: VyronConversationChangesStyle.changeGlyphSize,
                 height: VyronConversationChangesStyle.changeGlyphSize
             )
             .background {
                 RoundedRectangle(cornerRadius: VyronConversationChangesStyle.changeGlyphRadius)
-                    .strokeBorder(Palette.muted, lineWidth: VyronWorkspaceStyle.dividerWidth)
+                    .strokeBorder(palette.muted, lineWidth: VyronWorkspaceStyle.dividerWidth)
             }
             .frame(
                 width: VyronConversationChangesStyle.headerIconSize,
                 height: VyronConversationChangesStyle.headerIconSize
             )
             .background(
-                Palette.sidebar, in: RoundedRectangle(cornerRadius: VyronConversationChangesStyle.headerIconRadius)
+                palette.sidebar, in: RoundedRectangle(cornerRadius: VyronConversationChangesStyle.headerIconRadius)
             )
             .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
                 Text(VyronConversationChangesText.editedFiles(changes.count))
                     .font(VyronConversationChangesStyle.titleFont)
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(palette.text)
                     .accessibilityAddTraits(.isHeader)
                 if previews.count == changes.count {
                     VyronDiffCountsView(
@@ -101,21 +102,21 @@ struct VyronConversationChangesCard: View {
                             .accessibilityHidden(true)
                     }
                 }
-                .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                .buttonStyle(QuietButtonStyle(foreground: palette.text))
             }
             Button(action: actions.viewChanges) {
                 let shape = RoundedRectangle(cornerRadius: VyronConversationChangesStyle.actionRadius)
                 Text(VyronConversationChangesText.viewChanges)
                     .padding(.horizontal, VyronConversationChangesStyle.actionInset)
                     .frame(minHeight: VyronConversationChangesStyle.actionHeight)
-                    .background(Palette.selection, in: shape)
-                    .overlay { shape.strokeBorder(Palette.border).allowsHitTesting(false) }
+                    .background(palette.selection, in: shape)
+                    .overlay { shape.strokeBorder(palette.border).allowsHitTesting(false) }
                     .contentShape(shape)
             }
             .buttonStyle(.plain)
         }
         .font(VyronConversationChangesStyle.actionFont)
-        .foregroundStyle(Palette.text)
+        .foregroundStyle(palette.text)
         .fixedSize(horizontal: true, vertical: false)
     }
 

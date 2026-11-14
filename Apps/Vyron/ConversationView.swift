@@ -116,6 +116,7 @@ struct MarkdownContent: View {
 }
 
 private struct MarkdownProse: View {
+    @Environment(\.vyronPalette) private var palette
     let content: String
 
     var body: some View {
@@ -125,20 +126,26 @@ private struct MarkdownProse: View {
                 if trimmed.isEmpty {
                     Color.clear.frame(height: 3)
                 } else if trimmed.hasPrefix("### ") {
-                    prose(String(trimmed.dropFirst(4))).font(.system(size: 13, weight: .semibold)).padding(.top, 5)
+                    prose(String(trimmed.dropFirst(4)))
+                        .font(VyronConversationStyle.markdownSmallHeading)
+                        .padding(.top, 5)
                 } else if trimmed.hasPrefix("## ") {
-                    prose(String(trimmed.dropFirst(3))).font(.system(size: 15, weight: .semibold)).padding(.top, 7)
+                    prose(String(trimmed.dropFirst(3)))
+                        .font(VyronConversationStyle.markdownSubheading)
+                        .padding(.top, 7)
                 } else if trimmed.hasPrefix("# ") {
-                    prose(String(trimmed.dropFirst(2))).font(.system(size: 17, weight: .semibold)).padding(.top, 7)
+                    prose(String(trimmed.dropFirst(2)))
+                        .font(VyronConversationStyle.markdownHeading)
+                        .padding(.top, 7)
                 } else if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") {
                     HStack(alignment: .top, spacing: 9) {
-                        Text("•").foregroundStyle(Palette.accent.opacity(0.7))
+                        Text("•").foregroundStyle(palette.accent.opacity(0.7))
                         prose(String(trimmed.dropFirst(2)))
                     }
                 } else if trimmed.hasPrefix("> ") {
                     HStack(alignment: .top, spacing: 11) {
-                        RoundedRectangle(cornerRadius: 1).fill(Palette.accent.opacity(0.4)).frame(width: 2)
-                        prose(String(trimmed.dropFirst(2))).foregroundStyle(Palette.muted)
+                        RoundedRectangle(cornerRadius: 1).fill(palette.accent.opacity(0.4)).frame(width: 2)
+                        prose(String(trimmed.dropFirst(2))).foregroundStyle(palette.muted)
                     }
                     .padding(.vertical, 5)
                 } else {
@@ -148,7 +155,7 @@ private struct MarkdownProse: View {
         }
         .font(VyronConversationStyle.prose)
         .lineSpacing(VyronConversationStyle.proseLineSpacing)
-        .foregroundStyle(Palette.text.opacity(0.92))
+        .foregroundStyle(palette.text.opacity(0.92))
         .textSelection(.enabled)
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -165,6 +172,7 @@ private struct MarkdownProse: View {
 }
 
 private struct CodeBlock: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     let code: String
     let language: String
@@ -190,26 +198,26 @@ private struct CodeBlock: View {
                         systemImage: copied ? "checkmark" : "doc.on.doc"
                     )
                         .font(.system(size: 9))
-                        .foregroundStyle(copied ? Palette.success : Palette.muted)
+                        .foregroundStyle(copied ? palette.success : palette.muted)
                 }
                 .buttonStyle(.plain)
             }
-            .foregroundStyle(Palette.muted)
+            .foregroundStyle(palette.muted)
             .padding(.horizontal, 14).padding(.vertical, 11)
-            .background(Palette.raised.opacity(0.4))
-            Rectangle().fill(Palette.border).frame(height: 1)
+            .background(palette.raised.opacity(0.4))
+            Rectangle().fill(palette.border).frame(height: 1)
             ScrollView(.horizontal, showsIndicators: true) {
                 Text(code)
                     .font(.system(size: 11, design: .monospaced))
                     .lineSpacing(5)
-                    .foregroundStyle(Palette.codeText.opacity(0.9))
+                    .foregroundStyle(palette.codeText.opacity(0.9))
                     .textSelection(.enabled)
                     .fixedSize(horizontal: true, vertical: false)
                     .padding(15)
             }
         }
-        .background(Palette.surface.opacity(0.65), in: RoundedRectangle(cornerRadius: 9))
+        .background(palette.surface.opacity(0.65), in: RoundedRectangle(cornerRadius: 9))
         .clipShape(RoundedRectangle(cornerRadius: 9))
-        .overlay(RoundedRectangle(cornerRadius: 9).stroke(Palette.border))
+        .overlay(RoundedRectangle(cornerRadius: 9).stroke(palette.border))
     }
 }

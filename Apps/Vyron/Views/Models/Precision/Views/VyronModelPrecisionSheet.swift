@@ -3,6 +3,7 @@ import VyronModelData
 import VyronModelDomain
 
 struct VyronModelPrecisionSheet: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
@@ -25,7 +26,7 @@ struct VyronModelPrecisionSheet: View {
                 failureNotice(failure)
                 Button(VyronAppText.settingsRefresh) { reload += 1 }
             } else if options != nil {
-                Text(VyronAppText.settingsNoReplacementVariants).foregroundStyle(Palette.muted)
+                Text(VyronAppText.settingsNoReplacementVariants).foregroundStyle(palette.muted)
             } else {
                 ProgressView(VyronAppText.settingsFindingVariants)
             }
@@ -70,14 +71,14 @@ struct VyronModelPrecisionSheet: View {
             .onChange(of: selectedVariantID) { _, _ in failure = nil }
             if let size = selectedVariant?.sizeBytes {
                 Text(VyronAppText.settingsWeightSize(size.fileSizeLabel))
-                    .font(VyronWorkspaceStyle.captionFont).foregroundStyle(Palette.muted)
+                    .font(VyronWorkspaceStyle.captionFont).foregroundStyle(palette.muted)
             }
             if let tag = selectedVariant?.ollamaTag {
                 Label(
                     VyronAppText.settingsPrecisionReplacementWarning(options.original.name, tag),
                     systemImage: VyronSymbols.warning
                 )
-                .foregroundStyle(Palette.warning)
+                .foregroundStyle(palette.warning)
                 .fixedSize(horizontal: false, vertical: true)
             }
             if let failure { failureNotice(failure) }
@@ -86,7 +87,7 @@ struct VyronModelPrecisionSheet: View {
 
     private func failureNotice(_ message: String) -> some View {
         Label(message, systemImage: VyronSymbols.warning)
-            .foregroundStyle(Palette.warning)
+            .foregroundStyle(palette.warning)
             .textSelection(.enabled)
             .fixedSize(horizontal: false, vertical: true)
     }

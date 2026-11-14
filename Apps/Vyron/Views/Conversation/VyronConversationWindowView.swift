@@ -2,6 +2,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronConversationWindowView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var model: AppModel
@@ -15,7 +16,7 @@ struct VyronConversationWindowView: View {
         let _ = localizationLocale
         VStack(spacing: 0) {
             header
-            Rectangle().fill(Palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
+            Rectangle().fill(palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
             if let conversation {
                 transcript(conversation)
                 if let session {
@@ -24,19 +25,19 @@ struct VyronConversationWindowView: View {
                 } else {
                     Text(VyronHeaderText.readOnlyWindow)
                         .font(VyronConversationWindowStyle.detail)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .padding(VyronConversationWindowStyle.contentInset)
                 }
             } else {
                 Text(VyronHeaderText.conversationUnavailable)
                     .font(VyronConversationWindowStyle.detail)
-                    .foregroundStyle(Palette.muted)
+                    .foregroundStyle(palette.muted)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .background(Palette.canvas)
-        .foregroundStyle(Palette.text)
-        .tint(Palette.text)
+        .background(palette.canvas)
+        .foregroundStyle(palette.text)
+        .tint(palette.text)
         .navigationTitle(conversation?.title ?? "Vyron")
         .onDisappear { model.closeSideChatWindow(conversationID) }
     }
@@ -52,7 +53,7 @@ struct VyronConversationWindowView: View {
                         ? VyronHeaderText.temporarySideChatContext(session.context.sourceTitle)
                         : VyronHeaderText.sideChatContext(session.context.sourceTitle))
                         .font(VyronConversationWindowStyle.detail)
-                        .foregroundStyle(Palette.muted)
+                        .foregroundStyle(palette.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -64,7 +65,7 @@ struct VyronConversationWindowView: View {
                     Label(VyronHeaderText.openInMain, systemImage: VyronSymbols.openWindow)
                         .font(VyronConversationWindowStyle.action)
                 }
-                .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                .buttonStyle(QuietButtonStyle(foreground: palette.text))
                 .disabled(!model.canOpenSideChatInMain(conversationID))
             }
         }
@@ -73,7 +74,7 @@ struct VyronConversationWindowView: View {
 
     private func transcript(_ conversation: Conversation) -> some View {
         let transcript = VyronConversationTranscript(messages: conversation.messages)
-        ScrollViewReader { proxy in
+        return ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: VyronConversationWindowStyle.messageSpacing) {
                     ForEach(transcript.rows) { row in

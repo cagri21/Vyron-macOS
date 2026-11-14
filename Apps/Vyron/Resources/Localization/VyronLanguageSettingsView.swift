@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VyronLanguageSettingsView: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var localization: VyronLocalization
 
@@ -14,7 +15,7 @@ struct VyronLanguageSettingsView: View {
             }
             Text(VyronLanguageText.hint)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

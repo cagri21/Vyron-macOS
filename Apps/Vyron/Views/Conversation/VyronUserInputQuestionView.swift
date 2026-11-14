@@ -3,6 +3,7 @@ import SwiftUI
 import VyronCore
 
 struct VyronUserInputQuestionView<Actions: View>: View {
+    @Environment(\.vyronPalette) private var palette
     let question: VyronUserInputQuestion
     @Binding var answer: String
     let submit: () -> Void
@@ -14,7 +15,7 @@ struct VyronUserInputQuestionView<Actions: View>: View {
         VStack(alignment: .leading, spacing: VyronUserInputStyle.sectionSpacing) {
             Text(verbatim: question.question)
                 .font(VyronUserInputStyle.question)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
             VStack(spacing: VyronUserInputStyle.rowSpacing) {
@@ -38,7 +39,7 @@ struct VyronUserInputQuestionView<Actions: View>: View {
                 > VyronUserInputLimits.maximumAnswerBytes {
                 Text(VyronQuestionText.answerTooLong)
                     .font(VyronUserInputStyle.description)
-                    .foregroundStyle(Palette.warning)
+                    .foregroundStyle(palette.warning)
             }
         }
     }
@@ -47,7 +48,7 @@ struct VyronUserInputQuestionView<Actions: View>: View {
         HStack(alignment: .firstTextBaseline, spacing: VyronUserInputStyle.controlSpacing) {
             Image(systemName: VyronSymbols.pencil)
                 .font(VyronUserInputStyle.icon)
-                .foregroundStyle(Palette.muted)
+                .foregroundStyle(palette.muted)
                 .accessibilityHidden(true)
             TextField("", text: Binding(
                 get: { customAnswer },
@@ -58,13 +59,13 @@ struct VyronUserInputQuestionView<Actions: View>: View {
             ), axis: .vertical)
                 .textFieldStyle(.plain)
                 .font(VyronUserInputStyle.input)
-                .foregroundStyle(Palette.text)
+                .foregroundStyle(palette.text)
                 .lineLimit(1...4)
                 .overlay(alignment: .topLeading) {
                     if customAnswer.isEmpty {
                         Text(VyronQuestionText.answerPlaceholder)
                             .font(VyronUserInputStyle.input)
-                            .foregroundStyle(Palette.muted)
+                            .foregroundStyle(palette.muted)
                             .lineLimit(1)
                             .allowsHitTesting(false)
                             .accessibilityHidden(true)

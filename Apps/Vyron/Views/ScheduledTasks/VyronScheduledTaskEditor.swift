@@ -3,6 +3,7 @@ import VyronCore
 import VyronModelDomain
 
 struct VyronScheduledTaskEditor: View {
+    @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     let initial: VyronScheduledTask?
     let context: VyronScheduledTaskContext
@@ -39,7 +40,7 @@ struct VyronScheduledTaskEditor: View {
         VStack(alignment: .leading, spacing: 0) {
             Text(initial == nil ? VyronScheduledTaskText.addTask : VyronScheduledTaskText.editTask)
                 .font(VyronScheduledTaskStyle.heading).padding(VyronScheduledTaskStyle.contentPadding)
-            Divider().overlay(Palette.border)
+            Divider().overlay(palette.border)
             ScrollView {
                 VStack(alignment: .leading, spacing: VyronScheduledTaskStyle.sectionSpacing) {
                     LabeledContent(VyronScheduledTaskText.title) {
@@ -52,11 +53,11 @@ struct VyronScheduledTaskEditor: View {
                             .font(VyronScheduledTaskStyle.body).scrollContentBackground(.hidden)
                             .padding(VyronScheduledTaskStyle.compactSpacing)
                             .frame(height: VyronScheduledTaskStyle.promptHeight)
-                            .background(Palette.field, in: RoundedRectangle(
+                            .background(palette.field, in: RoundedRectangle(
                                 cornerRadius: VyronScheduledTaskStyle.cornerRadius
                             ))
                             .overlay(RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius)
-                                .stroke(Palette.border))
+                                .stroke(palette.border))
                             .accessibilityLabel(VyronScheduledTaskText.prompt)
                     }
                     Picker(VyronScheduledTaskText.mode, selection: $task.definition.context.mode) {
@@ -65,7 +66,7 @@ struct VyronScheduledTaskEditor: View {
                         }
                     }
                     Text(VyronScheduledTaskText.editorHint)
-                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                     DatePicker(VyronScheduledTaskText.startsAt, selection: $task.schedule.startsAt)
                         .environment(\.timeZone, TimeZone(identifier: task.schedule.timeZoneIdentifier) ?? .current)
                     Picker(VyronScheduledTaskText.repeatSchedule, selection: $task.schedule.recurrence) {
@@ -79,13 +80,13 @@ struct VyronScheduledTaskEditor: View {
                     Toggle(VyronScheduledTaskText.enabled, isOn: $task.progress.isEnabled)
                     contextSummary
                     Text(VyronScheduledTaskText.executionNote)
-                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+                        .font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
                     if let error {
-                        Text(verbatim: error).foregroundStyle(Palette.warning).textSelection(.enabled)
+                        Text(verbatim: error).foregroundStyle(palette.warning).textSelection(.enabled)
                     }
                 }.font(VyronScheduledTaskStyle.body).padding(VyronScheduledTaskStyle.contentPadding)
             }
-            Divider().overlay(Palette.border)
+            Divider().overlay(palette.border)
             HStack {
                 Spacer()
                 Button(VyronScheduledTaskText.cancel) { dismiss() }
@@ -95,7 +96,7 @@ struct VyronScheduledTaskEditor: View {
             }.padding(VyronScheduledTaskStyle.cardPadding)
         }
         .frame(width: VyronScheduledTaskStyle.editorWidth, height: VyronScheduledTaskStyle.sheetHeight)
-        .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
+        .background(palette.canvas).foregroundStyle(palette.text).tint(palette.controlAccent)
     }
 
     private var contextSummary: some View {
@@ -118,10 +119,10 @@ struct VyronScheduledTaskEditor: View {
                 task.definition.context.mode = mode
             }.buttonStyle(QuietButtonStyle())
             Text(VyronScheduledTaskText.projectHint)
-                .font(VyronScheduledTaskStyle.caption).foregroundStyle(Palette.muted)
+                .font(VyronScheduledTaskStyle.caption).foregroundStyle(palette.muted)
         }
         .padding(VyronScheduledTaskStyle.cardPadding)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: VyronScheduledTaskStyle.cornerRadius))
     }
 
     private func saveTask() {
