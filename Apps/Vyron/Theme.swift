@@ -21,6 +21,11 @@ enum Palette {
     static let diffAdded = rgb(0x40C977)
     static let diffRemoved = rgb(0xFA423E)
     static let diffHunk = rgb(0x83C3FF)
+    static var diffSyntaxKeyword: Color { VyronColors.diffSyntaxKeyword }
+    static var diffSyntaxType: Color { VyronColors.diffSyntaxType }
+    static var diffSyntaxName: Color { VyronColors.diffSyntaxName }
+    static var diffSyntaxComment: Color { VyronColors.diffSyntaxComment }
+    static var diffSyntaxLiteral: Color { VyronColors.diffSyntaxLiteral }
     static let terminal = canvas
     static let codeText = text
     static var effortAccent: Color { VyronColors.effortAccent }

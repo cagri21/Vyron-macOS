@@ -20,6 +20,7 @@ NAMESPACES = (
     ("VyronPluginText", "plugins"),
     ("VyronSkillText", "skills"),
     ("VyronCompactionText", "compaction"),
+    ("VyronConversationChangesText", "conversationChanges"),
     ("VyronWorkspaceText", "workspace"),
     ("VyronToolsText", "tools"),
     ("VyronBrowserText", "browser"),

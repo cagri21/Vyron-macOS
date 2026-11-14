@@ -1,6 +1,7 @@
 import CryptoKit
 import Darwin
 import Foundation
+import VyronLocalization
 
 public struct DevelopmentFile: Identifiable, Codable, Sendable {
     public var id: String { path }
@@ -261,6 +262,14 @@ public actor DevelopmentWorkspace {
     }
 
     public func writeFile(path: String, content: String) throws -> DevelopmentChange {
+        try writeFile(path: path, content: content, includeImmediateBefore: false)
+    }
+
+    package func writeResponseFile(path: String, content: String) throws -> DevelopmentChange {
+        try writeFile(path: path, content: content, includeImmediateBefore: true)
+    }
+
+    private func writeFile(path: String, content: String, includeImmediateBefore: Bool) throws -> DevelopmentChange {
         try Task.checkCancellation()
         let data = Data(content.utf8)
         guard data.count <= Self.maximumFileBytes, !data.contains(0) else {
@@ -274,13 +283,14 @@ public actor DevelopmentWorkspace {
                 )
             }
         }
+        let immediateBefore = old.flatMap { String(data: $0, encoding: .utf8) }
         let initial: String?
         if let prior = pending[path] {
             initial = prior.before
         } else {
-            initial = old.flatMap { String(data: $0, encoding: .utf8) }
+            initial = immediateBefore
         }
-        if let old, String(data: old, encoding: .utf8) == nil {
+        if old != nil, immediateBefore == nil {
             throw DevelopmentError("Binary files cannot be replaced by the agent.")
         }
         if pending[path] == nil {
@@ -310,6 +320,11 @@ public actor DevelopmentWorkspace {
                 "The file was written, but its change history could not be saved: \(error.localizedDescription)"
             )
         }
+        if includeImmediateBefore {
+            return DevelopmentChange(
+                id: change.id, path: path, before: immediateBefore, after: content, unifiedDiff: change.unifiedDiff
+            )
+        }
         return change
     }
 
@@ -326,6 +341,19 @@ public actor DevelopmentWorkspace {
     }
 
     public func editFile(path: String, oldText: String, newText: String) throws -> DevelopmentChange {
+        try editFile(path: path, oldText: oldText, newText: newText, includeImmediateBefore: false)
+    }
+
+    package func editResponseFile(path: String, oldText: String, newText: String) throws -> DevelopmentChange {
+        try editFile(path: path, oldText: oldText, newText: newText, includeImmediateBefore: true)
+    }
+
+    private func editFile(
+        path: String,
+        oldText: String,
+        newText: String,
+        includeImmediateBefore: Bool
+    ) throws -> DevelopmentChange {
         try Task.checkCancellation()
         guard !oldText.isEmpty, let current = try readData(path: path),
             observedHashes[path] == Self.hash(current),
@@ -342,7 +370,9 @@ public actor DevelopmentWorkspace {
         let excerpt = observedText[path] ?? ""
         readHashes[path] = Self.hash(current)
         defer { if !completeRead { readHashes.removeValue(forKey: path) } }
-        let change = try writeFile(path: path, content: pieces[0] + newText + pieces[1])
+        let change = try writeFile(
+            path: path, content: pieces[0] + newText + pieces[1], includeImmediateBefore: includeImmediateBefore
+        )
         if !completeRead { observedText[path] = excerpt.replacingOccurrences(of: oldText, with: newText) }
         return change
     }
@@ -474,9 +504,56 @@ public actor DevelopmentWorkspace {
                 "The file changed after the agent's edit. Your changes were preserved; inspect it before reverting."
             )
         }
-        if let original = change.before {
-            try atomicWrite(path: path, data: Data(original.utf8))
-            readHashes[path] = Self.hash(Data(original.utf8))
+        try restoreFile(path: path, content: change.before, remainingChange: nil)
+        try persistRevert()
+    }
+
+    package func undoResponseChanges(_ changes: [DevelopmentChange]) throws -> VyronDevelopmentResponseUndo {
+        try Task.checkCancellation()
+        guard !commandRunning else {
+            throw DevelopmentError(VyronProjectApprovalText.responseUndoBusy)
+        }
+        for change in changes { _ = try currentChange(matching: change) }
+        var undo = VyronDevelopmentResponseUndo()
+        for change in changes {
+            do {
+                // Check again immediately before applying each change, including edits from outside Vyron.
+                let current = try currentChange(matching: change)
+                let remaining = change.before.flatMap { original in
+                    current.before?.utf8.elementsEqual(original.utf8) == true ? nil : DevelopmentChange(
+                        id: current.id, path: current.path, before: current.before, after: original,
+                        unifiedDiff: Self.diff(path: current.path, before: current.before, after: original)
+                    )
+                }
+                try restoreFile(path: change.path, content: change.before, remainingChange: remaining)
+                undo.restoredPaths.insert(change.path)
+                try persistRevert()
+            } catch {
+                undo.errorMessage = error.localizedDescription
+                break
+            }
+        }
+        return undo
+    }
+
+    private func currentChange(matching change: DevelopmentChange) throws -> DevelopmentChange {
+        try Task.checkCancellation()
+        guard let current = pending[change.path], current.id == change.id,
+            let currentData = try readData(path: change.path), current.after.utf8.elementsEqual(change.after.utf8),
+            currentData == Data(change.after.utf8),
+            (change.before?.utf8.count ?? 0) <= Self.maximumFileBytes,
+            change.before?.utf8.contains(0) != true
+        else {
+            throw DevelopmentError(VyronProjectApprovalText.responseUndoConflict(change.path))
+        }
+        return current
+    }
+
+    private func restoreFile(path: String, content: String?, remainingChange: DevelopmentChange?) throws {
+        if let content {
+            let data = Data(content.utf8)
+            try atomicWrite(path: path, data: data)
+            readHashes[path] = Self.hash(data)
         } else {
             let (parent, leaf) = try parentDescriptor(path: path, create: false)
             defer { close(parent) }
@@ -486,8 +563,11 @@ public actor DevelopmentWorkspace {
             }
             readHashes.removeValue(forKey: path)
         }
-        pending.removeValue(forKey: path)
-        writtenHashes.removeValue(forKey: path)
+        pending[path] = remainingChange
+        writtenHashes[path] = remainingChange.map { Self.hash(Data($0.after.utf8)) }
+    }
+
+    private func persistRevert() throws {
         do { try persistChanges() } catch {
             throw DevelopmentError(
                 "The file was reverted, but its change history could not be saved: \(error.localizedDescription)"

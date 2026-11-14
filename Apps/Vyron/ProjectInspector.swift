@@ -20,8 +20,8 @@ struct ProjectInspector: View {
                 ) {
                     ForEach(ProjectInspectorTab.allCases, id: \.self) { tab in
                         Text(
-                            tab == .changes && !model.inspector.developmentChanges.isEmpty
-                                ? VyronAppText.inspectorChangesCount(model.inspector.developmentChanges.count)
+                            tab == .changes && !model.inspector.reviewChanges.isEmpty
+                                ? VyronAppText.inspectorChangesCount(model.inspector.reviewChanges.count)
                                 : inspectorTabLabel(tab)
                         ).tag(tab)
                     }
@@ -34,7 +34,9 @@ struct ProjectInspector: View {
                 .buttonStyle(.plain).foregroundStyle(Palette.muted).help(VyronAppText.inspectorRefresh)
             }.padding(13)
             Rectangle().fill(Palette.border).frame(height: 1)
-            if model.workspaceState.workspaceURL == nil {
+            if model.inspector.inspectorTab == .changes && model.inspector.responseChangeReview != nil {
+                VyronProjectChangesView()
+            } else if model.workspaceState.workspaceURL == nil {
                 VStack(spacing: 12) {
                     Image(systemName: "folder").font(.system(size: 25, weight: .ultraLight)).foregroundStyle(
                         Palette.muted
@@ -47,7 +49,7 @@ struct ProjectInspector: View {
             } else {
                 switch model.inspector.inspectorTab {
                 case .files: ProjectFilesView()
-                case .changes: ProjectChangesView()
+                case .changes: VyronProjectChangesView()
                 case .activity: ProjectActivityView()
                 }
             }
@@ -150,96 +152,6 @@ private struct ProjectFilesView: View {
         if [".json", ".yaml", ".yml", ".toml"].contains(where: name.hasSuffix) { return "curlybraces" }
         if name.hasSuffix(".md") { return "doc.text" }
         return "chevron.left.forwardslash.chevron.right"
-    }
-}
-
-private struct ProjectChangesView: View {
-    @Environment(\.locale) private var localizationLocale
-    @EnvironmentObject private var model: AppModel
-    @State private var diffMode = "Diff"
-
-    var body: some View {
-        let _ = localizationLocale
-        VStack(alignment: .leading, spacing: 0) {
-            if let change = model.inspector.selectedDevelopmentChange {
-                VStack(alignment: .leading, spacing: 10) {
-                    Picker(
-                        VyronAppText.inspectorChangedFile,
-                        selection: Binding(
-                            get: { model.inspector.selectedDevelopmentChange?.path ?? "" },
-                            set: { model.inspector.selectedChangePath = $0 }
-                        )
-                    ) {
-                        ForEach(model.inspector.developmentChanges) { item in Text(item.path).tag(item.path) }
-                    }.font(.system(size: 10, design: .monospaced)).labelsHidden()
-                    HStack {
-                        Label(
-                            change.before == nil ? VyronAppText.inspectorAddedFile : VyronAppText.inspectorModifiedFile,
-                            systemImage: change.before == nil ? "plus.circle" : "pencil.circle"
-                        )
-                        .font(.system(size: 9)).foregroundStyle(Palette.accent)
-                        Spacer()
-                        Button {
-                            NSPasteboard.general.clearContents()
-                            NSPasteboard.general.setString(change.unifiedDiff, forType: .string)
-                        } label: {
-                            Image(systemName: "doc.on.doc").font(.system(size: 10))
-                        }
-                        .buttonStyle(.plain).foregroundStyle(Palette.muted).help(VyronAppText.inspectorCopyDiff)
-                        Button(VyronAppText.inspectorRevert) { model.revertChange(change.path) }
-                            .font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(Palette.warning).disabled(
-                                model.foregroundRun.isGenerating || model.foregroundRun.isStoppingDevelopment
-                            )
-                    }
-                    Picker(VyronAppText.inspectorView, selection: $diffMode) {
-                        Text(VyronAppText.inspectorDiff).tag("Diff")
-                        Text(VyronAppText.inspectorBefore).tag("Before")
-                        Text(VyronAppText.inspectorAfter).tag("After")
-                    }.pickerStyle(.segmented).controlSize(.small)
-                }.padding(13)
-                Rectangle().fill(Palette.border).frame(height: 1)
-                ScrollView([.horizontal, .vertical]) {
-                    if diffMode == "Diff" {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(Array(change.unifiedDiff.components(separatedBy: "\n").enumerated()), id: \.offset) { _, line in
-                                Text(line.isEmpty ? " " : line)
-                                    .foregroundStyle(diffColor(line)).padding(.vertical, 2)
-                            }
-                        }
-                        .font(.system(size: 10, design: .monospaced)).textSelection(.enabled)
-                        .fixedSize(horizontal: true, vertical: false).padding(13)
-                    } else {
-                        Text(
-                            diffMode == "Before"
-                                ? (change.before ?? VyronAppText.inspectorFileDidNotExist) : change.after
-                        )
-                        .font(.system(size: 10, design: .monospaced)).lineSpacing(4).textSelection(.enabled)
-                        .fixedSize(horizontal: true, vertical: false).padding(13)
-                    }
-                }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                Text(
-                    VyronAppText.inspectorChangesHint
-                )
-                .font(.system(size: 9)).foregroundStyle(Palette.muted).lineSpacing(3).padding(13)
-            } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "arrow.triangle.branch").font(.system(size: 24, weight: .ultraLight))
-                        .foregroundStyle(Palette.muted)
-                    Text(VyronAppText.inspectorNoChanges).font(.system(size: 12, weight: .medium))
-                    Text(VyronAppText.inspectorCompletedEditsHint)
-                        .font(.system(size: 10)).foregroundStyle(Palette.muted).multilineTextAlignment(.center)
-                        .lineSpacing(4)
-                }.padding(30).frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        }
-    }
-
-    private func diffColor(_ line: String) -> Color {
-        if line.hasPrefix("+++") || line.hasPrefix("---") { return Palette.muted }
-        if line.hasPrefix("+") { return Palette.diffAdded }
-        if line.hasPrefix("-") { return Palette.diffRemoved }
-        if line.hasPrefix("@@") { return Palette.diffHunk }
-        return Palette.text.opacity(0.85)
     }
 }
 

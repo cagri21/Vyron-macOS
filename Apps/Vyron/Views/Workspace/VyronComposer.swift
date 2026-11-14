@@ -47,30 +47,10 @@ struct VyronComposer: View {
             if let filename = model.developmentTaskFilename(for: draft) {
                 VyronDevelopmentTaskAttachmentView(filename: filename, content: draft)
             }
-            if !model.composerAttachments.folderAttachmentDraft.folders.isEmpty {
-                VyronFolderAttachmentsView(
-                    folders: model.composerAttachments.folderAttachmentDraft.folders,
-                    remove: model.removeFolderAttachment
-                )
-                Text(VyronFolderAttachmentText.privacyHint(model.modelSelection.activeConnectionName))
-                    .font(VyronWorkspaceStyle.captionFont)
-                    .foregroundStyle(Palette.muted)
-            }
+            if model.composerAttachments.hasDrafts { attachments }
             if model.composerAttachments.folderAttachmentDraft.isLoading {
                 ProgressView(VyronFolderAttachmentText.importing)
                     .font(VyronWorkspaceStyle.captionFont)
-            }
-            if !model.composerAttachments.screenshotDraft.images.isEmpty {
-                VyronScreenshotAttachmentsView(
-                    images: model.composerAttachments.screenshotDraft.images,
-                    remove: model.removeScreenshot
-                )
-                Text(model.screenshotAnalysisHint)
-                    .font(VyronWorkspaceStyle.captionFont)
-                    .foregroundStyle(Palette.muted)
-                Text(VyronScreenshotText.privacyHint(model.modelSelection.activeConnectionName))
-                    .font(VyronWorkspaceStyle.captionFont)
-                    .foregroundStyle(Palette.muted)
             }
             if model.composerAttachments.screenshotDraft.isLoading {
                 ProgressView(VyronScreenshotText.importing)
@@ -111,6 +91,32 @@ struct VyronComposer: View {
         ))
     }
 
+    private var attachments: some View {
+        let connectionName = model.modelSelection.activeConnectionName
+        let imageHelp = model.screenshotAnalysisHint + "\n\n" + VyronScreenshotText.privacyHint(connectionName)
+        let folderHelp = VyronFolderAttachmentText.privacyHint(connectionName)
+        let pdfHelp = VyronFolderAttachmentText.pdfPrivacyHint(connectionName)
+        let fileHelp = VyronFolderAttachmentText.filePrivacyHint(connectionName)
+        return ScrollView(.horizontal) {
+            HStack(alignment: .top, spacing: VyronWorkspaceStyle.compactSpacing) {
+                ForEach(model.composerAttachments.folderAttachmentDraft.folders) { folder in
+                    VyronFolderAttachmentCard(folder: folder, privacyHint: folderHelp, remove: model.removeFolderAttachment)
+                }
+                ForEach(model.composerAttachments.screenshotDraft.images) { image in
+                    VyronScreenshotAttachmentCard(attachment: image, helpText: imageHelp, remove: model.removeScreenshot)
+                }
+                ForEach(model.composerAttachments.pdfs) { pdf in
+                    let help = pdf.isTruncated ? pdfHelp + "\n" + VyronFolderAttachmentText.pdfLimited : pdfHelp
+                    VyronPDFAttachmentCard(attachment: pdf.preview, helpText: help, remove: model.removePDFAttachment)
+                }
+                ForEach(model.composerAttachments.files) { file in
+                    let help = file.isTruncated ? fileHelp + "\n" + VyronFolderAttachmentText.fileLimited : fileHelp
+                    VyronFileAttachmentCard(info: file.info, helpText: help, remove: model.removeFileAttachment)
+                }
+            }
+        }
+    }
+
     private var voiceControls: some View {
         VyronVoiceControls(
             voice: model.voice,
@@ -129,11 +135,11 @@ struct VyronComposer: View {
 
     private var addMenu: some View {
         Menu {
+            Button(VyronFolderAttachmentText.fileChoose) { model.chooseFileAttachments() }
+                .disabled(!model.canAttachFiles)
             Button(VyronFolderAttachmentText.chooseFolder) { model.chooseFolderAttachment() }
                 .disabled(!model.canAttachFolders)
             Button(VyronScreenshotText.pickerTitle) { model.openScreenshotPicker() }
-                .disabled(!model.canAttachScreenshots)
-            Button(VyronScreenshotText.importImages) { model.chooseScreenshotImages() }
                 .disabled(!model.canAttachScreenshots)
             Button(VyronScreenshotText.pasteImage) { model.pasteScreenshotImage() }
                 .keyboardShortcut("v", modifiers: [.command, .shift])

@@ -191,3 +191,5 @@
 "projectApprovalCommandNeedsReview" = "Command needs your review";
 "projectApprovalCommandNotPermitted" = "This command is not permitted in project mode.";
 "projectApprovalDefaultReviewReason" = "Review this project command before it runs.";
+"projectApprovalResponseUndoBusy" = "Wait for the project command to finish before undoing these edits.";
+"projectApprovalResponseUndoConflict" = "This response can’t be undone because a file changed. Your edits were preserved: %@";

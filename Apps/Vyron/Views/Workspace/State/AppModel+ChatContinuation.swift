@@ -104,6 +104,8 @@ extension AppModel {
                 suggestedQuestions: message.suggestedQuestions
             )
             copied.images = message.images
+            copied.pdfPreviews = message.pdfPreviews
+            copied.fileAttachments = message.fileAttachments
             copied.parentResponseID = message.parentResponseID.flatMap { messageIDs[$0] }
             return copied
         }
@@ -111,6 +113,12 @@ extension AppModel {
             continued.contextByMessageID = originalContext.reduce(into: [:]) { context, entry in
                 guard let oldID = UUID(uuidString: entry.key), let newID = messageIDs[oldID] else { return }
                 context[newID.uuidString] = entry.value
+            }
+        }
+        if let originalChanges = original.changesByResponseID {
+            continued.changesByResponseID = originalChanges.reduce(into: [:]) { snapshots, entry in
+                guard let oldID = UUID(uuidString: entry.key), let newID = messageIDs[oldID] else { return }
+                snapshots[newID.uuidString] = entry.value
             }
         }
         if let compaction = original.compaction, let boundary = messageIDs[compaction.throughMessageID] {

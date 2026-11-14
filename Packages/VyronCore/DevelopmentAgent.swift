@@ -88,9 +88,27 @@ public actor DevelopmentAgent {
     private let onSubagentEvent: (@Sendable (VyronSubagentEvent) -> Void)?
     private var running = false
     private var sessionContext: VyronDevelopmentSessionContext?
+    private var responseChangesByWorkspace: [String: [String: DevelopmentChange]] = [:]
     private var commandApprovalMode = VyronProjectApprovalMode.approveForMe
     private var folderAccess: VyronDevelopmentFolderAccess?
     private var fileOperationAccess: VyronDevelopmentFileOperationAccess?
+
+    package func responseChanges() -> [VyronDevelopmentResponseChanges] {
+        responseChangesByWorkspace.compactMap { workspacePath, files in
+            let changes = files.values.filter { change in
+                guard let before = change.before else { return true }
+                return !before.utf8.elementsEqual(change.after.utf8)
+            }.sorted { $0.path < $1.path }
+            return changes.isEmpty ? nil : VyronDevelopmentResponseChanges(workspacePath: workspacePath, changes: changes)
+        }.sorted { $0.workspacePath < $1.workspacePath }
+    }
+
+    private func recordResponseChange(_ change: DevelopmentChange, in workspace: DevelopmentWorkspace) {
+        let root = workspace.rootURL.path
+        let first = responseChangesByWorkspace[root]?[change.path]
+        responseChangesByWorkspace[root, default: [:]][change.path] =
+            VyronDevelopmentResponseChanges.merging(first: first, latest: change)
+    }
 
     public func configureFileOperationAccess(_ access: VyronDevelopmentFileOperationAccess) throws {
         guard !running else { throw DevelopmentAgentError.alreadyRunning }
@@ -147,6 +165,7 @@ public actor DevelopmentAgent {
             throw DevelopmentAgentError.contextBudget
         }
         running = true
+        responseChangesByWorkspace.removeAll()
         defer { running = false }
         var workspace = self.workspace
         var movedConversation = false
@@ -221,12 +240,8 @@ public actor DevelopmentAgent {
                 ),
             goal: inferenceGoal,
             conversationContext: conversationContext,
-            guidance: VyronDevelopmentSessionGuidance(
-                skillContext: sessionContext?.guidance.skillContext,
-                conversationSummary: sessionContext?.guidance.conversationSummary,
-                projectInstructions: projectInstructions,
-                images: images
-            )
+            guidance: (sessionContext?.guidance ?? VyronDevelopmentSessionGuidance())
+                .withProjectInstructions(projectInstructions)
         )
         var exchanges = progress.state.guidance.map {
             DevelopmentExchange(messages: [DevelopmentMessage(role: "user", content: $0)])
@@ -794,12 +809,8 @@ public actor DevelopmentAgent {
                                         ),
                                     goal: inferenceGoal,
                                     conversationContext: conversationContext,
-                                    guidance: VyronDevelopmentSessionGuidance(
-                                        skillContext: sessionContext?.guidance.skillContext,
-                                        conversationSummary: sessionContext?.guidance.conversationSummary,
-                                        projectInstructions: nextInstructions,
-                                        images: images
-                                    )
+                                    guidance: (sessionContext?.guidance ?? VyronDevelopmentSessionGuidance())
+                                        .withProjectInstructions(nextInstructions)
                                 )
                                 // Validate new guidance before changing the live conversation or its checkpoint owner.
                                 _ = try boundedDevelopmentMessages(
@@ -1087,7 +1098,8 @@ public actor DevelopmentAgent {
                                 )
                                 break
                             }
-                            let change = try await workspace.writeFile(path: path, content: text)
+                            let change = try await workspace.writeResponseFile(path: path, content: text)
+                            recordResponseChange(change, in: workspace)
                             try progress.recordFile(path: path, content: text, changed: true)
                             mutationVersion += 1
                             control.recordProgress()
@@ -1116,7 +1128,8 @@ public actor DevelopmentAgent {
                                 break
                             }
                             try progress.ensureFileCapacity(path)
-                            let change = try await workspace.editFile(path: path, oldText: old, newText: new)
+                            let change = try await workspace.editResponseFile(path: path, oldText: old, newText: new)
+                            recordResponseChange(change, in: workspace)
                             try progress.recordFile(path: path, content: change.after, changed: old != new)
                             if old != new {
                                 mutationVersion += 1
@@ -1566,13 +1579,15 @@ func developmentBaseMessages(
     """
     let selectedContext = guidance.skillContext.map { "\n\n<selected-skills>\n" + $0 + "\n</selected-skills>" } ?? ""
     let summary = guidance.conversationSummary.map { $0 + "\n\n" } ?? ""
+    let attachment = guidance.attachmentReference.map { "\n\n" + $0 } ?? ""
     var messages = [DevelopmentMessage(role: "system", content: system)]
     if let instructions = guidance.projectInstructions {
         messages.append(DevelopmentMessage(role: "user", content: instructions))
     }
     messages.append(DevelopmentMessage(
         role: "user",
-        content: summary + content + selectedContext + VyronDevelopmentImageContext.imageDescription(guidance.images),
+        content: summary + content + attachment + selectedContext
+            + VyronDevelopmentImageContext.imageDescription(guidance.images),
         images: guidance.images
     ))
     return messages

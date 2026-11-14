@@ -2,6 +2,12 @@
 import Foundation
 
 extension VyronAppText {
+    static var modelFeaturesSelectModel: String {
+        VyronResourceBundle.string("appModelFeaturesSelectModel", fallback: "Choose a model to check its features.")
+    }
+    static var modelFeaturesThinking: String {
+        VyronResourceBundle.string("appModelFeaturesThinking", fallback: "Thinking controls")
+    }
     static var modelFeaturesThinkingConnection: String {
         VyronResourceBundle.string("appModelFeaturesThinkingConnection", fallback: "This connection cannot change the model’s thinking settings in Vyron.")
     }
@@ -116,15 +122,5 @@ extension VyronAppText {
     }
     static var settingsClaudeAPIKey: String {
         VyronResourceBundle.string("appSettingsClaudeAPIKey", fallback: "Anthropic API key")
-    }
-    static func settingsClaudeOutputLimit(_ p1: String) -> String {
-        VyronResourceBundle.format(
-            "appSettingsClaudeOutputLimit",
-            fallback: "This model supports up to %@ output tokens.",
-            arguments: [p1]
-        )
-    }
-    static var settingsClaudePrivacy: String {
-        VyronResourceBundle.string("appSettingsClaudePrivacy", fallback: "The server above receives messages and project excerpts sent through this connection. Your key is stored in macOS Keychain.")
     }
 }

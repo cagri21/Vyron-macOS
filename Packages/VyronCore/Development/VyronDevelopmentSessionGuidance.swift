@@ -1,8 +1,9 @@
 public struct VyronDevelopmentSessionGuidance: Sendable {
     public let skillContext: String?
     public let conversationSummary: String?
-    public let projectInstructions: String?
+    public private(set) var projectInstructions: String?
     public let images: [VyronImageAttachment]
+    package var attachmentReference: String?
 
     public init(
         skillContext: String? = nil,
@@ -14,5 +15,11 @@ public struct VyronDevelopmentSessionGuidance: Sendable {
         self.conversationSummary = conversationSummary
         self.projectInstructions = projectInstructions
         self.images = images
+    }
+
+    func withProjectInstructions(_ instructions: String?) -> Self {
+        var guidance = self
+        guidance.projectInstructions = instructions
+        return guidance
     }
 }

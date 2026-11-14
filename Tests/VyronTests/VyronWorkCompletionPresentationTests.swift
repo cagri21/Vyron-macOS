@@ -47,6 +47,19 @@ final class VyronWorkCompletionPresentationTests: XCTestCase {
         XCTAssertTrue(test.model.inspector.terminalOutput.contains(output))
 
         let conversationID = try XCTUnwrap(test.model.selectedConversationID)
+        let reviewed = try XCTUnwrap(test.model.selectedConversation?.changesByResponseID?[answer.id.uuidString]?.first)
+        XCTAssertEqual(reviewed.changes.map(\.path), ["README.md"])
+        XCTAssertEqual(reviewed.changes.first?.before, "A local test project.\n")
+        XCTAssertEqual(reviewed.changes.first?.after, "Updated local project notes.\n")
+        test.model.showChangeReview(
+            conversationID: conversationID,
+            workspacePath: reviewed.workspacePath,
+            changes: reviewed.changes,
+            selectedPath: "README.md"
+        )
+        XCTAssertTrue(test.model.isWorkspaceInspectorVisible)
+        XCTAssertEqual(test.model.inspector.selectedReviewChange?.path, "README.md")
+
         test.model.openActivity(conversationID: conversationID, messageID: answer.id)
         XCTAssertEqual(test.model.trackedMessage, answer)
         XCTAssertEqual(test.model.trackedActivity, activity)
@@ -54,6 +67,7 @@ final class VyronWorkCompletionPresentationTests: XCTestCase {
         let reopened = AppModel(historyDirectory: test.directory)
         let saved = try XCTUnwrap(reopened.conversations.first { $0.id == conversationID })
         XCTAssertEqual(saved.messages.last, answer)
+        XCTAssertEqual(saved.changesByResponseID?[answer.id.uuidString]?.first?.changes.first?.id, reviewed.changes[0].id)
         XCTAssertFalse(reopened.foregroundRun.isGenerating)
         reopened.selectConversation(conversationID)
         reopened.openActivity(conversationID: conversationID, messageID: answer.id)

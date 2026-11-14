@@ -2,6 +2,12 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsSourceHint: String {
+        VyronResourceBundle.string("appSettingsSourceHint", fallback: "Paste an Ollama library page, a public Hugging Face GGUF repository, or a direct .gguf link.")
+    }
+    static var settingsSourceURL: String {
+        VyronResourceBundle.string("appSettingsSourceURL", fallback: "Model source URL")
+    }
     static var settingsStartEngine: String {
         VyronResourceBundle.string("appSettingsStartEngine", fallback: "Start engine")
     }

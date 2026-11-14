@@ -369,11 +369,18 @@ before starting new work. Folder changes wait for active project work to finish.
 
 ### Changes and terminal output
 
-The right inspector contains **Files**, **Changes**, and **Activity**. Review a
-unified diff or Before/After content; Revert preserves later user edits by
-refusing to overwrite a changed file. Changes track the agent's file-tool
-edits, rather than every possible filesystem change made by project scripts.
-Per-project diffs and revert history survive closing and reopening the app.
+Work responses with text edits show a summary beneath the answer with edited
+files and green addition and red deletion counts. Hover over a file to preview
+its diff. Click a file or **View changes** to open the response in the right
+inspector. **Undo** is available while the response’s edits still match the
+project and preserves earlier edits.
+
+The right inspector contains **Files**, **Changes**, and **Activity**.
+**Changes** shows a unified diff or Before/After content. Switch to
+**Project changes** to review or revert the project’s pending file-tool edits.
+Revert preserves later user edits by refusing to overwrite a changed file.
+Response and project diffs survive closing and reopening the app. They track
+source edits from Work’s file tools.
 
 The **Terminal** pane shows actual command output and exit status. Drag its top
 divider up or down to expand or shrink the logs while keeping space for the
@@ -1220,14 +1227,15 @@ own windows, hides the cursor, and limits the longest image edge to 2048 pixels.
 Device capture requires an open Simulator or mirroring window; this feature does
 not connect directly to physical devices or boot simulators.
 
-You can also choose **Attach images…**, drag image files or image data from
+You can also choose **Attach files…**, drag image files or image data from
 another app onto the composer, or use **Paste image** (**Command–Shift–V**).
 The composer highlights when an image can be dropped. Attach up to four images to compare
 screens, inspect interface problems, explain an error, or read visible content.
-Select a thumbnail for a larger preview, copy/save the image, or remove it before
-sending. Images are normalized to PNG with orientation applied and imported
-camera/location metadata removed. Imports are limited to 20 MiB; normalized
-attachments allow 8 MiB per image and 16 MiB per request.
+Each attachment shows a thumbnail, the file type, and the filename. Select the
+thumbnail to preview, copy, or save the image. Use the remove button to take the
+image out of the draft. Images are normalized to PNG with orientation applied and
+imported camera/location metadata removed. Imports are limited to 20 MiB.
+Normalized attachments allow 8 MiB per image and 16 MiB per request.
 
 Attaching images keeps the selected **Chat**, **Work**, or **Plan** mode, including
 in existing Work conversations. Work can use screenshot pixels while implementing
@@ -1256,21 +1264,48 @@ The existing Mac control live preview still stays in memory and is not sent to
 the model automatically. Live capture and actual vision quality require testing
 with macOS permission and the chosen vision model.
 
+## File attachments
+
+Choose **+ → Attach files…** or drag files from Finder onto the composer. You
+can select different file types together, for example a PDF, a PNG, and an MP3.
+Each file gets its own card and remove button. A PDF card has a red label, the
+filename, and a first-page preview.
+Select the card to enlarge the preview or use the remove button to take the
+PDF out of the draft.
+
+Vyron reads selectable text on your Mac. Send a question about the PDF, or send
+it with a blank message for a general analysis. The selected model connection
+receives the extracted text. The extracted text and first-page preview are saved
+in this chat’s local history. You can attach up to four PDFs, up to 20 MiB each,
+subject to the shared message context limit. Vyron checks the first 30 pages
+and includes up to 4,000 UTF-8 bytes per PDF. Image-only scans and PDFs that
+restrict copying require a version with selectable text and copying allowed.
+
+Vyron also accepts readable text files such as TXT, Markdown, CSV, JSON, and
+common source files. It takes a bounded excerpt from each document. MP3, WAV,
+M4A, and other supported audio files up to 20 MiB provide their filename and
+duration. Vyron can include a speech transcript for clips up to 60 seconds when
+macOS has on-device speech recognition available and you grant Speech
+Recognition access. The selected model receives the transcript and metadata. The audio
+recording stays on your Mac. File names and supplied excerpts remain available
+in chat history for follow-up questions.
+
 ## Folder analysis
 
 Drag folders from Finder onto the chat composer, or choose **+ → Attach a folder…**.
 Vyron includes a recursive file inventory and readable text from nested files in
-your selected **Chat**, **Work**, or **Plan** mode. Each attachment shows included
-and skipped counts and a remove button. Send a question with the folder, or send
-it with a blank message for a general analysis. Up to four folders can be attached,
-subject to the shared message context limit.
+your selected **Chat**, **Work**, or **Plan** mode. Each attachment shows a folder
+icon, the folder name, and a remove button. Hover over the folder name for the
+included and skipped counts and to see whether analysis coverage is limited.
+Send a question with the folder, or send it with a blank message for a general
+analysis. Up to four folders can be attached, subject to the shared message
+context limit.
 
 Folder imports exclude most hidden items, generated and dependency directories,
 common sensitive files, symbolic links, and binary contents. Inventory, excerpts,
-file size, depth, and entry counts are bounded; the attachment indicates when
-analysis coverage is limited. Folder names and included text go to the selected
-model connection when you send the message. A large folder may require narrowing
-the selection to inspect more of its contents.
+file size, depth, and entry counts are bounded. Folder names and included text go
+to the selected model connection when you send the message. A large folder may
+require narrowing the selection to inspect more of its contents.
 
 ## Developer workflows
 

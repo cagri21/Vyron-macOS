@@ -1,2 +1,2 @@
 "NSMicrophoneUsageDescription" = "Vyron, dikteyi seçtiğinizde veya sesli sohbet başlattığınızda mikrofonunuzu kullanır.";
-"NSSpeechRecognitionUsageDescription" = "Vyron, ileti dikte edebilmeniz ve yapay zekânızla konuşabilmeniz için konuşmanızı bu Mac’te metne dönüştürür.";
+"NSSpeechRecognitionUsageDescription" = "Vyron, dikte, sesli sohbetler ve ekli ses dosyaları için konuşmayı bu Mac’te metne dönüştürür.";

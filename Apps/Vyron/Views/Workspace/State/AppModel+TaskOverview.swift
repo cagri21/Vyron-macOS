@@ -21,6 +21,7 @@ extension AppModel {
             !isChatWorkspace
         else { return }
         appNavigation.trackingSelection = nil
+        inspector.closeResponseChangeReview()
         inspector.inspectorTab = tab
         appNavigation.showWorkspace = true
     }

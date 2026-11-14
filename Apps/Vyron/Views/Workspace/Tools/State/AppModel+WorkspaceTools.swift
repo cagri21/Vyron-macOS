@@ -14,6 +14,7 @@ extension AppModel {
         switch tool {
         case .changes:
             appNavigation.trackingSelection = nil
+            inspector.closeResponseChangeReview()
             inspector.inspectorTab = .changes
             appNavigation.showWorkspace = true
         case .files:

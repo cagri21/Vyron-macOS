@@ -10,6 +10,8 @@ public struct ChatMessage: Identifiable, Codable, Sendable, Equatable {
     public var images: [VyronImageAttachment]?
     /// The task text stays in `content` so inference and task continuation can use it directly.
     package var developmentTaskFilename: String?
+    package var pdfPreviews: [VyronPDFPreview]?
+    package var fileAttachments: [VyronFileAttachmentInfo]?
     /// Screenshots produced by a Work response, retained as artifacts rather than future model inputs.
     public var capturedImages: [VyronImageAttachment]?
     /// Owning assistant response for a clarification child; absent in legacy conversation history.

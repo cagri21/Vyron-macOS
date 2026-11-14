@@ -104,6 +104,54 @@ final class DevelopmentWorkspaceTests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("Sources/New.swift").path))
     }
 
+    func testResponseUndoPreservesEarlierEditsAndRemovesNewFiles() async throws {
+        let root = try fixture()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let file = root.appendingPathComponent("Main.swift")
+        try Data("original\n".utf8).write(to: file)
+        let workspace = try DevelopmentWorkspace(rootURL: root)
+        _ = try await workspace.readFile(path: "Main.swift")
+        _ = try await workspace.writeFile(path: "Main.swift", content: "earlier response\n")
+        let responseChange = try await workspace.editResponseFile(
+            path: "Main.swift", oldText: "earlier response", newText: "latest response"
+        )
+        let first = try await workspace.writeResponseFile(path: "New.swift", content: "first")
+        let latest = try await workspace.writeResponseFile(path: "New.swift", content: "latest")
+        let created = VyronDevelopmentResponseChanges.merging(first: first, latest: latest)
+        XCTAssertNil(created.before)
+        XCTAssertEqual(responseChange.before, "earlier response\n")
+
+        let result = try await workspace.undoResponseChanges([responseChange, created])
+        XCTAssertNil(result.errorMessage)
+        XCTAssertEqual(result.restoredPaths, ["Main.swift", "New.swift"])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("New.swift").path))
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), "earlier response\n")
+        let reopened = try DevelopmentWorkspace(rootURL: root)
+        let changes = await reopened.changes()
+        XCTAssertEqual(changes.count, 1)
+        XCTAssertEqual(changes.first?.before, "original\n")
+        XCTAssertEqual(changes.first?.after, "earlier response\n")
+    }
+
+    func testResponseUndoChecksAllFilesBeforeOverwritingAny() async throws {
+        let root = try fixture()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = try DevelopmentWorkspace(rootURL: root)
+        let first = try await workspace.writeResponseFile(path: "First.swift", content: "first")
+        let second = try await workspace.writeResponseFile(path: "Second.swift", content: "second")
+        let secondFile = root.appendingPathComponent("Second.swift")
+        try Data("user edit".utf8).write(to: secondFile)
+
+        do {
+            _ = try await workspace.undoResponseChanges([first, second])
+            XCTFail("Undo proceeded after an external edit")
+        } catch {
+            XCTAssertEqual(try String(contentsOf: secondFile, encoding: .utf8), "user edit")
+            let firstFile = root.appendingPathComponent("First.swift")
+            XCTAssertEqual(try String(contentsOf: firstFile, encoding: .utf8), "first")
+        }
+    }
+
     func testTruncatedReadCannotAuthorizeOverwriteButUniqueEditPreservesUnseenText() async throws {
         let root = try fixture(); defer { try? FileManager.default.removeItem(at: root) }
         let file = root.appendingPathComponent("Long.swift")

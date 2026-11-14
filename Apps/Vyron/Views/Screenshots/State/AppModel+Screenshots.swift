@@ -1,5 +1,4 @@
 import AppKit
-import UniformTypeIdentifiers
 import VyronCore
 
 extension AppModel {
@@ -27,18 +26,6 @@ extension AppModel {
         guard canAttachScreenshots else { return }
         composerAttachments.screenshotCaptureGeneration = composerAttachments.screenshotDraft.generation
         composerAttachments.showScreenshotPicker = true
-    }
-
-    func chooseScreenshotImages() {
-        guard canAttachScreenshots else { return }
-        let panel = NSOpenPanel()
-        panel.title = VyronScreenshotText.importImages
-        panel.allowedContentTypes = [.image]
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = true
-        let generation = composerAttachments.screenshotDraft.generation
-        guard panel.runModal() == .OK, composerAttachments.screenshotDraft.generation == generation else { return }
-        importScreenshotImages(panel.urls)
     }
 
     func importScreenshotImages(_ urls: [URL]) {

@@ -1,4 +1,5 @@
 import AppKit
+import CoreGraphics
 import Foundation
 import SwiftUI
 import XCTest
@@ -8,16 +9,18 @@ import VyronLocalization
 
 @MainActor
 final class VyronFolderAttachmentConversationTests: XCTestCase {
-    func testCaptureFolderPreviewAndPrivacyHintInEachSupportedLanguage() async throws {
+    func testFolderAndImageAttachmentsFitInOneCompactRowInEachSupportedLanguage() async throws {
         let test = try VyronFeatureTestHarness()
         defer { test.cleanUp() }
         test.select(test.profile(), provider: test.provider)
-        test.model.composerAttachments.folderAttachmentDraft.folders = [VyronFolderAttachment(
+        test.model.composer.draft = "Review these attachments."
+        let folder = VyronFolderAttachment(
             id: UUID(),
             name: "A project folder with a long name for checking attachment layout",
             context: "Supplied folder contents.",
             summary: VyronFolderAttachmentSummary(includedFileCount: 12, skippedFileCount: 3, isLimited: true)
-        )]
+        )
+        let image = try attachmentPreviewImage()
         let defaults = UserDefaults.standard
         let previousArguments = defaults.volatileDomain(forName: UserDefaults.argumentDomain)
         defer { defaults.setVolatileDomain(previousArguments, forName: UserDefaults.argumentDomain) }
@@ -30,40 +33,33 @@ final class VyronFolderAttachmentConversationTests: XCTestCase {
             arguments[VyronLocalizationDefaultsKey.language.rawValue] = language.rawValue
             defaults.setVolatileDomain(arguments, forName: UserDefaults.argumentDomain)
             for width: CGFloat in [640, 504] {
-                let content = VyronComposer()
-                    .environmentObject(test.model)
-                    .environment(\.locale, Locale(identifier: language.rawValue))
-                    .environment(\.colorScheme, .dark)
-                    .frame(width: width)
-                    .background(Palette.canvas)
-                let hosting = NSHostingView(rootView: content)
-                hosting.appearance = NSAppearance(named: .darkAqua)
-                hosting.frame = CGRect(x: 0, y: 0, width: width, height: 1)
-                for _ in 0..<4 {
-                    hosting.layoutSubtreeIfNeeded()
-                    await Task.yield()
-                    hosting.setFrameSize(hosting.fittingSize)
-                }
-                let size = hosting.fittingSize
-                guard size.width.isFinite, size.height.isFinite, size.width > 0, size.height > 0 else {
-                    throw XCTSkip("BLOCKED: folder composer has no offscreen fitting size.")
-                }
-                hosting.setFrameSize(size)
-                hosting.layoutSubtreeIfNeeded()
+                let attachments = test.model.composerAttachments
+                attachments.folderAttachmentDraft.folders = []
+                attachments.screenshotDraft.images = []
+                let baseline = try await layoutComposer(test.model, language: language, width: width).bounds.height
+                attachments.folderAttachmentDraft.folders = [folder]
+                attachments.screenshotDraft.images = [image]
+                let hosting = try await layoutComposer(test.model, language: language, width: width)
                 guard let bitmap = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) else {
-                    throw XCTSkip("BLOCKED: native offscreen folder composer capture is unavailable.")
+                    throw XCTSkip("BLOCKED: native offscreen composer capture is unavailable.")
                 }
                 hosting.cacheDisplay(in: hosting.bounds, to: bitmap)
                 let data = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
                 try data.write(to: directory.appendingPathComponent(
                     "composer-\(language.rawValue)-\(Int(width)).png"
                 ), options: .atomic)
-                XCTAssertEqual(size.width, width, accuracy: 1)
-                XCTAssertGreaterThan(size.height, 100)
-                XCTAssertLessThan(size.height, 450, "The folder preview and privacy hint must fit the composer.")
                 guard hasForegroundContent(bitmap) else {
-                    throw XCTSkip("BLOCKED: native offscreen folder composer did not paint its contents.")
+                    throw XCTSkip("BLOCKED: native offscreen composer did not paint its contents.")
                 }
+                XCTAssertEqual(hosting.bounds.width, width, accuracy: 1)
+                let addedHeight = hosting.bounds.height - baseline
+                XCTAssertGreaterThanOrEqual(addedHeight, VyronScreenshotStyle.thumbnailHeight)
+                XCTAssertLessThanOrEqual(
+                    addedHeight,
+                    VyronScreenshotStyle.thumbnailHeight + 50,
+                    "The two attachments should fit alongside each other with a single caption line."
+                )
+                XCTAssertTrue(containsAttachmentPreview(bitmap))
             }
         }
     }
@@ -221,6 +217,69 @@ final class VyronFolderAttachmentConversationTests: XCTestCase {
         XCTAssertFalse(test.model.computerWork.isComputerWorkActive)
         XCTAssertNil(test.model.computerWork.pendingAgentGoal)
         XCTAssertNil(test.model.errorMessage)
+    }
+
+    private func layoutComposer(_ model: AppModel, language: VyronLanguage, width: CGFloat) async throws -> NSView {
+        let content = VyronComposer()
+            .environmentObject(model)
+            .environment(\.locale, Locale(identifier: language.rawValue))
+            .environment(\.colorScheme, .dark)
+            .frame(width: width)
+            .background(Palette.canvas)
+        let hosting = NSHostingView(rootView: content)
+        hosting.appearance = NSAppearance(named: .darkAqua)
+        hosting.frame = CGRect(x: 0, y: 0, width: width, height: 1)
+        for _ in 0..<4 {
+            hosting.layoutSubtreeIfNeeded()
+            await Task.yield()
+            hosting.setFrameSize(hosting.fittingSize)
+        }
+        let size = hosting.fittingSize
+        guard size.width.isFinite, size.height.isFinite, size.width > 0, size.height > 0 else {
+            throw XCTSkip("BLOCKED: composer has no offscreen fitting size.")
+        }
+        hosting.setFrameSize(size)
+        hosting.layoutSubtreeIfNeeded()
+        return hosting
+    }
+
+    private func attachmentPreviewImage() throws -> VyronImageAttachment {
+        let context = try XCTUnwrap(CGContext(
+            data: nil,
+            width: 320,
+            height: 180,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
+        ))
+        context.setFillColor(CGColor(gray: 0.95, alpha: 1))
+        context.fill(CGRect(x: 0, y: 0, width: 320, height: 180))
+        context.setFillColor(CGColor(red: 0.8, green: 0.1, blue: 0.7, alpha: 1))
+        context.fill(CGRect(x: 0, y: 124, width: 320, height: 56))
+        context.setFillColor(CGColor(gray: 0.2, alpha: 1))
+        for y in stride(from: 24, through: 104, by: 20) {
+            context.fill(CGRect(x: 28, y: y, width: 220 - y, height: 7))
+        }
+        let bitmap = NSBitmapImageRep(cgImage: try XCTUnwrap(context.makeImage()))
+        return VyronImageAttachment(
+            name: "A screenshot with a long descriptive filename for checking truncation.png",
+            mimeType: "image/png",
+            data: try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+        )
+    }
+
+    private func containsAttachmentPreview(_ bitmap: NSBitmapImageRep) -> Bool {
+        var previewSamples = 0
+        for y in stride(from: 0, to: bitmap.pixelsHigh, by: 3) {
+            for x in stride(from: 0, to: bitmap.pixelsWide, by: 3) {
+                if let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
+                    color.redComponent > 0.55, color.greenComponent < 0.25, color.blueComponent > 0.45 {
+                    previewSamples += 1
+                }
+            }
+        }
+        return previewSamples > 100
     }
 
     private func hasForegroundContent(_ bitmap: NSBitmapImageRep) -> Bool {

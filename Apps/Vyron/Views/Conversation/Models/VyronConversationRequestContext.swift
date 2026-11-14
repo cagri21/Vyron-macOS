@@ -87,10 +87,13 @@ enum VyronConversationRequestContext {
             )
             var newSnapshots: Set<String> = []
             let contextualTurn = turn.map { message -> ChatMessage in
+                var contextual = message
+                contextual.pdfPreviews = nil
+                contextual.fileAttachments = nil
                 guard let snapshot = context[message.id.uuidString], !includedSnapshots.contains(snapshot),
                     !newSnapshots.contains(snapshot)
                 else {
-                    return message
+                    return contextual
                 }
                 let opening = "\n\n<local-project-context>\n"
                 let closing = "\n</local-project-context>"
@@ -100,14 +103,13 @@ enum VyronConversationRequestContext {
                     let marker = "\n[context truncated]"
                     let allowance = remainingContextBytes - opening.utf8.count - closing.utf8.count
                         - marker.utf8.count
-                    guard allowance > 0 else { return message }
+                    guard allowance > 0 else { return contextual }
                     var excerptBytes = snapshot.utf8.prefix(allowance)
                     while String(bytes: excerptBytes, encoding: .utf8) == nil {
                         excerptBytes = excerptBytes.dropLast()
                     }
                     addition = opening + String(decoding: excerptBytes, as: UTF8.self) + marker + closing
                 }
-                var contextual = message
                 contextual.content += addition
                 remainingContextBytes = max(0, remainingContextBytes - addition.utf8.count)
                 newSnapshots.insert(snapshot)

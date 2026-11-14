@@ -191,3 +191,5 @@
 "projectApprovalCommandNeedsReview" = "Komut incelemenizi bekliyor";
 "projectApprovalCommandNotPermitted" = "Proje modunda bu komuta izin verilmez.";
 "projectApprovalDefaultReviewReason" = "Bu proje komutunu çalıştırılmadan önce inceleyin.";
+"projectApprovalResponseUndoBusy" = "Bu düzenlemeleri geri almadan önce proje komutunun bitmesini bekleyin.";
+"projectApprovalResponseUndoConflict" = "Bir dosya değiştiği için bu yanıt geri alınamıyor. Düzenlemeleriniz korundu: %@";

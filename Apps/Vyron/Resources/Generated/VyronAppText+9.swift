@@ -2,6 +2,12 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsOneDownload: String {
+        VyronResourceBundle.string("appSettingsOneDownload", fallback: "One download at a time")
+    }
+    static var settingsOptionalAPIKey: String {
+        VyronResourceBundle.string("appSettingsOptionalAPIKey", fallback: "API key (optional)")
+    }
     static var settingsOptionalHelper: String {
         VyronResourceBundle.string("appSettingsOptionalHelper", fallback: "Optional helper")
     }
@@ -112,11 +118,5 @@ extension VyronAppText {
     }
     static var settingsServerURL: String {
         VyronResourceBundle.string("appSettingsServerURL", fallback: "Server URL")
-    }
-    static var settingsSourceHint: String {
-        VyronResourceBundle.string("appSettingsSourceHint", fallback: "Paste an Ollama library page, a public Hugging Face GGUF repository, or a direct .gguf link.")
-    }
-    static var settingsSourceURL: String {
-        VyronResourceBundle.string("appSettingsSourceURL", fallback: "Model source URL")
     }
 }

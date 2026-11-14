@@ -14,6 +14,8 @@ final class VyronWorkspaceInspectorState: ObservableObject {
     @Published var selectedProjectFilePath: String?
     @Published var projectFilePreview = ""
     @Published var selectedChangePath: String?
+    @Published private(set) var responseChangeReview: VyronInspectorChangeReview?
+    @Published var showsResponseChanges = false
     @Published private var recordedTerminalOutput = ""
     @Published var showTerminal = false
 
@@ -32,6 +34,7 @@ final class VyronWorkspaceInspectorState: ObservableObject {
 
     func showDevelopmentOutput(for conversationID: UUID?) {
         displayedConversationID = conversationID
+        if responseChangeReview?.conversationID != conversationID { closeResponseChangeReview() }
     }
 
     func beginDevelopmentOutput(for conversationID: UUID, selectedConversationID: UUID?) {
@@ -39,10 +42,39 @@ final class VyronWorkspaceInspectorState: ObservableObject {
         displayedConversationID = selectedConversationID
         recordedEvents = []
         recordedTerminalOutput = ""
+        if conversationID == selectedConversationID { closeResponseChangeReview() }
     }
 
     var selectedDevelopmentChange: DevelopmentChange? {
         developmentChanges.first { $0.path == selectedChangePath } ?? developmentChanges.first
+    }
+
+    var reviewChanges: [DevelopmentChange] {
+        showsResponseChanges ? (responseChangeReview?.changes ?? developmentChanges) : developmentChanges
+    }
+
+    var selectedReviewChange: DevelopmentChange? {
+        guard showsResponseChanges, let review = responseChangeReview else { return selectedDevelopmentChange }
+        return review.changes.first { $0.path == review.selectedPath } ?? review.changes.first
+    }
+
+    func selectChangeReviewPath(_ path: String) {
+        if showsResponseChanges {
+            responseChangeReview?.selectedPath = path
+        } else {
+            selectedChangePath = path
+        }
+    }
+
+    func openResponseChangeReview(_ review: VyronInspectorChangeReview) {
+        responseChangeReview = review
+        showsResponseChanges = true
+        inspectorTab = .changes
+    }
+
+    func closeResponseChangeReview() {
+        showsResponseChanges = false
+        responseChangeReview = nil
     }
 
     func filteredDevelopmentFiles(matching searchText: String) -> [DevelopmentFile] {

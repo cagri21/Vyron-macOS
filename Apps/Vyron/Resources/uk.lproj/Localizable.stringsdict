@@ -42,6 +42,26 @@
 			<string>%d доступних варіантів</string>
 		</dict>
 	</dict>
+	<key>conversationChangesEditedFiles</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>Змінено %d файли</string>
+			<key>many</key>
+			<string>Змінено %d файлів</string>
+			<key>one</key>
+			<string>Змінено %d файл</string>
+			<key>other</key>
+			<string>Змінено %d файлів</string>
+		</dict>
+	</dict>
 	<key>headerWorkingCount</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

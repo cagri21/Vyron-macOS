@@ -20,11 +20,17 @@ extension VyronAppText {
     static var inspectorProject: String {
         VyronResourceBundle.string("appInspectorProject", fallback: "Project")
     }
+    static var inspectorProjectChanges: String {
+        VyronResourceBundle.string("appInspectorProjectChanges", fallback: "Project changes")
+    }
     static var inspectorReadOnlyPreview: String {
         VyronResourceBundle.string("appInspectorReadOnlyPreview", fallback: "Read-only preview")
     }
     static var inspectorRefresh: String {
         VyronResourceBundle.string("appInspectorRefresh", fallback: "Refresh project files and changes")
+    }
+    static var inspectorResponseChanges: String {
+        VyronResourceBundle.string("appInspectorResponseChanges", fallback: "This response")
     }
     static var inspectorRevert: String {
         VyronResourceBundle.string("appInspectorRevert", fallback: "Revert")
@@ -104,11 +110,5 @@ extension VyronAppText {
     }
     static var modelFeaturesRetry: String {
         VyronResourceBundle.string("appModelFeaturesRetry", fallback: "Check model features")
-    }
-    static var modelFeaturesSelectModel: String {
-        VyronResourceBundle.string("appModelFeaturesSelectModel", fallback: "Choose a model to check its features.")
-    }
-    static var modelFeaturesThinking: String {
-        VyronResourceBundle.string("appModelFeaturesThinking", fallback: "Thinking controls")
     }
 }

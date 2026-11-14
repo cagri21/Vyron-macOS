@@ -35,7 +35,7 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>Vyron uses your microphone when you choose dictation or start a voice conversation.</string>
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>Vyron transcribes your speech on this Mac so you can dictate messages and talk to your AI.</string>
+    <string>Vyron transcribes speech on this Mac for dictation, voice conversations, and attached audio files.</string>
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsLocalNetworking</key><true/>

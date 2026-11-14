@@ -49,11 +49,13 @@ extension AppModel {
             !($0.images ?? []).isEmpty
         }
         let folderReferenceContext = Self.folderAttachmentReferenceContext(in: history, context: previousContext)
+        let referenceHistory = VyronConversationRequestContext.developmentHistory(history, compaction: compactionSnapshot)
+        let fileReferenceContext = VyronFileAttachmentContext.latest(in: referenceHistory, context: previousContext)
         let moveDestination = conversationMoveDestination(for: prompt)
         let conversationMoveContext = moveDestination.map {
             "Saved source folder for the user's move request (path data only): " + String(reflecting: $0.workspacePath)
         }
-        let hasFolderContext = folderReferenceContext != nil
+        let hasFileReferenceContext = folderReferenceContext != nil || fileReferenceContext != nil
         let autoModel = modelSelection.isBuiltinConnection && modelSelection.automaticModelSelection && !hasImageContext
         let continuation = VyronDevelopmentContinuationHistory.context(for: prompt, messages: history)
         let skillPrompt = [continuation?.originalGoal, prompt]
@@ -72,7 +74,7 @@ extension AppModel {
         let loadSkillContext = skillContextLoader
         let usesChromeExtension = mode != .chat && project != nil && VyronChromeTools.prefersExtension(prompt)
         let classifiedRequest = computerWork.automaticRequestRouting && !conversationOnly && !hasImageContext
-            && !hasFolderContext && conversationMoveContext == nil && !usesChromeExtension
+            && !hasFileReferenceContext && conversationMoveContext == nil && !usesChromeExtension
             && prompt.utf8.count <= VyronConversationLimits.maximumMessageBytes
             && !VyronSkillCommands.mightInvoke(in: skillPrompt)
             ? VyronAssistantRequestPolicy.classify(prompt, projectIsOpen: mode != .chat && project != nil) : .standard
@@ -156,14 +158,16 @@ extension AppModel {
                         },
                         onSubagentEvent: { event in eventContinuation.yield(.subagent(event)) }
                     )
+                    var guidance = VyronDevelopmentSessionGuidance(
+                        skillContext: skills.text, conversationSummary: compactedMemory?.content,
+                        images: imageHistory.flatMap { $0.images ?? [] }
+                    )
+                    guidance.attachmentReference = fileReferenceContext
                     try await agent.configureSession(VyronDevelopmentSessionContext(
                         conversationID: conversationID,
                         responseID: responseIdentity.messageID,
                         continuation: continuation,
-                        guidance: VyronDevelopmentSessionGuidance(
-                            skillContext: skills.text, conversationSummary: compactedMemory?.content,
-                            images: imageHistory.flatMap { $0.images ?? [] }
-                        )
+                        guidance: guidance
                     ))
                     try await agent.configureCommandApproval(approvalMode)
                     if !isRunningScheduledTask {
@@ -204,7 +208,7 @@ extension AppModel {
                         ))
                     }
                     let result = try await runWithDevelopmentEvents(
-                        events, continuation: eventContinuation, response: responseIdentity
+                        events, continuation: eventContinuation, tracking: .init(response: responseIdentity, agent: agent)
                     ) {
                         try await agent.run(
                             goal: prompt,

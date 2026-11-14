@@ -2,6 +2,16 @@
 import Foundation
 
 extension VyronAppText {
+    static func settingsClaudeOutputLimit(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "appSettingsClaudeOutputLimit",
+            fallback: "This model supports up to %@ output tokens.",
+            arguments: [p1]
+        )
+    }
+    static var settingsClaudePrivacy: String {
+        VyronResourceBundle.string("appSettingsClaudePrivacy", fallback: "The server above receives messages and project excerpts sent through this connection. Your key is stored in macOS Keychain.")
+    }
     static var settingsCloseConnection: String {
         VyronResourceBundle.string("appSettingsCloseConnection", fallback: "Close connection editor")
     }
@@ -124,11 +134,5 @@ extension VyronAppText {
     }
     static var settingsGenericModel: String {
         VyronResourceBundle.string("appSettingsGenericModel", fallback: "a model")
-    }
-    static var settingsGetOllama: String {
-        VyronResourceBundle.string("appSettingsGetOllama", fallback: "Get Ollama ↗")
-    }
-    static var settingsImportModelTagPlaceholder: String {
-        VyronResourceBundle.string("appSettingsImportModelTagPlaceholder", fallback: "my-model:latest")
     }
 }

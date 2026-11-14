@@ -6,6 +6,7 @@ struct VyronConversationMessageView: View {
     @Environment(\.locale) private var localizationLocale
     let message: ChatMessage
     let isStreaming: Bool
+    var showsResponseChanges = false
     @State private var copied = false
     private var isUser: Bool { message.conversationRole == .user }
     private var displayContent: String {
@@ -52,9 +53,7 @@ struct VyronConversationMessageView: View {
         HStack {
             Spacer(minLength: 0)
             VStack(alignment: .trailing, spacing: VyronWorkspaceStyle.controlSpacing) {
-                if let images = message.images, !images.isEmpty {
-                    VyronScreenshotAttachmentsView(images: images)
-                }
+                userAttachments
                 if let filename = message.developmentTaskFilename {
                     VyronDevelopmentTaskAttachmentView(filename: filename, content: message.content)
                 } else {
@@ -73,6 +72,29 @@ struct VyronConversationMessageView: View {
                 }
             }
             .frame(maxWidth: VyronConversationStyle.maximumUserWidth, alignment: .trailing)
+        }
+    }
+
+    @ViewBuilder
+    private var userAttachments: some View {
+        let pdfs = message.pdfPreviews ?? []
+        let files = message.fileAttachments ?? []
+        if !pdfs.isEmpty || !files.isEmpty {
+            ScrollView(.horizontal) {
+                HStack(alignment: .top, spacing: VyronWorkspaceStyle.controlSpacing) {
+                    ForEach(message.images ?? []) { image in
+                        VyronScreenshotAttachmentCard(attachment: image)
+                    }
+                    ForEach(pdfs) { pdf in
+                        VyronPDFAttachmentCard(attachment: pdf)
+                    }
+                    ForEach(files) { file in
+                        VyronFileAttachmentCard(info: file)
+                    }
+                }
+            }
+        } else if let images = message.images, !images.isEmpty {
+            VyronScreenshotAttachmentsView(images: images)
         }
     }
 
@@ -98,6 +120,9 @@ struct VyronConversationMessageView: View {
             }
             if let images = message.capturedImages, !images.isEmpty {
                 VyronScreenshotAttachmentsView(images: images)
+            }
+            if showsResponseChanges, !isStreaming {
+                VyronResponseChangesView(responseID: message.id)
             }
             if !isStreaming, !displayContent.isEmpty {
                 copyButton

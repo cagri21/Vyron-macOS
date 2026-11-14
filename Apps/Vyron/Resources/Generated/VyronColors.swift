@@ -2,6 +2,11 @@
 import SwiftUI
 
 enum VyronColors {
+    static let diffSyntaxComment = VyronColorAssets.color(named: "DiffSyntaxComment")
+    static let diffSyntaxKeyword = VyronColorAssets.color(named: "DiffSyntaxKeyword")
+    static let diffSyntaxLiteral = VyronColorAssets.color(named: "DiffSyntaxLiteral")
+    static let diffSyntaxName = VyronColorAssets.color(named: "DiffSyntaxName")
+    static let diffSyntaxType = VyronColorAssets.color(named: "DiffSyntaxType")
     static let effortAccent = VyronColorAssets.color(named: "EffortAccent")
     static let effortSparkle = VyronColorAssets.color(named: "EffortSparkle")
     static let effortTrackEnd = VyronColorAssets.color(named: "EffortTrackEnd")

@@ -1,5 +1,6 @@
 import Foundation
 import VyronCore
+import VyronDevelopment
 
 struct Conversation: Identifiable, Codable {
     var id: UUID
@@ -11,6 +12,7 @@ struct Conversation: Identifiable, Codable {
     /// Stable sidebar owner. Absent in older history, which used one folder per project.
     var projectPath: String?
     var contextByMessageID: [String: String]?
+    var changesByResponseID: [String: [VyronDevelopmentResponseChanges]]?
     var mode: String?
     var queuedMessages: [VyronQueuedMessage]?
     /// Optional inference memory; the complete visible transcript remains in messages.

@@ -6,6 +6,6 @@ enum VyronPrivacyText {
         VyronResourceBundle.string("privacyMicrophoneUsage", fallback: "Vyron uses your microphone when you choose dictation or start a voice conversation.")
     }
     static var speechRecognitionUsage: String {
-        VyronResourceBundle.string("privacySpeechRecognitionUsage", fallback: "Vyron transcribes your speech on this Mac so you can dictate messages and talk to your AI.")
+        VyronResourceBundle.string("privacySpeechRecognitionUsage", fallback: "Vyron transcribes speech on this Mac for dictation, voice conversations, and attached audio files.")
     }
 }

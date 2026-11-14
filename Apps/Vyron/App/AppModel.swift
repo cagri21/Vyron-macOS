@@ -13,7 +13,10 @@ final class AppModel: ObservableObject {
     @Published var conversations: [Conversation] = []
     @Published var selectedConversationID: UUID? {
         didSet {
-            if selectedConversationID != oldValue { appNavigation.trackingSelection = nil }
+            if selectedConversationID != oldValue {
+                appNavigation.trackingSelection = nil
+                inspector.closeResponseChangeReview()
+            }
         }
     }
     @Published var newSideChatSessions: [UUID: VyronSideChatSession] = [:]

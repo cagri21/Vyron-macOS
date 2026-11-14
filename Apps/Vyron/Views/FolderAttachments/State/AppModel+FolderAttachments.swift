@@ -2,16 +2,24 @@ import AppKit
 import VyronCore
 
 extension AppModel {
-    static let maximumFolderAttachments = 4
+    nonisolated static let maximumFolderAttachments = 4
 
     var canAttachFolders: Bool {
-        isConversationModeCompatible(composer.mode)
-            && !isShuttingDown && !foregroundRun.isGenerating && !computerWork.isComputerWorkActive && !isRunningScheduledTask
-            && !foregroundRun.isStoppingDevelopment && !composer.isEditingQueuedMessage && !composerAttachments.isImporting
+        canStartFileAttachmentImport
             && composerAttachments.folderAttachmentDraft.folders.count < Self.maximumFolderAttachments
     }
 
-    var canAcceptComposerDrop: Bool { canAttachFolders || canAttachScreenshots }
+    var canAttachPDFs: Bool {
+        canStartFileAttachmentImport && composerAttachments.pdfs.count < VyronPDFAttachmentLimits.maximumCount
+    }
+
+    var canStartFileAttachmentImport: Bool {
+        isConversationModeCompatible(composer.mode)
+            && !isShuttingDown && !foregroundRun.isGenerating && !computerWork.isComputerWorkActive && !isRunningScheduledTask
+            && !foregroundRun.isStoppingDevelopment && !composer.isEditingQueuedMessage && !composerAttachments.isImporting
+    }
+
+    var canAcceptComposerDrop: Bool { canAttachFolders || canAttachFiles }
 
     func chooseFolderAttachment() {
         guard canAttachFolders else { return }
@@ -74,20 +82,39 @@ extension AppModel {
                 else { return }
                 let folders = composerAttachments.folderAttachmentDraft.folders + result.folders
                 let images = composerAttachments.screenshotDraft.images + result.images
+                let pdfs = composerAttachments.pdfs + result.pdfs
+                let files = composerAttachments.files + result.files
                 guard folders.count <= Self.maximumFolderAttachments else {
                     throw VyronFolderAttachmentDraftError.tooMany
                 }
                 guard images.count <= VyronImageAttachment.maximumCount,
                     images.reduce(0, { $0 + $1.data.count }) <= VyronImageAttachment.maximumRequestDataBytes
                 else { throw VyronScreenshotImportError.tooLarge }
-                guard Self.folderAttachmentContext(folders).utf8.count
+                guard pdfs.count <= VyronPDFAttachmentLimits.maximumCount
+                else { throw VyronPDFAttachmentError.tooMany }
+                guard files.count <= VyronFileAttachmentLimits.maximumCount
+                else { throw VyronComposerFileImportError.tooMany }
+                guard Self.folderAttachmentContext(folders).utf8.count + VyronPDFAttachmentContext.make(pdfs).utf8.count
+                    + VyronFileAttachmentContext.make(files).utf8.count
                     + VyronConversationRequestContext.systemPrompt.utf8.count
                     + VyronConversationLimits.folderImportOverheadBytes
                     < VyronScreenshotLimits.maximumConversationBudget
-                else { throw VyronFolderAttachmentDraftError.contextTooLarge }
+                else {
+                    if !files.isEmpty { throw VyronComposerFileImportError.contextTooLarge }
+                    if !pdfs.isEmpty { throw VyronPDFAttachmentError.contextTooLarge }
+                    throw VyronFolderAttachmentDraftError.contextTooLarge
+                }
                 composerAttachments.folderAttachmentDraft.folders = folders
                 composerAttachments.screenshotDraft.images = images
-                statusMessage = folders.isEmpty ? VyronScreenshotText.readyToAnalyze : VyronFolderAttachmentText.ready
+                composerAttachments.pdfs = pdfs
+                composerAttachments.files = files
+                if !result.files.isEmpty {
+                    statusMessage = VyronFolderAttachmentText.fileReady
+                } else if !result.pdfs.isEmpty {
+                    statusMessage = VyronFolderAttachmentText.pdfReady
+                } else {
+                    statusMessage = result.folders.isEmpty ? VyronScreenshotText.readyToAnalyze : VyronFolderAttachmentText.ready
+                }
             } catch is CancellationError {
                 return
             } catch {

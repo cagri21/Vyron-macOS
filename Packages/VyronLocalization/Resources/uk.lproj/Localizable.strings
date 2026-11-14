@@ -191,3 +191,5 @@
 "projectApprovalCommandNeedsReview" = "Команда потребує вашої перевірки";
 "projectApprovalCommandNotPermitted" = "Ця команда заборонена в режимі проєкту.";
 "projectApprovalDefaultReviewReason" = "Перевірте цю команду проєкту перед її виконанням.";
+"projectApprovalResponseUndoBusy" = "Дочекайтеся завершення команди проєкту, перш ніж скасовувати ці правки.";
+"projectApprovalResponseUndoConflict" = "Цю відповідь не можна скасувати, бо файл змінився. Ваші правки збережено: %@";

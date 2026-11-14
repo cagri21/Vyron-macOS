@@ -17,7 +17,8 @@ struct ConversationView: View {
                             }
                             VyronConversationMessageView(
                                 message: message,
-                                isStreaming: model.isResponseActivityLive(messageID: message.id)
+                                isStreaming: model.isResponseActivityLive(messageID: message.id),
+                                showsResponseChanges: true
                             )
                         }
                         .id(message.id)

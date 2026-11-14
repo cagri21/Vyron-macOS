@@ -6,6 +6,8 @@ final class VyronComposerAttachmentState: ObservableObject {
     @Published var attachedFiles: [AttachedFile] = []
     @Published var screenshotDraft = VyronScreenshotDraft()
     @Published var folderAttachmentDraft = VyronFolderAttachmentDraft()
+    @Published var pdfs: [VyronPDFAttachment] = []
+    @Published var files: [VyronFileAttachment] = []
     @Published var showScreenshotPicker = false
     @Published var pendingAttachments: Set<String> = []
 
@@ -15,7 +17,9 @@ final class VyronComposerAttachmentState: ObservableObject {
     var generation = UUID()
 
     var isImporting: Bool { screenshotDraft.isLoading || folderAttachmentDraft.isLoading }
-    var hasDrafts: Bool { !screenshotDraft.images.isEmpty || !folderAttachmentDraft.folders.isEmpty }
+    var hasDrafts: Bool {
+        !screenshotDraft.images.isEmpty || !folderAttachmentDraft.folders.isEmpty || !pdfs.isEmpty || !files.isEmpty
+    }
 
     func resetDrafts() {
         resetScreenshotDraft()
@@ -40,5 +44,7 @@ final class VyronComposerAttachmentState: ObservableObject {
         folderAttachmentImportTask?.cancel()
         folderAttachmentImportTask = nil
         folderAttachmentDraft = VyronFolderAttachmentDraft()
+        pdfs = []
+        files = []
     }
 }

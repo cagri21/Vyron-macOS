@@ -31,10 +31,14 @@ extension AppModel {
         handoff.preparedChatHandoffDraft = nil
         let images = composerAttachments.screenshotDraft.images
         let folders = composerAttachments.folderAttachmentDraft.folders
-        let folderContext = Self.folderAttachmentContext(folders)
+        let pdfs = composerAttachments.pdfs
+        let files = composerAttachments.files
+        let references = VyronConversationSubmissionReferences(
+            folders: Self.folderAttachmentContext(folders), pdfs: pdfs, files: files
+        )
+        let referenceContext = references.context
         let prompt = enteredPrompt.isEmpty
-            ? (folders.isEmpty ? VyronScreenshotText.analysisPrompt : VyronFolderAttachmentText.analysisPrompt)
-            : enteredPrompt
+            ? defaultAttachmentPrompt(references, includesImages: !images.isEmpty) : enteredPrompt
         let compactionCommand = VyronConversationCompactionCommand(prompt: prompt)
         if compactionCommand != nil, composerAttachments.hasDrafts {
             errorMessage = VyronCompactionText.attachments
@@ -44,13 +48,18 @@ extension AppModel {
             in: messages, snapshot: selectedConversation?.compaction
         )
         let systemPromptBytes = VyronConversationRequestContext.systemPrompt.utf8.count
-        if !folderContext.isEmpty,
-            prompt.utf8.count + folderContext.utf8.count + systemPromptBytes
+        if !referenceContext.isEmpty,
+            prompt.utf8.count + referenceContext.utf8.count + systemPromptBytes
                 + VyronConversationLimits.folderSubmissionOverheadBytes
                 + (compactedMemory?.content.utf8.count ?? 0)
                 + images.count * VyronImageAttachment.estimatedContextTokens
                 > VyronScreenshotLimits.maximumConversationBudget {
-            errorMessage = VyronFolderAttachmentText.contextTooLarge
+            if !files.isEmpty {
+                errorMessage = VyronFolderAttachmentText.fileContextTooLarge
+            } else {
+                errorMessage = pdfs.isEmpty
+                    ? VyronFolderAttachmentText.contextTooLarge : VyronFolderAttachmentText.pdfContextTooLarge
+            }
             return nil
         }
         if compactionCommand == nil, let compactedMemory,
@@ -86,10 +95,22 @@ extension AppModel {
             return nil
         }
         return VyronConversationSubmission(
-            draft: .init(enteredPrompt: enteredPrompt, prompt: prompt, images: images, folderContext: folderContext),
+            draft: .init(enteredPrompt: enteredPrompt, prompt: prompt, images: images, references: references),
             compaction: compaction,
             compactedMemory: compactedMemory
         )
+    }
+
+    private func defaultAttachmentPrompt(
+        _ references: VyronConversationSubmissionReferences,
+        includesImages: Bool
+    ) -> String {
+        if !references.files.isEmpty || (!references.pdfs.isEmpty && (includesImages || !references.folders.isEmpty))
+            || (includesImages && !references.folders.isEmpty) {
+            return VyronFolderAttachmentText.fileAnalysisPrompt
+        }
+        if !references.pdfs.isEmpty { return VyronFolderAttachmentText.pdfAnalysisPrompt }
+        return references.folders.isEmpty ? VyronScreenshotText.analysisPrompt : VyronFolderAttachmentText.analysisPrompt
     }
 
     func beginConversationResponse(for submission: VyronConversationSubmission) -> VyronStartedConversationResponse? {
@@ -114,13 +135,19 @@ extension AppModel {
         let previousConversation = conversations[index]
         var userMessage = ChatMessage(role: .user, content: submittedDraft.prompt, images: submittedDraft.images)
         userMessage.developmentTaskFilename = developmentTaskFilename(for: submittedDraft.prompt)
+        if !submittedDraft.references.pdfs.isEmpty {
+            userMessage.pdfPreviews = submittedDraft.references.pdfs.map(\.preview)
+        }
+        if !submittedDraft.references.files.isEmpty {
+            userMessage.fileAttachments = submittedDraft.references.files.map(\.info)
+        }
         composerAttachments.resetDrafts()
         conversations[index].messages.append(userMessage)
         let history = conversations[index].messages
         let linkedChatContext = linkedChatReferenceContext(in: submittedDraft.prompt)
         var previousContext = conversations[index].contextByMessageID ?? [:]
-        let attachedContext = [submittedDraft.folderContext.isEmpty ? nil : submittedDraft.folderContext, linkedChatContext]
-            .compactMap { $0 }.joined(separator: VyronTextSeparator.paragraph.rawValue)
+        let attachedContext = [submittedDraft.references.context, linkedChatContext]
+            .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: VyronTextSeparator.paragraph.rawValue)
         if !attachedContext.isEmpty {
             previousContext[userMessage.id.uuidString] = attachedContext
             conversations[index].contextByMessageID = previousContext

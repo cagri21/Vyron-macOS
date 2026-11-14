@@ -18,18 +18,20 @@ extension AppModel {
     func runWithDevelopmentEvents(
         _ events: AsyncStream<VyronTrackedRunEvent>,
         continuation: AsyncStream<VyronTrackedRunEvent>.Continuation,
-        response: VyronResponseIdentity,
+        tracking: VyronDevelopmentResponseTracking,
         operation: () async throws -> DevelopmentResult
     ) async throws -> DevelopmentResult {
-        async let drain: Void = recordDevelopmentEvents(events, response: response)
+        async let drain: Void = recordDevelopmentEvents(events, response: tracking.response)
         do {
             let result = try await operation()
             continuation.finish()
             await drain
+            recordResponseChanges(await tracking.agent.responseChanges(), response: tracking.response)
             return result
         } catch {
             continuation.finish()
             await drain
+            recordResponseChanges(await tracking.agent.responseChanges(), response: tracking.response)
             throw error
         }
     }

@@ -24,6 +24,270 @@
         }
       }
     },
+    "folderAttachmentFileChoose": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attach files…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya ekle…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прикріпити файли…"
+          }
+        }
+      }
+    },
+    "folderAttachmentFileUnsupported": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file type is unsupported: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu dosya türü desteklenmiyor: %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Непідтримуваний тип файлу: %@"
+          }
+        }
+      }
+    },
+    "folderAttachmentFileTooMany": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attach up to %d audio and text files per message."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesaj başına en fazla %d ses ve metin dosyası ekleyin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прикріпіть до %d аудіо- й текстових файлів до повідомлення."
+          }
+        }
+      }
+    },
+    "folderAttachmentFilePrivacyHint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File names and available text or transcripts go to %@ when you send the message."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesajı gönderdiğinizde dosya adları ve mevcut metin veya dökümler %@ bağlantısına gönderilir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Після надсилання повідомлення назви файлів і доступний текст або транскрипції буде передано до %@."
+          }
+        }
+      }
+    },
+    "folderAttachmentFileAudioNoTranscript": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No on-device transcript is available. The model receives the name and duration."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aygıtta oluşturulmuş bir döküm yok. Model dosya adını ve süresini alır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Транскрипція на пристрої недоступна. Модель отримає назву й тривалість файлу."
+          }
+        }
+      }
+    },
+    "folderAttachmentFileReady": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files ready to attach"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosyalar eklenmeye hazır"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файли готові до прикріплення"
+          }
+        }
+      }
+    },
+    "folderAttachmentFileLimited": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only an excerpt will be included."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca bir alıntı gönderilecek."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Буде додано лише уривок."
+          }
+        }
+      }
+    },
+    "folderAttachmentFileDroppedName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dropped audio"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sürüklenen ses"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетягнуте аудіо"
+          }
+        }
+      }
+    },
+    "folderAttachmentFileAudioType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ses"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аудіо"
+          }
+        }
+      }
+    },
+    "folderAttachmentFileDocumentType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metin"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст"
+          }
+        }
+      }
+    },
+    "folderAttachmentFileAnalysisPrompt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyze the attached files. Summarize what you can determine and mention any unavailable content."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ekli dosyaları analiz et. Çıkarabildiğin bilgileri özetle ve erişilemeyen içerikleri belirt."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проаналізуй прикріплені файли. Підсумуй те, що вдалося визначити, і зазнач, який вміст був недоступний."
+          }
+        }
+      }
+    },
+    "folderAttachmentFileContextTooLarge": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The files exceed the analysis limit. Remove a file or shorten your message."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosyalar analiz sınırını aşıyor. Bir dosyayı kaldırın veya mesajınızı kısaltın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файли перевищують ліміт аналізу. Вилучіть файл або скоротіть повідомлення."
+          }
+        }
+      }
+    },
     "folderAttachmentImporting": {
       "extractionState": "manual",
       "localizations": {
@@ -158,6 +422,397 @@
           "stringUnit": {
             "state": "translated",
             "value": "Частину вмісту пропущено через обмеження обсягу аналізу."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfAnalysisPrompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyze the attached material and summarize the relevant findings. Identify any limits in the supplied content."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eklenen içeriği incele ve ilgili bulguları özetle. Sağlanan içerikteki sınırları belirt."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проаналізуй додані матеріали й підсумуй важливі висновки. Зазнач обмеження наданого вмісту."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfChoose": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attach PDFs…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF ekle…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати PDF…"
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfContextTooLarge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The PDFs and other draft material exceed the analysis limit. Remove an attachment or shorten your message."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF’ler ve diğer taslak içeriği analiz sınırını aşıyor. Bir eki kaldırın veya iletinizi kısaltın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF та інші матеріали чернетки перевищують ліміт аналізу. Видаліть вкладення або скоротіть повідомлення."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfDroppedName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dropped document.pdf"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bırakılan belge.pdf"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетягнутий документ.pdf"
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfLimited": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only part of this PDF’s text fits within the analysis limits."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu PDF’nin metninin yalnızca bir bölümü analiz sınırlarına sığıyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У межах ліміту аналізу доступна лише частина тексту цього PDF."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfNoPreview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first page preview is unavailable."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İlk sayfanın önizlemesi kullanılamıyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Попередній перегляд першої сторінки недоступний."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfNoText": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This PDF has no readable text within the analysis limits. Choose a PDF with selectable text."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu PDF’de analiz sınırları içinde okunabilir metin yok. Seçilebilir metin içeren bir PDF seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У межах ліміту аналізу в цьому PDF немає читабельного тексту. Виберіть PDF із текстом, який можна виділити."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfPreview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview first page of %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ dosyasının ilk sayfasını önizle"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переглянути першу сторінку %@"
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfPrivacyHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you send, %@ receives text extracted locally from the PDF. The preview and text are saved in this chat’s history."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gönderdiğinizde, %@ PDF’den yerel olarak çıkarılan metni alır. Önizleme ve metin bu sohbetin geçmişine kaydedilir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Під час надсилання %@ отримує текст, видобутий із PDF на цьому Mac. Попередній перегляд і текст зберігаються в історії цього чату."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfReady": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF ready to analyze"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF analize hazır"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF готовий до аналізу"
+          }
+        }
+      }
+    },
+    "folderAttachmentFileDocumentUnsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a supported text file such as TXT, Markdown, CSV, or JSON."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TXT, Markdown, CSV veya JSON gibi desteklenen bir metin dosyası seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть підтримуваний текстовий файл, наприклад TXT, Markdown, CSV або JSON."
+          }
+        }
+      }
+    },
+    "folderAttachmentFileDocumentUnreadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron couldn’t read this text file. Choose a regular file encoded as UTF-8 or UTF-16 with a byte order mark."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron bu metin dosyasını okuyamadı. UTF-8 veya bayt sırası işareti içeren UTF-16 kodlamalı bir normal dosya seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron не вдалося прочитати цей текстовий файл. Виберіть звичайний файл у кодуванні UTF-8 або UTF-16 з позначкою порядку байтів."
+          }
+        }
+      }
+    },
+    "folderAttachmentFileDocumentTooLarge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This text file exceeds the %d MiB import limit."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu metin dosyası %d MiB içe aktarma sınırını aşıyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей текстовий файл перевищує ліміт імпорту в %d МіБ."
+          }
+        }
+      }
+    },
+    "folderAttachmentFileDocumentNoText": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This text file is empty."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu metin dosyası boş."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей текстовий файл порожній."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfTooLarge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This PDF exceeds the %d MiB import limit."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu PDF, %d MiB içe aktarma sınırını aşıyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей PDF перевищує ліміт імпорту в %d МіБ."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfTooMany": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attach up to %d PDFs at a time."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir seferde en fazla %d PDF ekleyin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додайте щонайбільше %d PDF за раз."
+          }
+        }
+      }
+    },
+    "folderAttachmentPdfUnreadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a readable PDF with text copying allowed."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okunabilir ve metin kopyalamaya izin veren bir PDF seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть читабельний PDF, у якому дозволено копіювати текст."
           }
         }
       }
@@ -18756,6 +19411,202 @@
         }
       }
     },
+    "conversationChangesViewChanges": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View changes"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değişiklikleri görüntüle"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переглянути зміни"
+          }
+        }
+      }
+    },
+    "conversationChangesUndoChanges": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geri al"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати"
+          }
+        }
+      }
+    },
+    "appInspectorProjectChanges": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Project changes"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proje değişiklikleri"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зміни проєкту"
+          }
+        }
+      }
+    },
+    "appInspectorResponseChanges": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This response"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yanıt"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ця відповідь"
+          }
+        }
+      }
+    },
+    "projectApprovalResponseUndoConflict": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This response can’t be undone because a file changed. Your edits were preserved: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir dosya değiştiği için bu yanıt geri alınamıyor. Düzenlemeleriniz korundu: %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цю відповідь не можна скасувати, бо файл змінився. Ваші правки збережено: %@"
+          }
+        }
+      }
+    },
+    "projectApprovalResponseUndoBusy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait for the project command to finish before undoing these edits."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu düzenlemeleri geri almadan önce proje komutunun bitmesini bekleyin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дочекайтеся завершення команди проєкту, перш ніж скасовувати ці правки."
+          }
+        }
+      }
+    },
+    "conversationChangesEditedFiles": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Edited %d file"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Edited %d files"
+                }
+              }
+            }
+          }
+        },
+        "tr": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d dosya düzenlendi"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Змінено %d файл"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Змінено %d файли"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Змінено %d файлів"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Змінено %d файлів"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "appInspectorChanges": {
       "localizations": {
         "en": {
@@ -24336,21 +25187,35 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vyron transcribes your speech on this Mac so you can dictate messages and talk to your AI."
+            "value": "Vyron transcribes speech on this Mac for dictation, voice conversations, and attached audio files."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vyron, ileti dikte edebilmeniz ve yapay zekânızla konuşabilmeniz için konuşmanızı bu Mac’te metne dönüştürür."
+            "value": "Vyron, dikte, sesli sohbetler ve ekli ses dosyaları için konuşmayı bu Mac’te metne dönüştürür."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vyron перетворює ваше мовлення на текст на цьому Mac, щоб ви могли диктувати повідомлення та спілкуватися зі ШІ."
+            "value": "Vyron перетворює мовлення на текст на цьому Mac для диктування, голосових розмов і вкладених аудіофайлів."
           }
         }
+      }
+    },
+    "folderAttachmentFileAudioUnreadable": {
+      "localizations": {
+        "en": {"stringUnit": {"state": "translated", "value": "This audio file could not be read. Choose a playable MP3, WAV, or M4A file."}},
+        "tr": {"stringUnit": {"state": "translated", "value": "Bu ses dosyası okunamadı. Oynatılabilir bir MP3, WAV veya M4A dosyası seçin."}},
+        "uk": {"stringUnit": {"state": "translated", "value": "Не вдалося прочитати аудіофайл. Виберіть файл MP3, WAV або M4A, який можна відтворити."}}
+      }
+    },
+    "folderAttachmentFileAudioTooLarge": {
+      "localizations": {
+        "en": {"stringUnit": {"state": "translated", "value": "This audio file exceeds the %d MiB limit."}},
+        "tr": {"stringUnit": {"state": "translated", "value": "Bu ses dosyası %d MiB sınırını aşıyor."}},
+        "uk": {"stringUnit": {"state": "translated", "value": "Розмір аудіофайлу перевищує ліміт у %d МіБ."}}
       }
     },
     "pluginsCodexName": {

@@ -2,12 +2,18 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsGetOllama: String {
+        VyronResourceBundle.string("appSettingsGetOllama", fallback: "Get Ollama ↗")
+    }
     static func settingsImportingNotice(_ p1: String) -> String {
         VyronResourceBundle.format(
             "appSettingsImportingNotice",
             fallback: "Importing %@. Cancel the import before starting another; canceled file imports restart from the beginning.",
             arguments: [p1]
         )
+    }
+    static var settingsImportModelTagPlaceholder: String {
+        VyronResourceBundle.string("appSettingsImportModelTagPlaceholder", fallback: "my-model:latest")
     }
     static var settingsInstallOllama: String {
         VyronResourceBundle.string("appSettingsInstallOllama", fallback: "Install Ollama, then return here and refresh.")
@@ -116,11 +122,5 @@ extension VyronAppText {
             fallback: "%@ on disk",
             arguments: [p1]
         )
-    }
-    static var settingsOneDownload: String {
-        VyronResourceBundle.string("appSettingsOneDownload", fallback: "One download at a time")
-    }
-    static var settingsOptionalAPIKey: String {
-        VyronResourceBundle.string("appSettingsOptionalAPIKey", fallback: "API key (optional)")
     }
 }

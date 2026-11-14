@@ -30,4 +30,19 @@ package enum VyronProjectApprovalText {
     package static func defaultReviewReason(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("projectApprovalDefaultReviewReason", fallback: "Review this project command before it runs.", language: language)
     }
+    package static var responseUndoBusy: String {
+        VyronSharedResources.current.string("projectApprovalResponseUndoBusy", fallback: "Wait for the project command to finish before undoing these edits.")
+    }
+
+    package static func responseUndoBusy(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("projectApprovalResponseUndoBusy", fallback: "Wait for the project command to finish before undoing these edits.", language: language)
+    }
+    package static func responseUndoConflict(_ p1: String, language: VyronResourceLanguage? = nil) -> String {
+        VyronSharedResources.current.format(
+            "projectApprovalResponseUndoConflict",
+            fallback: "This response can’t be undone because a file changed. Your edits were preserved: %@",
+            arguments: [p1],
+            language: language
+        )
+    }
 }

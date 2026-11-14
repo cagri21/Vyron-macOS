@@ -8,10 +8,6 @@ final class VyronScreenshotDropLoader {
         UTType.png.identifier, UTType.jpeg.identifier, UTType.tiff.identifier, UTType.heic.identifier,
         UTType.heif.identifier, UTType.gif.identifier, UTType.webP.identifier, UTType.bmp.identifier
     ]
-    private static let rasterExtensions: Set<String> = [
-        "png", "jpg", "jpeg", "tif", "tiff", "heic", "heif", "gif", "webp", "bmp"
-    ]
-
     static var contentTypes: [String] {
         [UTType.fileURL.identifier, UTType.image.identifier] + rasterTypeIdentifiers
     }
@@ -52,7 +48,7 @@ final class VyronScreenshotDropLoader {
         guard provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) else { return false }
         guard let name = provider.suggestedName else { return true }
         let extensionName = URL(fileURLWithPath: name).pathExtension
-        return extensionName.isEmpty || isImageExtension(extensionName)
+        return extensionName.isEmpty || VyronImageAttachment.isImageFilenameExtension(extensionName)
     }
 
     private static func imageType(for provider: NSItemProvider) -> String? {
@@ -61,11 +57,6 @@ final class VyronScreenshotDropLoader {
             $0 == UTType.image.identifier || rasterTypeIdentifiers.contains($0)
                 || UTType($0)?.conforms(to: .image) == true
         }
-    }
-
-    private static func isImageExtension(_ extensionName: String) -> Bool {
-        rasterExtensions.contains(extensionName.lowercased())
-            || UTType(filenameExtension: extensionName)?.conforms(to: .image) == true
     }
 
     private func load(
@@ -81,7 +72,7 @@ final class VyronScreenshotDropLoader {
             provider: provider, typeIdentifier: UTType.fileURL.identifier
         ).load()
         guard let url = URL(dataRepresentation: data, relativeTo: nil), url.isFileURL,
-            Self.isImageExtension(url.pathExtension)
+            VyronImageAttachment.isImageFilenameExtension(url.pathExtension)
         else { throw VyronScreenshotImportError.invalidImage }
         return try await loader.load(url)
     }
