@@ -22,7 +22,7 @@ final class VyronMacWorkTestController: VyronMacWorkControlling {
     var snapshotDate: Date?
     var inspectionText = "[1] Button · + {click}"
     var onLaunch: (@MainActor () async throws -> Void)?
-    var onActivate: (@MainActor () -> Void)?
+    var onActivate: (@MainActor () throws -> Void)?
     var onElementAction: (@MainActor () throws -> Void)?
     var launchedIDs: [String] = []
     var launchedApplicationURLs: [URL] = []
@@ -67,7 +67,7 @@ final class VyronMacWorkTestController: VyronMacWorkControlling {
         return app
     }
 
-    func activate(application: DesktopApplication) throws { onActivate?() }
+    func activate(application: DesktopApplication) throws { try onActivate?() }
 
     func inspect(application: DesktopApplication) throws -> AutomationSnapshot {
         guard permissions.accessibilityGranted else { throw MacControlError.accessibilityRequired }

@@ -71,6 +71,37 @@ final class VyronMacWorkAttachedApplicationTests: XCTestCase {
         XCTAssertTrue(controller.launchedApplicationURLs.isEmpty)
     }
 
+    func testFocusOfAnAttachedAppThatQuitsReviewsAndOpensOnlyTheAttachedCopy() async throws {
+        let controller = VyronMacWorkTestController()
+        let attachment = Self.attachment
+        let url = attachment.url.standardizedFileURL
+        let id = VyronMacWorkTestController.app.id
+        let running = DesktopApplication(id: id, name: "Selected app", bundleIdentifier: id, processIdentifier: 43)
+        let stopped = DesktopApplication(id: id, name: "Selected app", bundleIdentifier: id, processIdentifier: 0)
+        controller.attachedCatalog[url] = running
+        controller.onActivate = { [weak controller] in
+            controller?.attachedCatalog[url] = stopped
+            throw MacControlError.applicationUnavailable
+        }
+        var reviews: [MCPActionReview] = []
+        let session = makeSession([attachment], controller: controller, review: {
+            reviews.append($0)
+            return true
+        })
+
+        let opened = try await session.execute(DevelopmentToolCall(
+            name: VyronMacWorkTools.openApp, arguments: ["application_id": .string(id)]
+        ))
+
+        XCTAssertFalse(opened.isError, opened.text)
+        XCTAssertEqual(reviews.count, 1)
+        XCTAssertEqual(controller.launchedApplicationURLs, [url])
+        XCTAssertTrue(controller.launchedIDs.isEmpty)
+        let review = try XCTUnwrap(reviews.first)
+        let details = try JSONDecoder().decode([String: DevelopmentJSONValue].self, from: Data(review.arguments.utf8))
+        XCTAssertEqual(details["attached_application_path"], .string(url.path))
+    }
+
     private static var attachment: VyronApplicationAttachment {
         VyronApplicationAttachment(name: "Selected.app", path: "/tmp/Selected.app")
     }

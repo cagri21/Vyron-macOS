@@ -82,6 +82,67 @@ final class VyronMacWorkSessionTests: XCTestCase {
         XCTAssertEqual(details["application_path"], .string(installedURL.path))
     }
 
+    func testOpenAppReviewsLaunchWhenTheRunningApplicationQuitsDuringFocus() async throws {
+        let id = "com.spotify.client"
+        let url = URL(fileURLWithPath: "/Applications/Spotify.app")
+        let running = DesktopApplication(id: id, name: "Spotify", bundleIdentifier: id, processIdentifier: 925)
+        let installed = DesktopApplication(installedAt: url, name: "Spotify", bundleIdentifier: id)
+
+        for approved in [true, false] {
+            let controller = VyronMacWorkTestController()
+            controller.catalog = [running]
+            controller.running = [running]
+            var focusAttempts = 0
+            controller.onActivate = { [weak controller] in
+                focusAttempts += 1
+                controller?.running = []
+                controller?.catalog = [installed]
+                throw MacControlError.applicationUnavailable
+            }
+            var reviews: [MCPActionReview] = []
+            let session = makeSession(controller, review: {
+                XCTAssertEqual(focusAttempts, 1)
+                XCTAssertTrue(controller.launchedIDs.isEmpty)
+                reviews.append($0)
+                return approved
+            })
+
+            let opened = try await session.execute(DevelopmentToolCall(
+                name: VyronMacWorkTools.openApp, arguments: ["application_id": .string(id)]
+            ))
+
+            XCTAssertEqual(opened.isError, !approved, opened.text)
+            XCTAssertEqual(focusAttempts, 1)
+            XCTAssertEqual(reviews.count, 1)
+            XCTAssertEqual(controller.launchedIDs, approved ? [id] : [])
+            let review = try XCTUnwrap(reviews.first)
+            let details = try JSONDecoder().decode([String: DevelopmentJSONValue].self, from: Data(review.arguments.utf8))
+            XCTAssertEqual(details["application_path"], .string(url.path))
+        }
+    }
+
+    func testOpenAppDoesNotLaunchAnotherProcessWhenFocusFailsAndTheAppIsStillRunning() async throws {
+        let controller = VyronMacWorkTestController()
+        var focusAttempts = 0
+        controller.onActivate = {
+            focusAttempts += 1
+            throw MacControlError.activationFailed
+        }
+        let session = makeSession(controller, review: { _ in
+            XCTFail("Focusing an unchanged process should not require launch approval.")
+            return false
+        })
+
+        let result = try await session.execute(DevelopmentToolCall(
+            name: VyronMacWorkTools.openApp,
+            arguments: ["application_id": .string(VyronMacWorkTestController.app.id)]
+        ))
+
+        XCTAssertTrue(result.isError)
+        XCTAssertEqual(focusAttempts, 1)
+        XCTAssertTrue(controller.launchedIDs.isEmpty)
+    }
+
     func testPlanRejectsMutationsAndUnexpectedArgumentsBeforeNativeCalls() async throws {
         let controller = VyronMacWorkTestController()
         let context = VyronMacWorkContext(goal: "Inspect Calculator", projectRoot: nil, allowsActions: false)
