@@ -11,19 +11,24 @@ struct VyronResponseChangesView: View {
             ForEach(snapshots) { snapshot in
                 VyronConversationChangesCard(
                     changes: snapshot.changes,
-                    open: { change in
-                        model.showChangeReview(
-                            conversationID: conversation.id,
-                            workspacePath: snapshot.workspacePath,
-                            changes: snapshot.changes,
-                            selectedPath: change.path
-                        )
-                    },
-                    undo: model.canUndoResponseChanges(snapshot) ? {
-                        model.undoResponseChanges(
-                            conversationID: conversation.id, responseID: responseID, workspacePath: snapshot.workspacePath
-                        )
-                    } : nil
+                    actions: VyronConversationChangesActions(
+                        reviewFile: { change in
+                            model.showChangeReview(
+                                conversationID: conversation.id,
+                                workspacePath: snapshot.workspacePath,
+                                changes: snapshot.changes,
+                                selectedPath: change.path
+                            )
+                        },
+                        viewChanges: { model.openResponseChanges(snapshot, conversationID: conversation.id) },
+                        undo: model.canUndoResponseChanges(snapshot) ? {
+                            model.undoResponseChanges(
+                                conversationID: conversation.id,
+                                responseID: responseID,
+                                workspacePath: snapshot.workspacePath
+                            )
+                        } : nil
+                    )
                 )
             }
         }

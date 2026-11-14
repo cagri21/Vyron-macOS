@@ -2,6 +2,21 @@ import Foundation
 import VyronDevelopment
 
 extension AppModel {
+    func openResponseChanges(_ snapshot: VyronDevelopmentResponseChanges, conversationID: UUID) {
+        guard conversationID == selectedConversationID, let first = snapshot.changes.first else { return }
+        showChangeReview(
+            conversationID: conversationID,
+            workspacePath: snapshot.workspacePath,
+            changes: snapshot.changes,
+            selectedPath: first.path
+        )
+        openChangedProject(
+            path: snapshot.workspacePath,
+            changedPaths: snapshot.changes.map(\.path),
+            conversationID: conversationID
+        )
+    }
+
     func recordResponseChanges(_ snapshots: [VyronDevelopmentResponseChanges], response: VyronResponseIdentity) {
         guard !snapshots.isEmpty,
             let index = conversations.firstIndex(where: { $0.id == response.conversationID }),

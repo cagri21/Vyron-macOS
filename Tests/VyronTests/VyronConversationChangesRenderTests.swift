@@ -19,7 +19,10 @@ final class VyronConversationChangesRenderTests: XCTestCase {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 
         for width: CGFloat in [640, 400] {
-            let card = VyronConversationChangesCard(changes: [change, added], open: { _ in }, undo: {})
+            let card = VyronConversationChangesCard(
+                changes: [change, added],
+                actions: VyronConversationChangesActions(reviewFile: { _ in }, viewChanges: {}, undo: {})
+            )
             try await capture(
                 card, width: width, destination: directory.appendingPathComponent("card-\(Int(width)).png")
             )

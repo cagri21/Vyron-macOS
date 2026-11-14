@@ -371,9 +371,12 @@ before starting new work. Folder changes wait for active project work to finish.
 
 Work responses with text edits show a summary beneath the answer with edited
 files and green addition and red deletion counts. Hover over a file to preview
-its diff. Click a file or **View changes** to open the response in the right
-inspector. **Undo** is available while the response’s edits still match the
-project and preserves earlier edits.
+its diff, or click the file to review it in the right inspector. **View changes**
+opens the response diff and the project. When the folder contains an iOS Xcode
+project, Vyron opens the linked workspace or project in Xcode along with the
+changed files that still exist. Other projects open in Finder, which also opens
+the folder if Xcode is unavailable. **Undo** is available while the response’s
+edits still match the project and preserves earlier edits.
 
 The right inspector contains **Files**, **Changes**, and **Activity**.
 **Changes** shows a unified diff or Before/After content. Switch to

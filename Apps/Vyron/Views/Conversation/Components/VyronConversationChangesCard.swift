@@ -6,16 +6,15 @@ struct VyronConversationChangesCard: View {
     @State private var previews: [UUID: VyronUnifiedDiff] = [:]
 
     let changes: [DevelopmentChange]
-    let open: (DevelopmentChange) -> Void
-    var undo: (() -> Void)?
+    let actions: VyronConversationChangesActions
     var selectedPath: String?
 
     var body: some View {
         let _ = localizationLocale
-        if let first = changes.first {
+        if !changes.isEmpty {
             let shape = RoundedRectangle(cornerRadius: VyronConversationChangesStyle.cardRadius)
             VStack(alignment: .leading, spacing: 0) {
-                header(first)
+                header
                 Rectangle().fill(Palette.border).frame(height: VyronWorkspaceStyle.dividerWidth)
                 ForEach(changes) { change in
                     VyronConversationChangedFileRow(
@@ -23,7 +22,7 @@ struct VyronConversationChangesCard: View {
                         diff: previews[change.id],
                         isSelected: change.path == selectedPath
                     ) {
-                        open(change)
+                        actions.reviewFile(change)
                     }
                 }
             }
@@ -33,16 +32,16 @@ struct VyronConversationChangesCard: View {
         }
     }
 
-    private func header(_ first: DevelopmentChange) -> some View {
+    private var header: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: VyronConversationChangesStyle.headerSpacing) {
                 heading
                 Spacer(minLength: 0)
-                actions(first)
+                actionButtons
             }
             VStack(alignment: .leading, spacing: VyronConversationChangesStyle.headerSpacing) {
                 heading
-                actions(first).frame(maxWidth: .infinity, alignment: .trailing)
+                actionButtons.frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .padding(VyronConversationChangesStyle.headerInset)
@@ -92,9 +91,9 @@ struct VyronConversationChangesCard: View {
         .fixedSize(horizontal: true, vertical: false)
     }
 
-    private func actions(_ first: DevelopmentChange) -> some View {
+    private var actionButtons: some View {
         HStack(spacing: VyronConversationChangesStyle.headerSpacing) {
-            if let undo {
+            if let undo = actions.undo {
                 Button(action: undo) {
                     HStack(spacing: VyronWorkspaceStyle.compactSpacing) {
                         Text(VyronConversationChangesText.undoChanges)
@@ -104,7 +103,7 @@ struct VyronConversationChangesCard: View {
                 }
                 .buttonStyle(QuietButtonStyle(foreground: Palette.text))
             }
-            Button { open(first) } label: {
+            Button(action: actions.viewChanges) {
                 let shape = RoundedRectangle(cornerRadius: VyronConversationChangesStyle.actionRadius)
                 Text(VyronConversationChangesText.viewChanges)
                     .padding(.horizontal, VyronConversationChangesStyle.actionInset)
