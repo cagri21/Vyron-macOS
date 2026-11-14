@@ -98,6 +98,10 @@ extension AppModel {
             let message = VyronStatusText.importCanceled
             statusMessage = message
             modelSelection.connectionStatus = message
+        case .precisionReplacement(let change):
+            let message = VyronAppText.settingsPrecisionSwitchCanceled(change.original.name)
+            modelSelection.connectionStatus = message
+            statusMessage = message
         case nil:
             break
         }

@@ -212,6 +212,22 @@ package extension VyronModelDataText {
     static func ollamaDecisionTooLarge(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("modelDataOllamaDecisionTooLarge", fallback: "The agent decision is too large.", language: language)
     }
+    static func ollamaInstalledIdentityChanged(_ p1: String, language: VyronResourceLanguage? = nil) -> String {
+        VyronSharedResources.current.format(
+            "modelDataOllamaInstalledIdentityChanged",
+            fallback: "The installed model %@ changed during the operation.",
+            arguments: [p1],
+            language: language
+        )
+    }
+    static func ollamaInstalledIdentityUnavailable(_ p1: String, language: VyronResourceLanguage? = nil) -> String {
+        VyronSharedResources.current.format(
+            "modelDataOllamaInstalledIdentityUnavailable",
+            fallback: "Ollama could not verify the identity of installed model %@.",
+            arguments: [p1],
+            language: language
+        )
+    }
     static func ollamaMaximumContext(_ p1: String, language: VyronResourceLanguage? = nil) -> String {
         VyronSharedResources.current.format(
             "modelDataOllamaMaximumContext",
@@ -233,19 +249,5 @@ package extension VyronModelDataText {
 
     static func ollamaOutputLimitBeforeAnswer(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("modelDataOllamaOutputLimitBeforeAnswer", fallback: "The local model reached its output limit before completing its answer.", language: language)
-    }
-    static var ollamaOutputLimitBeforeResponse: String {
-        VyronSharedResources.current.string("modelDataOllamaOutputLimitBeforeResponse", fallback: "The local model reached its output limit before producing an answer or a native tool call.")
-    }
-
-    static func ollamaOutputLimitBeforeResponse(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDataOllamaOutputLimitBeforeResponse", fallback: "The local model reached its output limit before producing an answer or a native tool call.", language: language)
-    }
-    static var ollamaStructuredFallbackTooLarge: String {
-        VyronSharedResources.current.string("modelDataOllamaStructuredFallbackTooLarge", fallback: "The local structured-output fallback exceeds its context budget. Use a shorter task or snapshot.")
-    }
-
-    static func ollamaStructuredFallbackTooLarge(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDataOllamaStructuredFallbackTooLarge", fallback: "The local structured-output fallback exceeds its context budget. Use a shorter task or snapshot.", language: language)
     }
 }

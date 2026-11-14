@@ -102,6 +102,23 @@ extension VyronAppText {
     static var settingsCancelImport: String {
         VyronResourceBundle.string("appSettingsCancelImport", fallback: "Cancel import")
     }
+    static var settingsChangePrecision: String {
+        VyronResourceBundle.string("appSettingsChangePrecision", fallback: "Change precision…")
+    }
+    static func settingsChangePrecisionTitle(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "appSettingsChangePrecisionTitle",
+            fallback: "Change precision for %@",
+            arguments: [p1]
+        )
+    }
+    static func settingsChangingPrecision(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "appSettingsChangingPrecision",
+            fallback: "Switching to %@…",
+            arguments: [p1]
+        )
+    }
     static var settingsChatHelper: String {
         VyronResourceBundle.string("appSettingsChatHelper", fallback: "Chat helper")
     }
@@ -113,14 +130,5 @@ extension VyronAppText {
     }
     static var settingsCheckingFiles: String {
         VyronResourceBundle.string("appSettingsCheckingFiles", fallback: "Checking downloaded files…")
-    }
-    static var settingsChooseLocalHint: String {
-        VyronResourceBundle.string("appSettingsChooseLocalHint", fallback: "Choose On this Mac above to download or import weights locally.")
-    }
-    static var settingsChooseModel: String {
-        VyronResourceBundle.string("appSettingsChooseModel", fallback: "Choose a model")
-    }
-    static var settingsClaudeAPIKey: String {
-        VyronResourceBundle.string("appSettingsClaudeAPIKey", fallback: "Anthropic API key")
     }
 }

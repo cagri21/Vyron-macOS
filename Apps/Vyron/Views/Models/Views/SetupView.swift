@@ -8,6 +8,7 @@ struct SetupView: View {
     @ObservedObject private var downloads: VyronModelDownloads
     @ObservedObject private var selection: VyronModelSelectionModel
     @State private var customModelTag = ""
+    @State private var precisionModel: LocalModel?
     let showsHeader: Bool
 
     init(downloads: VyronModelDownloads, selection: VyronModelSelectionModel, showsHeader: Bool = true) {
@@ -23,6 +24,10 @@ struct SetupView: View {
                 VyronModelManagerHeader()
                 Rectangle().fill(Palette.border).frame(height: VyronSettingsStyle.dividerWidth)
             }
+            if let transfer = downloads.active, case .precisionReplacement(let change) = transfer.kind {
+                VyronModelPrecisionProgress(downloads: downloads, transfer: transfer, change: change)
+                    .padding(.horizontal, VyronSettingsStyle.modelManagerInset)
+            }
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     ModelConnectionsView(selection: selection)
@@ -30,18 +35,20 @@ struct SetupView: View {
                         engineSection
                         selectionSection
                     }
-                    if !model.canManageModelSelection {
-                        notice(
-                            VyronAppText.settingsTaskBlocksModels,
-                            icon: VyronSymbols.downloadPaused
-                        )
-                    } else if let transfer = downloads.active {
-                        notice(
-                            transfer.kind == .ggufImport
-                                ? VyronAppText.settingsImportingNotice(transfer.tag)
-                                : VyronAppText.settingsDownloadingNotice(transfer.tag),
-                            icon: VyronSymbols.download
-                        )
+                    if !downloads.isChangingPrecision {
+                        if !model.canManageModelSelection {
+                            notice(
+                                VyronAppText.settingsTaskBlocksModels,
+                                icon: VyronSymbols.downloadPaused
+                            )
+                        } else if let transfer = downloads.active {
+                            notice(
+                                transfer.kind == .ggufImport
+                                    ? VyronAppText.settingsImportingNotice(transfer.tag)
+                                    : VyronAppText.settingsDownloadingNotice(transfer.tag),
+                                icon: VyronSymbols.download
+                            )
+                        }
                     }
                     if selection.isConnected && !selection.automaticModelSelection && !selection.modelIsAvailable {
                         notice(
@@ -68,7 +75,7 @@ struct SetupView: View {
                             }
                         }
                         customModelSection
-                        if !uncataloguedModels.isEmpty { otherInstalledSection }
+                        VyronOtherInstalledModels { precisionModel = $0 }
                     }
                     if let error = model.errorMessage {
                         HStack(alignment: .top, spacing: 7) {
@@ -98,6 +105,9 @@ struct SetupView: View {
         }
         .background(Palette.canvas).foregroundStyle(Palette.text).tint(Palette.controlAccent)
         .task { await model.refreshModels(quiet: true) }
+        .sheet(item: $precisionModel) { installed in
+            VyronModelPrecisionSheet(installed: installed)
+        }
     }
 
     private var engineSection: some View {
@@ -129,10 +139,11 @@ struct SetupView: View {
                     } label: {
                         Label(VyronAppText.settingsRefresh, systemImage: VyronSymbols.refresh)
                             .font(.system(size: 11))
-                    }.buttonStyle(QuietButtonStyle())
+                    }.buttonStyle(QuietButtonStyle()).disabled(downloads.isChangingPrecision)
                 } else if LocalRuntimeManager.executableURL != nil {
                     Button(VyronAppText.settingsStartEngine) { Task { await model.startEngine() } }
                         .buttonStyle(AccentButtonStyle())
+                        .disabled(downloads.isChangingPrecision)
                 } else {
                     Link(VyronAppText.settingsGetOllama, destination: URL(string: "https://ollama.com/download/mac")!)
                         .font(.system(size: 11)).foregroundStyle(Palette.accent)
@@ -193,7 +204,7 @@ struct SetupView: View {
         let installed = selection.installedModel(for: descriptor)
         let selected = installed.map { selection.isSelectedModel($0.name) } ?? false
         let heavy = descriptor.role == .coding && !descriptor.isAutomaticCodingCandidate
-        let active = downloads.active?.tag == descriptor.tag
+        let active = !downloads.isChangingPrecision && downloads.active?.tag == descriptor.tag
         let paused = downloads.pausedTags.contains(descriptor.tag)
         return VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 9) {
@@ -224,7 +235,9 @@ struct SetupView: View {
                         ),
                     systemImage: installed == nil ? VyronSymbols.download : VyronSymbols.internalDrive
                 )
-                if let quantization = installed?.quantization { Text(quantization).fontDesign(.monospaced) }
+                if let quantization = installed?.quantization {
+                    Text(VyronModelPrecisionLabel.text(quantization)).fontDesign(.monospaced)
+                }
                 Text(VyronAppText.settingsSuggestedContext(descriptor.recommendedContextTokens / 1_024))
                     .fontDesign(.monospaced)
             }.font(.system(size: 9)).foregroundStyle(Palette.muted)
@@ -243,6 +256,7 @@ struct SetupView: View {
                         .font(.system(size: 9)).foregroundStyle(Palette.muted)
                     Spacer()
                     if let installed {
+                        VyronChangeModelPrecisionButton(installed: installed) { precisionModel = $0 }
                         if selected {
                             Label(VyronAppText.settingsInUse, systemImage: VyronSymbols.selected)
                                 .font(.system(size: 10))
@@ -305,7 +319,7 @@ struct SetupView: View {
                             || downloads.isActive || !model.canManageModelSelection
                     )
             }
-            if let tag = downloads.active?.tag, isCustomDownloadTag(tag) {
+            if !downloads.isChangingPrecision, let tag = downloads.active?.tag, isCustomDownloadTag(tag) {
                 Text(tag).font(.system(size: 10, weight: .medium, design: .monospaced))
                 downloadProgress(tag: tag)
             }
@@ -319,40 +333,6 @@ struct SetupView: View {
                 }
             }
         }
-    }
-
-    private var otherInstalledSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Eyebrow(text: VyronAppText.settingsOtherModels)
-            ForEach(uncataloguedModels) { local in
-                HStack(spacing: 9) {
-                    Image(systemName: VyronSymbols.modelSource).foregroundStyle(Palette.accent)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(local.name).font(.system(size: 11, weight: .medium, design: .monospaced))
-                        Text(
-                            [local.size.fileSizeLabel, local.parameterSize, local.quantization].compactMap { $0 }
-                                .joined(separator: " · ")
-                        )
-                        .font(.system(size: 9)).foregroundStyle(Palette.muted)
-                        VyronModelScoreLabel(score: model.modelRanking.score(for: local.name))
-                    }
-                    Spacer()
-                    if selection.isSelectedModel(local.name) {
-                        badge(VyronAppText.settingsSelected, color: Palette.accent)
-                    } else {
-                        Button(VyronAppText.settingsUseModel) { model.useLocalModel(local.name) }
-                            .font(.system(size: 11, weight: .medium)).buttonStyle(.plain).foregroundStyle(
-                                Palette.accent
-                            )
-                            .disabled(!model.canManageModelSelection)
-                    }
-                }.padding(.vertical, 4)
-            }
-        }
-    }
-
-    private var uncataloguedModels: [LocalModel] {
-        model.modelRanking.allModels.filter { ModelCatalog.descriptor(for: $0.name) == nil }
     }
 
     private func isCustomDownloadTag(_ tag: String) -> Bool {

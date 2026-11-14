@@ -202,6 +202,9 @@
 "appSettingsBuiltinDetail" = "Yerleşik Ollama · yerel çıkarım";
 "appSettingsCancel" = "İptal";
 "appSettingsCancelImport" = "İçe aktarmayı iptal et";
+"appSettingsChangePrecision" = "Hassasiyeti değiştir…";
+"appSettingsChangePrecisionTitle" = "%@ için hassasiyeti değiştir";
+"appSettingsChangingPrecision" = "%@ sürümüne geçiliyor…";
 "appSettingsChatHelper" = "Sohbet yardımcısı";
 "appSettingsCheckAgain" = "Yeniden kontrol et";
 "appSettingsCheckingConnection" = "Model bağlantısı denetleniyor…";
@@ -229,6 +232,7 @@
 "appSettingsDevstralSummary" = "Depo inceleme ve düzenleme için yazılım mühendisliği modeli.";
 "appSettingsDiscoverModels" = "Modelleri bul";
 "appSettingsDownload" = "İndir";
+"appSettingsDownloadAndSwitchVariant" = "İndir ve geç";
 "appSettingsDownloadByURL" = "URL ile model indir";
 "appSettingsDownloadImport" = "İndir ve içe aktar";
 "appSettingsDownloadProgress" = "%@ / %@";
@@ -274,8 +278,11 @@
 "appSettingsMyModelServer" = "Model sunucum";
 "appSettingsNewConnection" = "Yeni bağlantı";
 "appSettingsNoModelsFromServer" = "Sunucu hiçbir model listelemedi. Sınamak için tam model kimliğini girin.";
+"appSettingsNoReplacementVariants" = "Bu model için başka hassasiyet sürümü bulunamadı.";
 "appSettingsNoSupportedVariant" = "Bu kaynak, desteklenen bir model sürümü yayımlamamış.";
 "appSettingsOllama" = "Ollama";
+"appSettingsOllamaDevelopmentTimeout" = "İstek zaman aşımı (saniye)";
+"appSettingsOllamaDevelopmentTimeoutHint" = "Her yerel Çalışma veya Plan isteği için %1$@–%2$@ saniye girin. %3$@ saniye kullanmak için boş bırakın.";
 "appSettingsOllamaTagHint" = "Bir Ollama etiketi girin. Ağırlıklar bu Mac’e indirilir; geliştirme görevinden önce Ajan uyumluluğu denetlenir.";
 "appSettingsOllamaTagPlaceholder" = "model-name:tag";
 "appSettingsOnDisk" = "Diskte %@";
@@ -287,8 +294,14 @@
 "appSettingsPause" = "Duraklat";
 "appSettingsPaused" = "Duraklatıldı";
 "appSettingsPrecision" = "Bit / hassasiyet";
-"appSettingsPrecisionBits" = "%d bit · %@";
+"appSettingsPrecisionBits" = "%d bit (%@)";
 "appSettingsPrecisionHint" = "Hassasiyet, yayımlanmış ağırlıkları seçer. Çalışma belleğine bağlam ve diğer uygulamalar da dahildir.";
+"appSettingsPrecisionRemovalFailed" = "Vyron, %@ sürümünü seçti. %@ sürümünün kaldırıldığını doğrulayamadı. %@";
+"appSettingsPrecisionReplacementSucceeded" = "Vyron, %@ sürümünü seçti ve %@ sürümünü bu Mac’ten kaldırdı.";
+"appSettingsPrecisionReplacementUnavailable" = "Bu hassasiyet değişikliği yapılamıyor. Yerel model listesini yenileyip tekrar deneyin.";
+"appSettingsPrecisionReplacementWarning" = "Vyron, %2$@ sürümünü doğrulayıp seçtikten sonra %1$@ sürümünü bu Mac’ten kaldıracak. İndirme veya geçiş başarısız olursa ya da iptal edilirse mevcut sürüm yüklü kalır.";
+"appSettingsPrecisionSwitchCanceled" = "Hassasiyet değişikliği iptal edildi. Vyron, %@ sürümünü yüklü bıraktı.";
+"appSettingsPrecisionSwitchFailed" = "Hassasiyet değiştirilemedi. Vyron, %@ sürümünü kaldırma adımını atladı. %@";
 "appSettingsPrecisionVariantHint" = "Her hassasiyet seçeneği, bu sunucudaki tam bir model sürümünü seçer.";
 "appSettingsPreparingDownload" = "İndirme hazırlanıyor…";
 "appSettingsQwen36Memory" = "23 GB ağırlık; 32K bağlam ve yüklü tek model kullanın.";
@@ -305,6 +318,7 @@
 "appSettingsRefresh" = "Yenile";
 "appSettingsRemoteServer" = "Uzak sunucu";
 "appSettingsRemoveConnection" = "%@ bağlantısını kaldır";
+"appSettingsRemovingPreviousVariant" = "%@ kaldırılıyor…";
 "appSettingsRequestBudgetHint" = "Bu ayar, Vyron’un istek bütçesini sınırlar. Modelin gerçek bağlam kapasitesini sunucu belirler.";
 "appSettingsResume" = "Sürdür";
 "appSettingsSaveTestHint" = "Kaydetmeden önce bu bağlantıyla kısa bir yanıt sınanır.";
@@ -319,6 +333,7 @@
 "appSettingsStartEngine" = "Motoru başlat";
 "appSettingsStartEngineHint" = "Yüklü modelleri görmek ve ağırlıkları indirmek için yerel motoru başlatın.";
 "appSettingsSuggestedContext" = "%dK önerilen bağlam";
+"appSettingsSwitchVariant" = "Sürümü değiştir";
 "appSettingsTaskBlocksModels" = "Modeli değiştirmek veya indirme başlatmak için mevcut görevi bitirin ya da durdurun.";
 "appSettingsTemperature" = "Sıcaklık";
 "appSettingsTestResponse" = "Yanıtı sına";

@@ -2,6 +2,13 @@
 import Foundation
 
 package extension VyronModelDomainText {
+    static var providerUnsupportedTools: String {
+        VyronSharedResources.current.string("modelDomainProviderUnsupportedTools", fallback: "Native tool calling could not be verified for this model. Use Chat, or choose a model that supports tools.")
+    }
+
+    static func providerUnsupportedTools(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainProviderUnsupportedTools", fallback: "Native tool calling could not be verified for this model. Use Chat, or choose a model that supports tools.", language: language)
+    }
     static var routingClarification: String {
         VyronSharedResources.current.string("modelDomainRoutingClarification", fallback: "What would you like me to do on your Mac?")
     }
@@ -28,6 +35,14 @@ package extension VyronModelDomainText {
         VyronSharedResources.current.format(
             "modelDomainSettingsContextRange",
             fallback: "Context must be between %@ and %@ tokens.",
+            arguments: [p1, p2],
+            language: language
+        )
+    }
+    static func settingsOllamaDevelopmentTimeoutRange(_ p1: String, _ p2: String, language: VyronResourceLanguage? = nil) -> String {
+        VyronSharedResources.current.format(
+            "modelDomainSettingsOllamaDevelopmentTimeoutRange",
+            fallback: "Enter a Work and Plan timeout between %1$@ and %2$@ seconds.",
             arguments: [p1, p2],
             language: language
         )

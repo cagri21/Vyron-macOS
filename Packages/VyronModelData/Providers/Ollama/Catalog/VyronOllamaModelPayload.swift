@@ -4,6 +4,7 @@ import VyronModelDomain
 struct VyronOllamaModelPayload: Decodable {
     let name: String
     let size: Int64?
+    let digest: String?
     let details: Details?
     let remote_model: String?
     let remote_host: String?

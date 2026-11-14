@@ -9,6 +9,7 @@ enum VyronModelHTTP {
     static let get = "GET"
     static let head = "HEAD"
     static let post = "POST"
+    static let delete = "DELETE"
 
     static func bearer(_ key: String) -> String {
         "Bearer " + key

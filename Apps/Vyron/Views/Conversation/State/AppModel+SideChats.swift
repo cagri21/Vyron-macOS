@@ -3,7 +3,7 @@ import VyronCore
 
 extension AppModel {
     func canCreateSideChat(from id: UUID) -> Bool {
-        !isShuttingDown && !modelSelection.connectionOperationInProgress
+        !isShuttingDown && !modelSelection.connectionOperationInProgress && !modelDownloads.isChangingPrecision
             && modelSelection.isConnected && modelSelection.modelIsAvailable
             && modelSelection.inferenceProvider != nil
             && !sidebarState.sidebarOrganization.isConversationArchived(id)
@@ -81,7 +81,8 @@ extension AppModel {
     }
 
     func canSendSideChat(_ id: UUID) -> Bool {
-        !isShuttingDown && !sidebarState.sidebarOrganization.isConversationArchived(id)
+        !isShuttingDown && !modelDownloads.isChangingPrecision
+            && !sidebarState.sidebarOrganization.isConversationArchived(id)
             && newSideChatSessions[id] != nil
             && foregroundRun.response(in: id) == nil && computerWork.pendingAgentGoal?.conversationID != id
             && !(selectedConversationID == id

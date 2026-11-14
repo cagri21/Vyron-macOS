@@ -35,6 +35,28 @@ final class VyronModelSettingsDraftTests: XCTestCase {
         XCTAssertEqual(try draft.settings(thinkingSupport: .unsupported), ModelSettings())
     }
 
+    func testOllamaTimeoutDraftLoadsSavesAndClearsSeconds() throws {
+        var settings = ModelSettings()
+        settings.ollamaDevelopmentTimeoutSeconds = 720
+        var draft = VyronModelSettingsDraft(settings)
+        XCTAssertEqual(draft.budget.ollamaDevelopmentTimeoutSeconds, "720")
+
+        draft.budget.ollamaDevelopmentTimeoutSeconds = " 840 "
+        let edited = try draft.settings(thinkingSupport: .unsupported)
+        XCTAssertEqual(edited.ollamaDevelopmentTimeoutSeconds, 840)
+
+        draft.budget.ollamaDevelopmentTimeoutSeconds = ""
+        let cleared = try draft.settings(thinkingSupport: .unsupported)
+        XCTAssertNil(cleared.ollamaDevelopmentTimeoutSeconds)
+    }
+
+    func testOllamaTimeoutDraftRejectsFractionalSeconds() {
+        var draft = VyronModelSettingsDraft(ModelSettings())
+        draft.budget.ollamaDevelopmentTimeoutSeconds = "30.5"
+
+        XCTAssertThrowsError(try draft.settings(thinkingSupport: .unsupported))
+    }
+
     func testNamedThinkingSelectionKeepsBudgetsAndClearsBooleanPreference() throws {
         var settings = configuredSettings()
         settings.thinking = nil

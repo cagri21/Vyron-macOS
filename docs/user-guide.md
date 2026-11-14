@@ -994,6 +994,12 @@ Ollama downloads can be paused/resumed; canceling a file import removes its
 temporary download and requires restarting the import. Single-file GGUF is
 supported; split files and private/gated repositories are not supported yet.
 
+For an installed Ollama model, choose **Change precision…** on its card to see
+matching variants. Vyron uses the selected variant if it is already installed or
+downloads it first. It tests a short response and selects the replacement before
+removing the exact previous tag. Canceling or failing before the switch keeps
+the previous variant installed.
+
 Precision is a specific weight variant, not an arbitrary generation switch.
 Hosted servers expose bit options only when they publish separate variants.
 The runtime must support the chosen model's architecture. Storage size is
@@ -1008,6 +1014,10 @@ model. Empty fields restore Vyron's automatic defaults. Settings and exact
 model IDs persist in `~/Library/Application Support/VyronAI/model-connections.json`;
 API keys are stored separately in macOS Keychain. Existing chats and local
 model preferences are retained.
+
+For **On this Mac**, set **Request timeout (seconds)** in **Local model settings**
+and select **Apply**. The field accepts whole seconds from 1 to 3,600. An empty
+field uses 600 seconds per Ollama inference request in Work and Plan.
 
 On the same Mac, deleting or replacing only `Vyron.app` and installing a new
 version keeps those connection settings and Keychain entries. They are outside

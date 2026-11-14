@@ -202,6 +202,9 @@
 "appSettingsBuiltinDetail" = "Вбудована Ollama · локальне виконання";
 "appSettingsCancel" = "Скасувати";
 "appSettingsCancelImport" = "Скасувати імпорт";
+"appSettingsChangePrecision" = "Змінити точність…";
+"appSettingsChangePrecisionTitle" = "Змінити точність для %@";
+"appSettingsChangingPrecision" = "Перемикання на %@…";
 "appSettingsChatHelper" = "Помічник для чату";
 "appSettingsCheckAgain" = "Перевірити знову";
 "appSettingsCheckingConnection" = "Перевірка підключення моделі…";
@@ -229,6 +232,7 @@
 "appSettingsDevstralSummary" = "Модель програмної інженерії для дослідження й редагування репозиторію.";
 "appSettingsDiscoverModels" = "Знайти моделі";
 "appSettingsDownload" = "Завантажити";
+"appSettingsDownloadAndSwitchVariant" = "Завантажити й перемкнутися";
 "appSettingsDownloadByURL" = "Завантажити модель за URL";
 "appSettingsDownloadImport" = "Завантажити й імпортувати";
 "appSettingsDownloadProgress" = "%@ з %@";
@@ -274,8 +278,11 @@
 "appSettingsMyModelServer" = "Мій сервер моделей";
 "appSettingsNewConnection" = "Нове підключення";
 "appSettingsNoModelsFromServer" = "Сервер не надав списку моделей. Введіть точний ідентифікатор моделі для перевірки.";
+"appSettingsNoReplacementVariants" = "Для цієї моделі немає інших варіантів точності.";
 "appSettingsNoSupportedVariant" = "У цьому джерелі немає підтримуваного варіанта моделі.";
 "appSettingsOllama" = "Ollama";
+"appSettingsOllamaDevelopmentTimeout" = "Час очікування запиту (секунди)";
+"appSettingsOllamaDevelopmentTimeoutHint" = "Введіть від %1$@ до %2$@ секунд для кожного локального запиту в режимі «Робота» або «План». Порожнє поле задає %3$@ секунд.";
 "appSettingsOllamaTagHint" = "Введіть тег Ollama. Ваги завантажуються на цей Mac; сумісність з агентом перевіряється перед завданням із розробки.";
 "appSettingsOllamaTagPlaceholder" = "model-name:tag";
 "appSettingsOnDisk" = "%@ на диску";
@@ -287,8 +294,14 @@
 "appSettingsPause" = "Призупинити";
 "appSettingsPaused" = "Призупинено";
 "appSettingsPrecision" = "Біти / точність";
-"appSettingsPrecisionBits" = "%d біт · %@";
+"appSettingsPrecisionBits" = "%d біт (%@)";
 "appSettingsPrecisionHint" = "Точність визначає опубліковані ваги. Оперативна пам’ять також потрібна для контексту та інших програм.";
+"appSettingsPrecisionRemovalFailed" = "Vyron вибрав %@. Не вдалося підтвердити видалення %@. %@";
+"appSettingsPrecisionReplacementSucceeded" = "Vyron вибрав %@ і видалив %@ із цього Mac.";
+"appSettingsPrecisionReplacementUnavailable" = "Змінити точність зараз неможливо. Оновіть список локальних моделей і спробуйте ще раз.";
+"appSettingsPrecisionReplacementWarning" = "Vyron видалить %@ із цього Mac після того, як перевірить і вибере %@. Якщо завантаження або перемикання завершиться помилкою чи його буде скасовано, поточний варіант залишиться встановленим.";
+"appSettingsPrecisionSwitchCanceled" = "Зміну точності скасовано. Vyron залишив %@ встановленим.";
+"appSettingsPrecisionSwitchFailed" = "Не вдалося змінити точність. Vyron пропустив видалення %@. %@";
 "appSettingsPrecisionVariantHint" = "Кожен варіант точності вибирає конкретний варіант моделі на цьому сервері.";
 "appSettingsPreparingDownload" = "Підготовка завантаження…";
 "appSettingsQwen36Memory" = "Ваги 23 ГБ; використовуйте контекст 32K й одну завантажену модель.";
@@ -305,6 +318,7 @@
 "appSettingsRefresh" = "Оновити";
 "appSettingsRemoteServer" = "Віддалений сервер";
 "appSettingsRemoveConnection" = "Видалити %@";
+"appSettingsRemovingPreviousVariant" = "Видалення %@…";
 "appSettingsRequestBudgetHint" = "Це обмежує обсяг запиту Vyron. Фактичну місткість контексту моделі визначає сервер.";
 "appSettingsResume" = "Продовжити";
 "appSettingsSaveTestHint" = "Перед збереженням підключення перевіряється коротка відповідь.";
@@ -319,6 +333,7 @@
 "appSettingsStartEngine" = "Запустити рушій";
 "appSettingsStartEngineHint" = "Запустіть локальний рушій, щоб переглянути встановлені моделі й завантажити ваги.";
 "appSettingsSuggestedContext" = "Рекомендований контекст: %dK";
+"appSettingsSwitchVariant" = "Перемкнути варіант";
 "appSettingsTaskBlocksModels" = "Завершіть або зупиніть поточне завдання, щоб змінити модель чи почати завантаження.";
 "appSettingsTemperature" = "Температура";
 "appSettingsTestResponse" = "Перевірити відповідь";

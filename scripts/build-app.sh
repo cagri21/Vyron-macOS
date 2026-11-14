@@ -22,8 +22,12 @@ if (( $# > 1 )); then
 fi
 cd "$desktop_root"
 python3 Apps/Vyron/Resources/generate_resources.py --check
-swift build -c "$configuration" --build-system native --disable-sandbox
-binary_dir="$(swift build -c "$configuration" --build-system native --disable-sandbox --show-bin-path)"
+build_arguments=(-c "$configuration" --disable-sandbox)
+if [[ -n "${VYRON_SWIFTPM_BUILD_SYSTEM:-}" ]]; then
+    build_arguments+=(--build-system "$VYRON_SWIFTPM_BUILD_SYSTEM")
+fi
+swift build "${build_arguments[@]}"
+binary_dir="$(swift build "${build_arguments[@]}" --show-bin-path)"
 mkdir -p "$app_dir/Contents/MacOS" "$app_dir/Contents/Resources"
 cp "$binary_dir/Vyron" "$app_dir/Contents/MacOS/Vyron"
 cp "$binary_dir/VyronChromeHost" "$app_dir/Contents/MacOS/VyronChromeHost"

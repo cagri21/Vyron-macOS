@@ -25,9 +25,13 @@ public actor OllamaClient: ModelProvider, VyronEffortChatProviding, VyronModelTh
     }
 
     public init(settings: ModelSettings) throws {
+        try self.init(settings: settings, configuration: .ephemeral)
+    }
+
+    init(settings: ModelSettings, configuration: URLSessionConfiguration) throws {
         self.init(
             baseURL: URL(string: "http://127.0.0.1:11434")!,
-            configuration: .ephemeral,
+            configuration: configuration,
             connection: VyronOllamaConnectionSettings(
                 isConfigured: false,
                 model: try settings.validated(),

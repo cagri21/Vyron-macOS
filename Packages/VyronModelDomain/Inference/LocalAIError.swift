@@ -7,6 +7,7 @@ public enum LocalAIError: Error, LocalizedError, Sendable, Equatable {
     case cloudModelNotAllowed
     case modelNotInstalled(String)
     case connectionFailed
+    case requestTimedOut
     case httpError(Int, String)
     case invalidResponse(String)
     case incompleteStream
@@ -24,6 +25,8 @@ public enum LocalAIError: Error, LocalizedError, Sendable, Equatable {
             return VyronModelDomainText.ollamaModelNotInstalled(name)
         case .connectionFailed:
             return VyronModelDomainText.ollamaConnectionFailed
+        case .requestTimedOut:
+            return VyronModelDomainText.ollamaRequestTimedOut
         case .httpError(let status, let detail):
             return detail.isEmpty
                 ? VyronModelDomainText.ollamaHTTPError(String(status))

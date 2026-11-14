@@ -2,6 +2,27 @@
 import Foundation
 
 package extension VyronModelDataText {
+    static var ollamaOutputLimitBeforeResponse: String {
+        VyronSharedResources.current.string("modelDataOllamaOutputLimitBeforeResponse", fallback: "The local model reached its output limit before producing an answer or a native tool call.")
+    }
+
+    static func ollamaOutputLimitBeforeResponse(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDataOllamaOutputLimitBeforeResponse", fallback: "The local model reached its output limit before producing an answer or a native tool call.", language: language)
+    }
+    static var ollamaSameInstalledIdentity: String {
+        VyronSharedResources.current.string("modelDataOllamaSameInstalledIdentity", fallback: "Both tags point to the same installed model.")
+    }
+
+    static func ollamaSameInstalledIdentity(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDataOllamaSameInstalledIdentity", fallback: "Both tags point to the same installed model.", language: language)
+    }
+    static var ollamaStructuredFallbackTooLarge: String {
+        VyronSharedResources.current.string("modelDataOllamaStructuredFallbackTooLarge", fallback: "The local structured-output fallback exceeds its context budget. Use a shorter task or snapshot.")
+    }
+
+    static func ollamaStructuredFallbackTooLarge(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDataOllamaStructuredFallbackTooLarge", fallback: "The local structured-output fallback exceeds its context budget. Use a shorter task or snapshot.", language: language)
+    }
     static var ollamaStructuredResponseUnavailable: String {
         VyronSharedResources.current.string("modelDataOllamaStructuredResponseUnavailable", fallback: "The local structured response was unavailable.")
     }
@@ -227,26 +248,5 @@ package extension VyronModelDataText {
 
     static func sourceUnsupported(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("modelDataSourceUnsupported", fallback: "Use an Ollama model page, a public Hugging Face GGUF repository, or a direct .gguf download URL.", language: language)
-    }
-    static var streamingEventTooLarge: String {
-        VyronSharedResources.current.string("modelDataStreamingEventTooLarge", fallback: "Streaming event is too large.")
-    }
-
-    static func streamingEventTooLarge(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDataStreamingEventTooLarge", fallback: "Streaming event is too large.", language: language)
-    }
-    static var structuredContextExceeded: String {
-        VyronSharedResources.current.string("modelDataStructuredContextExceeded", fallback: "The structured request exceeds the selected model's context budget.")
-    }
-
-    static func structuredContextExceeded(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDataStructuredContextExceeded", fallback: "The structured request exceeds the selected model's context budget.", language: language)
-    }
-    static var structuredResponseTooLarge: String {
-        VyronSharedResources.current.string("modelDataStructuredResponseTooLarge", fallback: "The structured response is too large.")
-    }
-
-    static func structuredResponseTooLarge(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDataStructuredResponseTooLarge", fallback: "The structured response is too large.", language: language)
     }
 }

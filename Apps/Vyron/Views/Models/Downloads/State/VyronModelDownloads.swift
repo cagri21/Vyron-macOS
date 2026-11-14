@@ -8,6 +8,7 @@ final class VyronModelDownloads: ObservableObject {
     @Published private(set) var progressByTag: [String: ModelPullProgress] = [:]
     @Published private(set) var pausedTags: Set<String>
     @Published private(set) var availableStorageBytes: Int64?
+    @Published private(set) var isRemovingPreviousVariant = false
 
     private let pausedDownloads: VyronPausedModelDownloadsStore
     private let storageDirectory: URL
@@ -15,6 +16,10 @@ final class VyronModelDownloads: ObservableObject {
     private var stopped = false
 
     var isActive: Bool { active != nil }
+    var isChangingPrecision: Bool {
+        if case .precisionReplacement = active?.kind { return true }
+        return false
+    }
 
     init(pausedDownloads: VyronPausedModelDownloadsStore, storageDirectory: URL) {
         self.pausedDownloads = pausedDownloads
@@ -31,9 +36,11 @@ final class VyronModelDownloads: ObservableObject {
         savePausedTags(pausedTags.filter { !isInstalled($0) })
     }
 
-    func start(_ transfer: VyronModelTransfer, operation: VyronModelTransferOperation) {
-        guard active == nil, !stopped else { return }
+    @discardableResult
+    func start(_ transfer: VyronModelTransfer, operation: VyronModelTransferOperation) -> Bool {
+        guard active == nil, !stopped else { return false }
         active = transfer
+        if isChangingPrecision { progressByTag.removeValue(forKey: transfer.tag) }
         if transfer.kind == .pull { savePausedTags(pausedTags.subtracting([transfer.tag])) }
         let settling = task
         task = Task { @MainActor [weak self] in
@@ -42,11 +49,19 @@ final class VyronModelDownloads: ObservableObject {
             guard let self, self.isCurrent(transfer), !Task.isCancelled else { return }
             await self.run(transfer, operation: operation)
         }
+        return true
+    }
+
+    func beginPrecisionRemoval(for transfer: VyronModelTransfer, afterSelecting select: () throws -> Void) throws {
+        try Task.checkCancellation()
+        guard isCurrent(transfer), isChangingPrecision else { throw CancellationError() }
+        try select()
+        isRemovingPreviousVariant = true
     }
 
     @discardableResult
     func cancel() -> VyronModelTransferKind? {
-        guard let active else { return nil }
+        guard let active, !isRemovingPreviousVariant else { return nil }
         if active.kind == .pull { savePausedTags(pausedTags.union([active.tag])) }
         self.active = nil
         task?.cancel()
@@ -62,15 +77,16 @@ final class VyronModelDownloads: ObservableObject {
 
     private func run(_ transfer: VyronModelTransfer, operation: VyronModelTransferOperation) async {
         defer {
-            if isCurrent(transfer) {
+            if active?.id == transfer.id {
                 active = nil
                 task = nil
+                isRemovingPreviousVariant = false
             }
         }
         do {
             let model = try await operation.execute { [weak self] progress in
                 Task { @MainActor [weak self] in
-                    guard let self, self.isCurrent(transfer) else { return }
+                    guard let self, self.isCurrent(transfer), !self.isRemovingPreviousVariant else { return }
                     self.progressByTag[transfer.tag] = progress
                 }
             }

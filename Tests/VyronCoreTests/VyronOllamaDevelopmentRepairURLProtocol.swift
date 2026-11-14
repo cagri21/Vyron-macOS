@@ -20,7 +20,7 @@ final class VyronOllamaDevelopmentRepairURLProtocol: URLProtocol, @unchecked Sen
                 data = Data(#"{"capabilities":["completion","tools","thinking"],"thinking":{"values":[false,true]},"model_info":{"qwen3.context_length":32768}}"#.utf8)
                 status = 200
             case "/api/chat":
-                data = try Self.state.response(to: requestBody())
+                data = try Self.state.response(to: requestBody(), timeout: request.timeoutInterval)
                 status = Self.state.responseStatus
             default:
                 throw URLError(.unsupportedURL)

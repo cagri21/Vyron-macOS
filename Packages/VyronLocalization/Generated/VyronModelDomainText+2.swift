@@ -192,6 +192,13 @@ package extension VyronModelDomainText {
             language: language
         )
     }
+    static var ollamaRequestTimedOut: String {
+        VyronSharedResources.current.string("modelDomainOllamaRequestTimedOut", fallback: "Ollama request timed out.")
+    }
+
+    static func ollamaRequestTimedOut(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainOllamaRequestTimedOut", fallback: "Ollama request timed out.", language: language)
+    }
     static var providerAccessRejected: String {
         VyronSharedResources.current.string("modelDomainProviderAccessRejected", fallback: "The model server rejected access. Check the API key and permissions.")
     }
@@ -249,12 +256,5 @@ package extension VyronModelDomainText {
 
     static func providerOutputLimitReached(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("modelDomainProviderOutputLimitReached", fallback: "The model reached its output limit before completing the response. Try smaller file edits or increase the connection's output limit.", language: language)
-    }
-    static var providerUnsupportedTools: String {
-        VyronSharedResources.current.string("modelDomainProviderUnsupportedTools", fallback: "Native tool calling could not be verified for this model. Use Chat, or choose a model that supports tools.")
-    }
-
-    static func providerUnsupportedTools(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDomainProviderUnsupportedTools", fallback: "Native tool calling could not be verified for this model. Use Chat, or choose a model that supports tools.", language: language)
     }
 }

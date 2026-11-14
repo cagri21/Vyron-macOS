@@ -2,6 +2,15 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsChooseLocalHint: String {
+        VyronResourceBundle.string("appSettingsChooseLocalHint", fallback: "Choose On this Mac above to download or import weights locally.")
+    }
+    static var settingsChooseModel: String {
+        VyronResourceBundle.string("appSettingsChooseModel", fallback: "Choose a model")
+    }
+    static var settingsClaudeAPIKey: String {
+        VyronResourceBundle.string("appSettingsClaudeAPIKey", fallback: "Anthropic API key")
+    }
     static func settingsClaudeOutputLimit(_ p1: String) -> String {
         VyronResourceBundle.format(
             "appSettingsClaudeOutputLimit",
@@ -70,6 +79,9 @@ extension VyronAppText {
     static var settingsDownload: String {
         VyronResourceBundle.string("appSettingsDownload", fallback: "Download")
     }
+    static var settingsDownloadAndSwitchVariant: String {
+        VyronResourceBundle.string("appSettingsDownloadAndSwitchVariant", fallback: "Download & switch")
+    }
     static var settingsDownloadByURL: String {
         VyronResourceBundle.string("appSettingsDownloadByURL", fallback: "Download a model by URL")
     }
@@ -116,23 +128,7 @@ extension VyronAppText {
     static var settingsFindingModelFiles: String {
         VyronResourceBundle.string("appSettingsFindingModelFiles", fallback: "Finding model files…")
     }
-    static var settingsFindingVariants: String {
-        VyronResourceBundle.string("appSettingsFindingVariants", fallback: "Finding published variants…")
-    }
     static var settingsFindVariants: String {
         VyronResourceBundle.string("appSettingsFindVariants", fallback: "Find variants")
-    }
-    static var settingsFinishingSetup: String {
-        VyronResourceBundle.string("appSettingsFinishingSetup", fallback: "Finishing local setup…")
-    }
-    static func settingsFreeStorage(_ p1: String) -> String {
-        VyronResourceBundle.format(
-            "appSettingsFreeStorage",
-            fallback: "%@ free",
-            arguments: [p1]
-        )
-    }
-    static var settingsGenericModel: String {
-        VyronResourceBundle.string("appSettingsGenericModel", fallback: "a model")
     }
 }

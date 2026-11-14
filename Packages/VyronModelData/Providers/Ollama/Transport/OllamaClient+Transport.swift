@@ -115,11 +115,11 @@ extension OllamaClient {
     }
 
     static func normalized(_ error: Error) -> Error {
-        if error is CancellationError || (error as? URLError)?.code == .cancelled || Task.isCancelled {
+        let code = (error as? URLError)?.code
+        if error is CancellationError || code == .cancelled || Task.isCancelled {
             return CancellationError()
         }
-        if error is LocalAIError { return error }
-        if error is URLError { return LocalAIError.connectionFailed }
-        return error
+        guard let code else { return error }
+        return code == .timedOut ? LocalAIError.requestTimedOut : LocalAIError.connectionFailed
     }
 }

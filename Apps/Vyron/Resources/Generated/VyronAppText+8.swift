@@ -2,6 +2,22 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsFindingVariants: String {
+        VyronResourceBundle.string("appSettingsFindingVariants", fallback: "Finding published variants…")
+    }
+    static var settingsFinishingSetup: String {
+        VyronResourceBundle.string("appSettingsFinishingSetup", fallback: "Finishing local setup…")
+    }
+    static func settingsFreeStorage(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "appSettingsFreeStorage",
+            fallback: "%@ free",
+            arguments: [p1]
+        )
+    }
+    static var settingsGenericModel: String {
+        VyronResourceBundle.string("appSettingsGenericModel", fallback: "a model")
+    }
     static var settingsGetOllama: String {
         VyronResourceBundle.string("appSettingsGetOllama", fallback: "Get Ollama ↗")
     }
@@ -104,23 +120,7 @@ extension VyronAppText {
     static var settingsNoModelsFromServer: String {
         VyronResourceBundle.string("appSettingsNoModelsFromServer", fallback: "The server did not list any models. Enter an exact model ID to test it.")
     }
-    static var settingsNoSupportedVariant: String {
-        VyronResourceBundle.string("appSettingsNoSupportedVariant", fallback: "This source did not publish a supported model variant.")
-    }
-    static var settingsOllama: String {
-        VyronResourceBundle.string("appSettingsOllama", fallback: "Ollama")
-    }
-    static var settingsOllamaTagHint: String {
-        VyronResourceBundle.string("appSettingsOllamaTagHint", fallback: "Enter an Ollama tag. Downloads weights to this Mac; Agent compatibility is checked before a development task.")
-    }
-    static var settingsOllamaTagPlaceholder: String {
-        VyronResourceBundle.string("appSettingsOllamaTagPlaceholder", fallback: "model-name:tag")
-    }
-    static func settingsOnDisk(_ p1: String) -> String {
-        VyronResourceBundle.format(
-            "appSettingsOnDisk",
-            fallback: "%@ on disk",
-            arguments: [p1]
-        )
+    static var settingsNoReplacementVariants: String {
+        VyronResourceBundle.string("appSettingsNoReplacementVariants", fallback: "No other precision variants are available for this model.")
     }
 }

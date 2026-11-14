@@ -60,6 +60,7 @@ struct VyronModelSettingsFields: View {
                 Text(VyronAppText.settingsClaudeOutputLimit(tokens.formatted(.number.locale(localizationLocale))))
                     .font(.system(size: 10)).foregroundStyle(Palette.muted).lineSpacing(3)
             }
+            if profile == nil { ollamaTimeoutField }
             if claudeModelID == nil {
                 samplingFields
                 thinkingField
@@ -67,6 +68,23 @@ struct VyronModelSettingsFields: View {
         }
         .onChange(of: thinkingSupport, initial: true) { _, support in
             draft.reconcileThinking(with: support)
+        }
+    }
+
+    private var ollamaTimeoutField: some View {
+        let allowed = VyronOllamaDevelopmentTimeout.allowedSeconds
+        let defaultSeconds = String(VyronOllamaDevelopmentTimeout.defaultSeconds)
+        return Group {
+            setting(
+                VyronAppText.settingsOllamaDevelopmentTimeout,
+                placeholder: defaultSeconds,
+                text: $draft.budget.ollamaDevelopmentTimeoutSeconds
+            )
+            Text(VyronAppText.settingsOllamaDevelopmentTimeoutHint(
+                String(allowed.lowerBound), String(allowed.upperBound), defaultSeconds
+            ))
+            .font(VyronWorkspaceStyle.captionFont)
+            .foregroundStyle(Palette.muted)
         }
     }
 

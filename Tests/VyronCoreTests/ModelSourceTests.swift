@@ -85,6 +85,61 @@ final class ModelSourceTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(ModelSourceClient.parameterSize(in: "Qwen-0.6B-Q8_0.gguf"), "0.6B")
     }
 
+    func testInstalledPrecisionDiscoveryKeepsModelSizeAndTuning() async throws {
+        SourceStubProtocol.state.set { request in
+            XCTAssertEqual(request.url?.absoluteString, "https://ollama.com/library/qwen3.8/tags")
+            let html = """
+            <a href="/library/qwen3.8:27b">18 GB</a>
+            <a href="/library/qwen3.8:27b-q4_K_M">18 GB</a>
+            <a href="/library/qwen3.8:27b-mxfp8">30 GB</a>
+            <a href="/library/qwen3.8:27b-q8_0">30 GB</a>
+            <a href="/library/qwen3.8:27b-mtp-q8_0">30 GB</a>
+            <a href="/library/qwen3.8:27b-dflash2-nvfp4">30 GB</a>
+            <a href="/library/qwen3.8:27b-q8_0_instruct">30 GB</a>
+            <a href="/library/qwen3.8:27b-q8_0-cloud">30 GB</a>
+            <a href="/library/qwen3.8:35b-q8_0">40 GB</a>
+            """
+            return (200, [:], Data(html.utf8))
+        }
+        let source = client()
+        let model = LocalModel(name: "library/qwen3.8:27b-q4_K_M", size: 18_000_000_000, parameterSize: "27.3B")
+        let variants = try await source.discoverPrecisionVariants(for: model)
+        XCTAssertEqual(variants.map(\.ollamaTag), ["qwen3.8:27b-mxfp8", "qwen3.8:27b-q8_0"])
+
+        let alias = LocalModel(name: "qwen3.8:latest", size: model.size, parameterSize: "27.3B")
+        let aliasVariants = try await source.discoverPrecisionVariants(for: alias)
+        XCTAssertEqual(aliasVariants.map(\.ollamaTag), ["qwen3.8:27b-mxfp8", "qwen3.8:27b-q4_K_M", "qwen3.8:27b-q8_0"])
+    }
+
+    func testInstalledPrecisionDiscoveryRejectsUnknownAliasesAndUnofficialSourcesWithoutTransport() async throws {
+        SourceStubProtocol.state.set { _ in
+            XCTFail("No transport expected")
+            throw URLError(.unsupportedURL)
+        }
+        for name in ["owner/example:7b", "example-cloud:7b", "example:latest"] {
+            let model = LocalModel(name: name, size: 42)
+            XCTAssertFalse(ModelSourceClient.canDiscoverPrecisionVariants(for: model))
+            let variants = try await client().discoverPrecisionVariants(for: model)
+            XCTAssertTrue(variants.isEmpty)
+        }
+    }
+
+    func testInstalledPrecisionAlternatesMatchSameLocalNamespaceAndTuning() {
+        let current = LocalModel(name: "owner/example:instruct-q4_K_M", size: 40, parameterSize: "7B")
+        let variants = ModelSourceClient.installedPrecisionVariants(for: current, among: [
+            current,
+            LocalModel(name: "owner/example:instruct-q8_0", size: 80, parameterSize: "7B"),
+            LocalModel(name: "owner/example:instruct-fp16", size: 160, parameterSize: "8B"),
+            LocalModel(name: "owner/example:base-q8_0", size: 80, parameterSize: "7B"),
+            LocalModel(name: "other/example:instruct-q8_0", size: 80, parameterSize: "7B"),
+            LocalModel(name: "owner/example:instruct-q8_0-cloud", size: 80, parameterSize: "7B")
+        ])
+
+        XCTAssertEqual(variants.map(\.ollamaTag), ["owner/example:instruct-q8_0"])
+        XCTAssertEqual(variants.map(\.quantization), ["Q8_0"])
+        XCTAssertEqual(variants.map(\.sizeBytes), [80])
+    }
+
     func testHuggingFaceDiscoveryFollowsPaginationAndPreservesEncodedRevision() async throws {
         let requests = SourceValues<String>()
         SourceStubProtocol.state.set { request in

@@ -27,6 +27,35 @@ final class ModelConnectionStoreTests: XCTestCase {
         XCTAssertEqual(try store.load(), ModelConnectionState())
     }
 
+    func testBuiltinOllamaTimeoutRoundTripsAfterLoadingLegacySettings() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        addTeardownBlock { try FileManager.default.removeItem(at: directory) }
+        let store = ModelConnectionStore(fileURL: directory.appendingPathComponent("connections.json"))
+        let legacyState = Data(#"{"profiles":[],"builtinSettings":{"temperature":0.3}}"#.utf8)
+        try legacyState.write(to: store.fileURL)
+
+        var state = try store.load()
+        XCTAssertEqual(state.builtinSettings.temperature, 0.3)
+        XCTAssertNil(state.builtinSettings.ollamaDevelopmentTimeoutSeconds)
+
+        state.builtinSettings.ollamaDevelopmentTimeoutSeconds = 725
+        try store.save(state)
+        XCTAssertEqual(try store.load(), state)
+    }
+
+    func testBuiltinOllamaTimeoutValidatesInclusiveSecondBounds() throws {
+        var settings = ModelSettings()
+        for seconds in [1, 3_600] {
+            settings.ollamaDevelopmentTimeoutSeconds = seconds
+            XCTAssertEqual(try settings.validated().ollamaDevelopmentTimeoutSeconds, seconds)
+        }
+        for seconds in [0, 3_601] {
+            settings.ollamaDevelopmentTimeoutSeconds = seconds
+            XCTAssertThrowsError(try settings.validated())
+        }
+    }
+
     func testCorruptedSettingsArePreservedOnReadFailure() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)

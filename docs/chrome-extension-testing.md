@@ -100,6 +100,14 @@ python3 ~/.codex/skills/vyron/scripts/vyron.py run --project "$(pwd -P)" -- \
 ```
 
 The ZIP contains runtime files and icons only; it is a convenient local archive.
-Build a new packaged app at a fresh `.build/…/Vyron.app` destination with
-`zsh scripts/build-app.sh debug <absolute-new-app-path>` through the same runner.
+Build a new packaged app at a fresh `.build/…/Vyron.app` destination through the
+same runner. Select the legacy SwiftPM build system explicitly for this guarded
+command because the default build system can hit sandbox restrictions.
+
+```sh
+python3 ~/.codex/skills/vyron/scripts/vyron.py run --project "$(pwd -P)" --timeout 240 -- \
+    env VYRON_SWIFTPM_BUILD_SYSTEM=native zsh scripts/build-app.sh debug \
+    "$(pwd -P)/.build/chrome-review/Vyron.app"
+```
+
 The build script refuses to overwrite an existing custom output path.

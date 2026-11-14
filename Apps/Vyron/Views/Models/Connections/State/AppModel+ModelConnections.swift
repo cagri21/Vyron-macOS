@@ -174,7 +174,7 @@ extension AppModel {
         if modelSelection.isBuiltinConnection { await startEngine() } else { await refreshModels() }
     }
 
-    private func verifyModelResponse(provider: any ModelProvider, model: String) async throws {
+    func verifyModelResponse(provider: any ModelProvider, model: String) async throws {
         _ = try await provider.chat(
             model: model,
             messages: [ChatMessage(role: .user, content: "Reply with OK.")],

@@ -76,13 +76,14 @@ extension ModelSourceClient {
                 with: " ",
                 options: .regularExpression
             )
+            let suffix = String(tag.dropFirst(family.count + 1))
             variants.append(
                 ModelSourceVariant(
                     id: tag,
                     name: tag,
                     ollamaTag: tag,
-                    quantization: precision(in: tag),
-                    parameterSize: parameterSize(in: tag),
+                    quantization: precision(in: suffix),
+                    parameterSize: parameterSize(in: suffix),
                     sizeBytes: parseSize(text)
                 )
             )

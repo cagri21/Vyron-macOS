@@ -33,6 +33,10 @@ struct VyronModelSettingsDraft: Equatable {
         )
         if case .level(let level) = thinking { value.thinkingLevel = level }
         value.responseSpeed = responseSpeed
+        value.ollamaDevelopmentTimeoutSeconds = try integer(
+            budget.ollamaDevelopmentTimeoutSeconds,
+            label: VyronAppText.settingsOllamaDevelopmentTimeout
+        )
         return value
     }
 

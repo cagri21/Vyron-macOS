@@ -13,6 +13,7 @@ public struct ModelSettings: Codable, Equatable, Sendable {
     public var thinkingLevel: VyronModelThinkingLevel? = nil
     // Additive optional storage keeps older connection documents and the stable initializer compatible.
     public var responseSpeed: VyronResponseSpeed? = nil
+    public var ollamaDevelopmentTimeoutSeconds: Int? = nil
 
     public init(
         contextTokens: Int? = nil,
@@ -75,6 +76,16 @@ public struct ModelSettings: Codable, Equatable, Sendable {
                 VyronModelDomainText.settingsTopPRange(
                     VyronModelSettingsLimits.topP.lowerBound.formatted(.number.locale(locale)),
                     VyronModelSettingsLimits.topP.upperBound.formatted(.number.locale(locale)),
+                    language: language
+                )
+            )
+        }
+        let timeoutRange = VyronOllamaDevelopmentTimeout.allowedSeconds
+        if let ollamaDevelopmentTimeoutSeconds, !timeoutRange.contains(ollamaDevelopmentTimeoutSeconds) {
+            throw ModelProviderError.invalidSettings(
+                VyronModelDomainText.settingsOllamaDevelopmentTimeoutRange(
+                    timeoutRange.lowerBound.formatted(.number.locale(locale)),
+                    timeoutRange.upperBound.formatted(.number.locale(locale)),
                     language: language
                 )
             )

@@ -63,10 +63,13 @@
 "modelDataOllamaChatContextExceeded" = "Bu konuşma seçilen modelin yerel bağlam sınırını aşıyor. Daha kısa bir konuşma başlatın veya başka bir yerel model seçin.";
 "modelDataOllamaChatNoAnswer" = "Yerel model görünür bir yanıt vermeden tamamlandı. Daha kısa bir istek veya başka bir yerel model deneyin.";
 "modelDataOllamaDecisionTooLarge" = "Aracı kararı çok büyük.";
+"modelDataOllamaInstalledIdentityChanged" = "Yüklü %@ modeli işlem sırasında değişti.";
+"modelDataOllamaInstalledIdentityUnavailable" = "Ollama, yüklü %@ modelinin kimliğini doğrulayamadı.";
 "modelDataOllamaMaximumContext" = "Bu model, maksimum bağlamın %@ belirteç olduğunu bildiriyor. Daha küçük bir bağlam seçin.";
 "modelDataOllamaNoAnswerOrTool" = "Yerel model, yanıt veya yerleşik araç çağrısı olmadan tamamlandı.";
 "modelDataOllamaOutputLimitBeforeAnswer" = "Yerel model yanıtını tamamlamadan önce çıktı sınırına ulaştı.";
 "modelDataOllamaOutputLimitBeforeResponse" = "Yerel model, yanıt veya yerleşik araç çağrısı üretmeden önce çıktı sınırına ulaştı.";
+"modelDataOllamaSameInstalledIdentity" = "İki etiket de aynı yüklü modeli gösteriyor.";
 "modelDataOllamaStructuredFallbackTooLarge" = "Yapılandırılmış çıktı için kullanılan yerel alternatif, bağlam sınırını aşıyor. Daha kısa bir görev veya anlık görüntü kullanın.";
 "modelDataOllamaStructuredResponseUnavailable" = "Yerel yapılandırılmış yanıt alınamadı.";
 "modelDataOpenAIManagedSampling" = "Bu OpenAI bağlantısında örneklemeyi model yönetir. Bağlantıyı kullanmak için Sıcaklık ve Top P alanlarını temizleyin.";
@@ -169,6 +172,7 @@
 "modelDomainOllamaInvalidModelName" = "qwen3-coder:30b gibi yerel bir Ollama model adı girin.";
 "modelDomainOllamaInvalidResponse" = "Yerel Ollama yanıtı okunamadı. %@";
 "modelDomainOllamaModelNotInstalled" = "%@ modeli bu Mac'e indirilmemiş.";
+"modelDomainOllamaRequestTimedOut" = "Ollama isteği zaman aşımına uğradı.";
 "modelDomainProviderAccessRejected" = "Model sunucusu erişimi reddetti. API anahtarını ve izinleri kontrol edin.";
 "modelDomainProviderConnectionFailed" = "Model sunucusuna bağlanılamadı. Sunucunun adresini ve çalışıp çalışmadığını kontrol edin.";
 "modelDomainProviderHTTPError" = "Model sunucusu HTTP %@ döndürdü. Bağlantıyı ve desteklenen API'yi kontrol edin.";
@@ -182,6 +186,7 @@
 "modelDomainRoutingInvalidRoute" = "Yerel model, sohbeti bilgisayar görevinden ayıramadı. İsteğinizi farklı bir şekilde ifade edin.";
 "modelDomainRoutingInvalidText" = "%@ KB'den kısa bir mesaj girin.";
 "modelDomainSettingsContextRange" = "Bağlam %@ ile %@ belirteç arasında olmalıdır.";
+"modelDomainSettingsOllamaDevelopmentTimeoutRange" = "Çalışma ve Plan için %1$@ ile %2$@ saniye arasında bir zaman aşımı girin.";
 "modelDomainSettingsOutputExceedsContext" = "En yüksek çıktı, bağlam penceresinden küçük olmalıdır.";
 "modelDomainSettingsOutputRange" = "En yüksek çıktı %@ ile %@ belirteç arasında olmalıdır.";
 "modelDomainSettingsTemperatureRange" = "Sıcaklık %@ ile %@ arasında olmalıdır.";

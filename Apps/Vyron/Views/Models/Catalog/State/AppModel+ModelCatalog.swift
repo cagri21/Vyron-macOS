@@ -5,12 +5,13 @@ import VyronRuntime
 extension AppModel {
     var canManageModelSelection: Bool {
         !isShuttingDown && !modelSelection.isStarting && !modelSelection.connectionOperationInProgress
+            && !modelDownloads.isChangingPrecision
             && !foregroundRun.isGenerating && !foregroundRun.isStoppingDevelopment && scheduledTasks.activeTaskID == nil
             && !computerWork.isPlanningControls && !computerWork.isComputerWorkActive
     }
 
     func startEngine() async {
-        guard !isShuttingDown, !Task.isCancelled else { return }
+        guard !isShuttingDown, !Task.isCancelled, !modelDownloads.isChangingPrecision else { return }
         guard modelSelection.isBuiltinConnection else { await refreshModels(); return }
         guard !modelSelection.isStarting else { return }
         modelSelection.isStarting = true
@@ -31,7 +32,8 @@ extension AppModel {
         }
     }
 
-    func refreshModels(quiet: Bool = false) async {
+    func refreshModels(quiet: Bool = false, duringPrecisionChange: Bool = false) async {
+        guard !modelDownloads.isChangingPrecision || duringPrecisionChange else { return }
         guard !modelSelection.isRefreshing else { return }
         if modelSelection.inferenceProvider != nil { modelDownloads.refreshStorageCapacity() }
         let revision = modelSelection.connectionRevision
@@ -47,7 +49,7 @@ extension AppModel {
                 }
             }
             if !quiet { statusMessage = modelSelection.models.isEmpty ? VyronStatusText.downloadToBegin : nil }
-            requestModelFeatureVerification()
+            if !duringPrecisionChange { requestModelFeatureVerification() }
             modelDownloads.refreshStorageCapacity()
         case .failed(let failure):
             if !quiet {

@@ -63,10 +63,13 @@
 "modelDataOllamaChatContextExceeded" = "Розмова перевищує обсяг контексту вибраної локальної моделі. Почніть коротшу розмову або виберіть іншу локальну модель.";
 "modelDataOllamaChatNoAnswer" = "Локальна модель завершила роботу без видимої відповіді. Спробуйте коротший запит або іншу локальну модель.";
 "modelDataOllamaDecisionTooLarge" = "Рішення агента завелике.";
+"modelDataOllamaInstalledIdentityChanged" = "Установлена модель %@ змінилася під час операції.";
+"modelDataOllamaInstalledIdentityUnavailable" = "Ollama не вдалося підтвердити ідентичність установленої моделі %@.";
 "modelDataOllamaMaximumContext" = "Ця модель повідомляє, що максимальний контекст становить %@ токенів. Виберіть менший контекст.";
 "modelDataOllamaNoAnswerOrTool" = "Локальна модель завершила роботу без відповіді чи виклику вбудованого інструмента.";
 "modelDataOllamaOutputLimitBeforeAnswer" = "Локальна модель досягла обмеження виводу, перш ніж завершити відповідь.";
 "modelDataOllamaOutputLimitBeforeResponse" = "Локальна модель досягла обмеження виводу, перш ніж повернути відповідь чи виклик вбудованого інструмента.";
+"modelDataOllamaSameInstalledIdentity" = "Обидва теги вказують на ту саму встановлену модель.";
 "modelDataOllamaStructuredFallbackTooLarge" = "Резервний локальний спосіб отримання структурованої відповіді перевищує обсяг контексту. Скоротіть завдання або знімок.";
 "modelDataOllamaStructuredResponseUnavailable" = "Локальна структурована відповідь була недоступна.";
 "modelDataOpenAIManagedSampling" = "У цьому підключенні OpenAI вибіркою керує модель. Очистьте поля «Температура» й «Top P», щоб використовувати підключення.";
@@ -169,6 +172,7 @@
 "modelDomainOllamaInvalidModelName" = "Введіть назву локальної моделі Ollama, наприклад qwen3-coder:30b.";
 "modelDomainOllamaInvalidResponse" = "Не вдалося прочитати відповідь локальної Ollama. %@";
 "modelDomainOllamaModelNotInstalled" = "Модель %@ не завантажено на цей Mac.";
+"modelDomainOllamaRequestTimedOut" = "Час очікування запиту Ollama вичерпано.";
 "modelDomainProviderAccessRejected" = "Сервер моделей відхилив доступ. Перевірте ключ API та дозволи.";
 "modelDomainProviderConnectionFailed" = "Не вдалося підключитися до сервера моделей. Перевірте його адресу та переконайтеся, що він працює.";
 "modelDomainProviderHTTPError" = "Сервер моделей повернув HTTP %@. Перевірте з’єднання та підтримуваний API.";
@@ -182,6 +186,7 @@
 "modelDomainRoutingInvalidRoute" = "Локальна модель не змогла визначити, чи це розмова, чи завдання для комп’ютера. Перефразуйте запит.";
 "modelDomainRoutingInvalidText" = "Введіть повідомлення розміром до %@ КБ.";
 "modelDomainSettingsContextRange" = "Контекст має містити від %@ до %@ токенів.";
+"modelDomainSettingsOllamaDevelopmentTimeoutRange" = "Введіть час очікування від %1$@ до %2$@ секунд для режимів «Робота» і «План».";
 "modelDomainSettingsOutputExceedsContext" = "Максимальний обсяг виведення має бути меншим за вікно контексту.";
 "modelDomainSettingsOutputRange" = "Максимальний обсяг виведення має бути від %@ до %@ токенів.";
 "modelDomainSettingsTemperatureRange" = "Температура має бути в діапазоні від %@ до %@.";

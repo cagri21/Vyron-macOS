@@ -10,6 +10,58 @@ final class VyronOllamaDevelopmentReplyRepairTests: XCTestCase {
         super.tearDown()
     }
 
+    func testWorkAndPlanUseTimeoutsForTheirOllamaConnection() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [VyronOllamaDevelopmentRepairURLProtocol.self]
+        let builtIn = try OllamaClient(settings: ModelSettings(), configuration: configuration)
+        var settings = ModelSettings()
+        settings.ollamaDevelopmentTimeoutSeconds = 725
+        let customized = try OllamaClient(settings: settings, configuration: configuration)
+        let configured = try VyronOllamaDevelopmentRepairFixture.client()
+        let reply = try VyronOllamaDevelopmentRepairFixture.reply(
+            DevelopmentMessage(role: "assistant", content: "The project is ready to inspect.")
+        )
+        let state = VyronOllamaDevelopmentRepairURLProtocol.state
+
+        for mode in [DevelopmentMode.agent, .plan] {
+            state.configure { _, _ in reply }
+            for client in [builtIn, customized, configured] {
+                _ = try await client.developmentStep(
+                    model: VyronOllamaDevelopmentRepairFixture.model,
+                    messages: baseMessages,
+                    effort: .balanced,
+                    mode: mode
+                )
+            }
+            XCTAssertEqual(state.requestTimeouts, [600, 725, 180])
+        }
+    }
+
+    func testWorkDistinguishesOllamaRequestTimeoutFromConnectionFailure() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [VyronOllamaDevelopmentRepairURLProtocol.self]
+        let client = try OllamaClient(settings: ModelSettings(), configuration: configuration)
+        let state = VyronOllamaDevelopmentRepairURLProtocol.state
+        let failures: [(URLError.Code, LocalAIError)] = [
+            (.timedOut, .requestTimedOut),
+            (.cannotConnectToHost, .connectionFailed)
+        ]
+
+        for (code, expected) in failures {
+            state.configure { _, _ in throw URLError(code) }
+
+            do {
+                _ = try await client.developmentStep(
+                    model: VyronOllamaDevelopmentRepairFixture.model, messages: baseMessages
+                )
+                XCTFail("Expected an Ollama request failure for \(code).")
+            } catch {
+                XCTAssertEqual(error as? LocalAIError, expected)
+            }
+            XCTAssertEqual(state.requests.count, 1)
+        }
+    }
+
     func testEmptyAndWhitespaceCompletionRepairOnceThenAcceptNativeTools() async throws {
         let call = DevelopmentToolCall(name: "list_files", arguments: ["limit": .number(10)], id: "native-list")
         let native = try VyronOllamaDevelopmentRepairFixture.reply(

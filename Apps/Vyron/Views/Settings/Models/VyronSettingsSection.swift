@@ -39,7 +39,7 @@ enum VyronSettingsSection: String, CaseIterable, Identifiable {
             [title, VyronVoiceText.title, VyronVoiceText.voice, VyronVoiceText.startDictation]
         case .models:
             [title, VyronWorkspaceText.manageModels, VyronAppText.settingsAddLocalModel,
-             VyronAppText.settingsAutomaticSelection]
+             VyronAppText.settingsAutomaticSelection, VyronAppText.settingsOllamaDevelopmentTimeout]
         case .billing:
             [title, VyronBillingText.apiCreditBalance, VyronBillingText.openAI, VyronBalanceText.accountBalance]
         case .plugins:

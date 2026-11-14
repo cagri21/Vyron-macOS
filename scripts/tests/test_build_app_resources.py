@@ -60,8 +60,13 @@ class BuildAppResourceTests(unittest.TestCase):
                 for name, content in {
                     "python3": "#!/bin/zsh\nexit 0\n",
                     "swift": (
-                        '#!/bin/zsh\nif [[ "$*" == *"--show-bin-path"* ]]; then\n'
-                        '    print -r -- "$VYRON_TEST_BINARY"\nfi\n'
+                        '#!/bin/zsh\n'
+                        'case "$*" in\n'
+                        '    "build -c debug --disable-sandbox") exit 0 ;;\n'
+                        '    "build -c debug --disable-sandbox --show-bin-path")\n'
+                        '        print -r -- "$VYRON_TEST_BINARY" ;;\n'
+                        '    *) print -u2 -r -- "Unexpected Swift arguments: $*"; exit 1 ;;\n'
+                        'esac\n'
                     ),
                     "codesign": "#!/bin/zsh\nexit 0\n",
                 }.items():
@@ -71,6 +76,7 @@ class BuildAppResourceTests(unittest.TestCase):
                 environment = dict(os.environ)
                 environment["PATH"] = str(tools) + ":/usr/bin:/bin"
                 environment["VYRON_TEST_BINARY"] = str(binary)
+                environment.pop("VYRON_SWIFTPM_BUILD_SYSTEM", None)
                 app = project / ".build/review/Vyron.app"
                 result = subprocess.run(
                     ["/bin/zsh", str(script), "debug", str(app)], cwd=project,

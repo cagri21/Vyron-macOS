@@ -123,7 +123,11 @@ extension OllamaClient: VyronDevelopmentInferenceProviding {
                         options: options
                     )
                 )
-                request.timeoutInterval = VyronOllamaTransportLimits.structuredInferenceTimeout
+                request.timeoutInterval = configuredConnection
+                    ? VyronOllamaTransportLimits.structuredInferenceTimeout
+                    : TimeInterval(
+                        settings.ollamaDevelopmentTimeoutSeconds ?? VyronOllamaDevelopmentTimeout.defaultSeconds
+                    )
                 let (data, response) = try await session.data(for: request)
                 try Task.checkCancellation()
                 guard let http = response as? HTTPURLResponse else {

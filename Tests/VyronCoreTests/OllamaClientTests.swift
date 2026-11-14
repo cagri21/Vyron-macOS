@@ -80,6 +80,102 @@ final class OllamaClientTests: XCTestCase, @unchecked Sendable {
         return OllamaClient(baseURL: URL(string: endpoint)!, configuration: configuration)
     }
 
+    func testInstalledModelDeletionChecksBothDigestsAndOnlySendsOriginalTag() async throws {
+        let catalog = Self.precisionCatalog()
+        let paths = Values<String>()
+        StubURLProtocol.state.set { request in
+            let path = request.url?.path ?? ""
+            paths.append(path)
+            if path == "/api/tags" { return (200, catalog) }
+            XCTAssertEqual(path, "/api/delete")
+            XCTAssertEqual(request.httpMethod, "DELETE")
+            let body = try JSONDecoder().decode([String: String].self, from: requestBody(request))
+            XCTAssertEqual(body, ["model": "qwen3.8:27b"])
+            return (200, "")
+        }
+        let local = client()
+        let original = try await local.installedModelIdentity(named: "qwen3.8:27b")
+        let replacement = try await local.installedModelIdentity(named: "library/qwen3.8:27b-q8_0")
+        XCTAssertEqual(original.model.quantization, "nvfp4")
+        XCTAssertEqual(replacement.name, "qwen3.8:27b-Q8_0")
+
+        try await local.deleteInstalledModel(original, keeping: replacement)
+
+        XCTAssertEqual(paths.values, ["/api/tags", "/api/tags", "/api/tags", "/api/delete"])
+    }
+
+    func testInstalledModelDeletionStopsIfEitherDigestChanged() async throws {
+        let catalog = Self.precisionCatalog()
+        StubURLProtocol.state.set { _ in (200, catalog) }
+        let local = client()
+        let original = try await local.installedModelIdentity(named: "qwen3.8:27b")
+        let replacement = try await local.installedModelIdentity(named: "qwen3.8:27b-Q8_0")
+        let changes = [
+            (original.name, Self.precisionCatalog(original: "changed")),
+            (replacement.name, Self.precisionCatalog(replacement: "changed"))
+        ]
+
+        for (changedName, changedCatalog) in changes {
+            StubURLProtocol.state.set { request in
+                XCTAssertEqual(request.url?.path, "/api/tags")
+                return (200, changedCatalog)
+            }
+            do {
+                try await local.deleteInstalledModel(original, keeping: replacement)
+                XCTFail("Deleting after a manifest changed must fail")
+            } catch LocalAIError.invalidResponse(let detail) {
+                XCTAssertTrue(detail.contains(changedName))
+            }
+        }
+    }
+
+    func testInstalledModelIdentityDistinguishesMissingFromMissingDigest() async throws {
+        StubURLProtocol.state.set { _ in
+            (200, #"{"models":[{"name":"qwen3.8:27b","size":18000000000}]}"#)
+        }
+        let local = client()
+        let absent = try await local.installedModelIdentityIfPresent(named: "qwen3.8:27b-q8_0")
+        XCTAssertNil(absent)
+        do {
+            _ = try await local.installedModelIdentityIfPresent(named: "qwen3.8:27b")
+            XCTFail("An installed model without a digest must raise an error")
+        } catch LocalAIError.invalidResponse(let detail) {
+            XCTAssertTrue(detail.contains("qwen3.8:27b"))
+        }
+    }
+
+    func testCanceledInstalledModelDeletionSendsNoRequest() async throws {
+        let catalog = Self.precisionCatalog()
+        StubURLProtocol.state.set { _ in (200, catalog) }
+        let local = client()
+        let original = try await local.installedModelIdentity(named: "qwen3.8:27b")
+        let replacement = try await local.installedModelIdentity(named: "qwen3.8:27b-q8_0")
+        StubURLProtocol.state.set { _ in
+            XCTFail("Cancellation must stop deletion before transport")
+            return (200, catalog)
+        }
+
+        let deletion = Task {
+            _ = withUnsafeCurrentTask { $0?.cancel() }
+            try await local.deleteInstalledModel(original, keeping: replacement)
+        }
+        do {
+            try await deletion.value
+            XCTFail("Deleting in a canceled task must fail")
+        } catch is CancellationError {
+            XCTAssertTrue(deletion.isCancelled)
+        }
+    }
+
+    private static func precisionCatalog(original: String = "original", replacement: String = "replacement") -> String {
+        #"""
+        {"models":[
+          {"name":"qwen3.8:27b","digest":"\#(original)","details":{"quantization_level":"nvfp4"}},
+          {"name":"qwen3.8:27b-Q8_0","digest":"\#(replacement)","details":{"quantization_level":"Q8_0"}}
+        ]}
+        """#
+    }
+
     func testEndpointAllowsOnlyPlainHTTPLoopbackAndCanonicalizesLocalhost() throws {
         let local = try OllamaClient.canonicalEndpoint(URL(string: "http://localhost:11434/")!)
         XCTAssertEqual(local.absoluteString, "http://127.0.0.1:11434")

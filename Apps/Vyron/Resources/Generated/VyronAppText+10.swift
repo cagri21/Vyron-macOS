@@ -2,6 +2,60 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsRecommended: String {
+        VyronResourceBundle.string("appSettingsRecommended", fallback: "Recommended to try")
+    }
+    static var settingsRefresh: String {
+        VyronResourceBundle.string("appSettingsRefresh", fallback: "Refresh")
+    }
+    static var settingsRemoteServer: String {
+        VyronResourceBundle.string("appSettingsRemoteServer", fallback: "Remote server")
+    }
+    static func settingsRemoveConnection(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "appSettingsRemoveConnection",
+            fallback: "Remove %@",
+            arguments: [p1]
+        )
+    }
+    static func settingsRemovingPreviousVariant(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "appSettingsRemovingPreviousVariant",
+            fallback: "Removing %@…",
+            arguments: [p1]
+        )
+    }
+    static var settingsRequestBudgetHint: String {
+        VyronResourceBundle.string("appSettingsRequestBudgetHint", fallback: "This limits Vyron’s request budget. The server determines its model’s actual context capacity.")
+    }
+    static var settingsResume: String {
+        VyronResourceBundle.string("appSettingsResume", fallback: "Resume")
+    }
+    static var settingsSaveTestHint: String {
+        VyronResourceBundle.string("appSettingsSaveTestHint", fallback: "Saving tests a short response before storing this connection.")
+    }
+    static var settingsSaveUse: String {
+        VyronResourceBundle.string("appSettingsSaveUse", fallback: "Save & use")
+    }
+    static var settingsSelected: String {
+        VyronResourceBundle.string("appSettingsSelected", fallback: "Selected")
+    }
+    static func settingsSelectedUnavailable(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "appSettingsSelectedUnavailable",
+            fallback: "Your selected model, %@, is unavailable from this connection. Choose an available model or check its server; manual selection never falls back silently.",
+            arguments: [p1]
+        )
+    }
+    static var settingsServerPrivacy: String {
+        VyronResourceBundle.string("appSettingsServerPrivacy", fallback: "The selected server receives messages and project excerpts. A local server may forward them to a hosted model. Keys are stored in macOS Keychain.")
+    }
+    static var settingsServerType: String {
+        VyronResourceBundle.string("appSettingsServerType", fallback: "Server type")
+    }
+    static var settingsServerURL: String {
+        VyronResourceBundle.string("appSettingsServerURL", fallback: "Server URL")
+    }
     static var settingsSourceHint: String {
         VyronResourceBundle.string("appSettingsSourceHint", fallback: "Paste an Ollama library page, a public Hugging Face GGUF repository, or a direct .gguf link.")
     }
@@ -20,6 +74,9 @@ extension VyronAppText {
             fallback: "%dK suggested context",
             arguments: [p1]
         )
+    }
+    static var settingsSwitchVariant: String {
+        VyronResourceBundle.string("appSettingsSwitchVariant", fallback: "Switch variant")
     }
     static var settingsTaskBlocksModels: String {
         VyronResourceBundle.string("appSettingsTaskBlocksModels", fallback: "Finish or stop the current task to change models or start a download.")
@@ -65,27 +122,5 @@ extension VyronAppText {
     }
     static var settingsUseAuto: String {
         VyronResourceBundle.string("appSettingsUseAuto", fallback: "Use Auto")
-    }
-    static var settingsUseDefaults: String {
-        VyronResourceBundle.string("appSettingsUseDefaults", fallback: "Use defaults")
-    }
-    static var settingsUseForChat: String {
-        VyronResourceBundle.string("appSettingsUseForChat", fallback: "Use for chat")
-    }
-    static var settingsUseModel: String {
-        VyronResourceBundle.string("appSettingsUseModel", fallback: "Use model")
-    }
-    static var settingsVariant: String {
-        VyronResourceBundle.string("appSettingsVariant", fallback: "Variant")
-    }
-    static var settingsWeightsExceedMemory: String {
-        VyronResourceBundle.string("appSettingsWeightsExceedMemory", fallback: "These weights exceed this Mac’s physical memory.")
-    }
-    static func settingsWeightSize(_ p1: String) -> String {
-        VyronResourceBundle.format(
-            "appSettingsWeightSize",
-            fallback: "%@ weights",
-            arguments: [p1]
-        )
     }
 }

@@ -14697,6 +14697,292 @@
         }
       }
     },
+    "appSettingsChangePrecision": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change precision…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hassasiyeti değiştir…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінити точність…"
+          }
+        }
+      }
+    },
+    "appSettingsChangePrecisionTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change precision for %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ için hassasiyeti değiştir"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінити точність для %@"
+          }
+        }
+      }
+    },
+    "appSettingsNoReplacementVariants": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No other precision variants are available for this model."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu model için başka hassasiyet sürümü bulunamadı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для цієї моделі немає інших варіантів точності."
+          }
+        }
+      }
+    },
+    "appSettingsPrecisionReplacementWarning": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron will remove %@ from this Mac after it verifies and selects %@. If the download or switch fails or is canceled, the current variant stays installed."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron, %2$@ sürümünü doğrulayıp seçtikten sonra %1$@ sürümünü bu Mac’ten kaldıracak. İndirme veya geçiş başarısız olursa ya da iptal edilirse mevcut sürüm yüklü kalır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron видалить %@ із цього Mac після того, як перевірить і вибере %@. Якщо завантаження або перемикання завершиться помилкою чи його буде скасовано, поточний варіант залишиться встановленим."
+          }
+        }
+      }
+    },
+    "appSettingsDownloadAndSwitchVariant": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download & switch"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İndir ve geç"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажити й перемкнутися"
+          }
+        }
+      }
+    },
+    "appSettingsSwitchVariant": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch variant"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sürümü değiştir"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перемкнути варіант"
+          }
+        }
+      }
+    },
+    "appSettingsChangingPrecision": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switching to %@…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sürümüne geçiliyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перемикання на %@…"
+          }
+        }
+      }
+    },
+    "appSettingsRemovingPreviousVariant": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removing %@…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kaldırılıyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалення %@…"
+          }
+        }
+      }
+    },
+    "appSettingsPrecisionReplacementSucceeded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron selected %@ and removed %@ from this Mac."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron, %@ sürümünü seçti ve %@ sürümünü bu Mac’ten kaldırdı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron вибрав %@ і видалив %@ із цього Mac."
+          }
+        }
+      }
+    },
+    "appSettingsPrecisionRemovalFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron selected %@. It couldn’t confirm removal of %@. %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron, %@ sürümünü seçti. %@ sürümünün kaldırıldığını doğrulayamadı. %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron вибрав %@. Не вдалося підтвердити видалення %@. %@"
+          }
+        }
+      }
+    },
+    "appSettingsPrecisionSwitchFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t switch precision. Vyron skipped removal of %@. %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hassasiyet değiştirilemedi. Vyron, %@ sürümünü kaldırma adımını atladı. %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося змінити точність. Vyron пропустив видалення %@. %@"
+          }
+        }
+      }
+    },
+    "appSettingsPrecisionSwitchCanceled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precision change canceled. Vyron kept %@ installed."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hassasiyet değişikliği iptal edildi. Vyron, %@ sürümünü yüklü bıraktı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зміну точності скасовано. Vyron залишив %@ встановленим."
+          }
+        }
+      }
+    },
+    "appSettingsPrecisionReplacementUnavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This precision change is unavailable. Refresh the local model list and try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hassasiyet değişikliği yapılamıyor. Yerel model listesini yenileyip tekrar deneyin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінити точність зараз неможливо. Оновіть список локальних моделей і спробуйте ще раз."
+          }
+        }
+      }
+    },
     "appSettingsCancel": {
       "localizations": {
         "en": {
@@ -15795,6 +16081,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Максимум токенів відповіді"
+          }
+        }
+      }
+    },
+    "appSettingsOllamaDevelopmentTimeout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request timeout (seconds)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İstek zaman aşımı (saniye)"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Час очікування запиту (секунди)"
+          }
+        }
+      }
+    },
+    "appSettingsOllamaDevelopmentTimeoutHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter %1$@–%2$@ seconds for each local Work or Plan request. Leave blank to use %3$@ seconds."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Her yerel Çalışma veya Plan isteği için %1$@–%2$@ saniye girin. %3$@ saniye kullanmak için boş bırakın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть від %1$@ до %2$@ секунд для кожного локального запиту в режимі «Робота» або «План». Порожнє поле задає %3$@ секунд."
           }
         }
       }
@@ -19218,19 +19550,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d-bit · %@"
+            "value": "%d-bit (%@)"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d bit · %@"
+            "value": "%d bit (%@)"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d біт · %@"
+            "value": "%d біт (%@)"
           }
         }
       }
@@ -35440,6 +35772,29 @@
         }
       }
     },
+    "modelDomainOllamaRequestTimedOut": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama request timed out."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama isteği zaman aşımına uğradı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Час очікування запиту Ollama вичерпано."
+          }
+        }
+      }
+    },
     "modelDomainOllamaHTTPError": {
       "extractionState": "manual",
       "localizations": {
@@ -36774,6 +37129,29 @@
         }
       }
     },
+    "modelDomainSettingsOllamaDevelopmentTimeoutRange": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a Work and Plan timeout between %1$@ and %2$@ seconds."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalışma ve Plan için %1$@ ile %2$@ saniye arasında bir zaman aşımı girin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть час очікування від %1$@ до %2$@ секунд для режимів «Робота» і «План»."
+          }
+        }
+      }
+    },
     "modelDomainSettingsTemperatureRange": {
       "extractionState": "manual",
       "localizations": {
@@ -37851,6 +38229,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "Відповідь завелика."
+          }
+        }
+      }
+    },
+    "modelDataOllamaInstalledIdentityChanged": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The installed model %@ changed during the operation."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yüklü %@ modeli işlem sırasında değişti."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установлена модель %@ змінилася під час операції."
+          }
+        }
+      }
+    },
+    "modelDataOllamaInstalledIdentityUnavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama could not verify the identity of installed model %@."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama, yüklü %@ modelinin kimliğini doğrulayamadı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama не вдалося підтвердити ідентичність установленої моделі %@."
+          }
+        }
+      }
+    },
+    "modelDataOllamaSameInstalledIdentity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Both tags point to the same installed model."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İki etiket de aynı yüklü modeli gösteriyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обидва теги вказують на ту саму встановлену модель."
           }
         }
       }

@@ -63,10 +63,13 @@
 "modelDataOllamaChatContextExceeded" = "This conversation exceeds the selected model's local context budget. Start a shorter conversation or choose another local model.";
 "modelDataOllamaChatNoAnswer" = "The local model finished without a visible answer. Try a shorter request or another local model.";
 "modelDataOllamaDecisionTooLarge" = "The agent decision is too large.";
+"modelDataOllamaInstalledIdentityChanged" = "The installed model %@ changed during the operation.";
+"modelDataOllamaInstalledIdentityUnavailable" = "Ollama could not verify the identity of installed model %@.";
 "modelDataOllamaMaximumContext" = "This model advertises a maximum context of %@ tokens. Choose a smaller context.";
 "modelDataOllamaNoAnswerOrTool" = "The local model finished without an answer or a native tool call.";
 "modelDataOllamaOutputLimitBeforeAnswer" = "The local model reached its output limit before completing its answer.";
 "modelDataOllamaOutputLimitBeforeResponse" = "The local model reached its output limit before producing an answer or a native tool call.";
+"modelDataOllamaSameInstalledIdentity" = "Both tags point to the same installed model.";
 "modelDataOllamaStructuredFallbackTooLarge" = "The local structured-output fallback exceeds its context budget. Use a shorter task or snapshot.";
 "modelDataOllamaStructuredResponseUnavailable" = "The local structured response was unavailable.";
 "modelDataOpenAIManagedSampling" = "This OpenAI connection uses model-managed sampling. Clear Temperature and Top P to use it.";
@@ -169,6 +172,7 @@
 "modelDomainOllamaInvalidModelName" = "Enter a local Ollama model name, such as qwen3-coder:30b.";
 "modelDomainOllamaInvalidResponse" = "Could not read the local Ollama response. %@";
 "modelDomainOllamaModelNotInstalled" = "The model %@ is not downloaded to this Mac.";
+"modelDomainOllamaRequestTimedOut" = "Ollama request timed out.";
 "modelDomainProviderAccessRejected" = "The model server rejected access. Check the API key and permissions.";
 "modelDomainProviderConnectionFailed" = "Could not connect to the model server. Check its address and whether it is running.";
 "modelDomainProviderHTTPError" = "The model server returned HTTP %@. Check the connection and supported API.";
@@ -182,6 +186,7 @@
 "modelDomainRoutingInvalidRoute" = "The local model could not clearly distinguish a conversation from a computer task. Please rephrase your request.";
 "modelDomainRoutingInvalidText" = "Enter a message under %@ KB.";
 "modelDomainSettingsContextRange" = "Context must be between %@ and %@ tokens.";
+"modelDomainSettingsOllamaDevelopmentTimeoutRange" = "Enter a Work and Plan timeout between %1$@ and %2$@ seconds.";
 "modelDomainSettingsOutputExceedsContext" = "Maximum output must be smaller than the context window.";
 "modelDomainSettingsOutputRange" = "Maximum output must be between %@ and %@ tokens.";
 "modelDomainSettingsTemperatureRange" = "Temperature must be between %@ and %@.";

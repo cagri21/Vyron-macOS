@@ -1,6 +1,6 @@
 import Foundation
 
-/// A published model variant. Precision is reported only when it is present in its source name.
+/// A published or locally installed model variant with its available precision metadata.
 public struct ModelSourceVariant: Identifiable, Sendable, Equatable {
     public let id: String
     public let name: String

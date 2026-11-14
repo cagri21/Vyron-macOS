@@ -2,6 +2,27 @@
 import Foundation
 
 package extension VyronModelDataText {
+    static var streamingEventTooLarge: String {
+        VyronSharedResources.current.string("modelDataStreamingEventTooLarge", fallback: "Streaming event is too large.")
+    }
+
+    static func streamingEventTooLarge(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDataStreamingEventTooLarge", fallback: "Streaming event is too large.", language: language)
+    }
+    static var structuredContextExceeded: String {
+        VyronSharedResources.current.string("modelDataStructuredContextExceeded", fallback: "The structured request exceeds the selected model's context budget.")
+    }
+
+    static func structuredContextExceeded(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDataStructuredContextExceeded", fallback: "The structured request exceeds the selected model's context budget.", language: language)
+    }
+    static var structuredResponseTooLarge: String {
+        VyronSharedResources.current.string("modelDataStructuredResponseTooLarge", fallback: "The structured response is too large.")
+    }
+
+    static func structuredResponseTooLarge(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDataStructuredResponseTooLarge", fallback: "The structured response is too large.", language: language)
+    }
     static var toolResponseTooLarge: String {
         VyronSharedResources.current.string("modelDataToolResponseTooLarge", fallback: "The tool response is too large.")
     }
