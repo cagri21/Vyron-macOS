@@ -63,12 +63,15 @@ extension AppModel {
         }.joined(separator: "\n\n")
         let answers = request.questions.map { question in
             let value = response.answers.first { $0.questionID == question.id }?.value ?? ""
-            return question.question + "\n" + value
-        }.joined(separator: "\n\n")
+            return VyronClarificationAnswer(question: question.question, answer: value)
+        }
         var questionMessage = ChatMessage(role: .assistant, content: questions)
         questionMessage.parentResponseID = owner.messageID
-        var answerMessage = ChatMessage(role: .user, content: answers)
+        var answerMessage = ChatMessage(
+            role: .user, content: answers.map { $0.question + "\n" + $0.answer }.joined(separator: "\n\n")
+        )
         answerMessage.parentResponseID = owner.messageID
+        answerMessage.clarificationAnswers = answers
         conversations[conversationIndex].messages.insert(
             contentsOf: [questionMessage, answerMessage], at: messageIndex
         )

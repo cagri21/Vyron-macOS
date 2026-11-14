@@ -6,11 +6,14 @@ struct ConversationView: View {
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
-        let taskDates = VyronConversationTimeline(messages: model.messages).startDatesByMessageID
+        let messages = model.messages
+        let taskDates = VyronConversationTimeline(messages: messages).startDatesByMessageID
+        let transcript = VyronConversationTranscript(messages: messages)
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: VyronConversationStyle.turnSpacing) {
-                    ForEach(model.messages) { message in
+                    ForEach(transcript.rows) { row in
+                        let message = row.message
                         VStack(alignment: .leading, spacing: VyronConversationStyle.rowSpacing) {
                             if let date = taskDates[message.id] {
                                 VyronConversationTaskTimestamp(date: date)
@@ -18,7 +21,8 @@ struct ConversationView: View {
                             VyronConversationMessageView(
                                 message: message,
                                 isStreaming: model.isResponseActivityLive(messageID: message.id),
-                                showsResponseChanges: true
+                                showsResponseChanges: true,
+                                clarificationAnswers: row.clarificationAnswers
                             )
                         }
                         .id(message.id)

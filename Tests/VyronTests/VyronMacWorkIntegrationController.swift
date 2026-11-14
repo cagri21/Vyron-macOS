@@ -22,6 +22,10 @@ final class VyronMacWorkIntegrationController: VyronMacWorkControlling {
     func launch(applicationID: String) async throws -> DesktopApplication {
         throw MacControlError.applicationUnavailable
     }
+    func attachedApplication(at url: URL) -> DesktopApplication? { nil }
+    func launch(attachedApplicationAt url: URL, expectedApplicationID: String) async throws -> DesktopApplication {
+        throw MacControlError.applicationUnavailable
+    }
     func activate(application: DesktopApplication) throws { throw MacControlError.applicationUnavailable }
     func inspect(application: DesktopApplication) throws -> AutomationSnapshot {
         throw MacControlError.applicationUnavailable

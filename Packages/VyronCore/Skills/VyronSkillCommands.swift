@@ -9,7 +9,7 @@ public struct VyronSkillCommands: Sendable {
         let preferred = candidates.map { Self.preferredName(for: $0) }
         let counts = Dictionary(grouping: preferred, by: { $0 }).mapValues(\.count)
         let qualified = zip(candidates, preferred).map { skill, name in
-            counts[name, default: 0] == 1 && name != "compact"
+            counts[name, default: 0] == 1 && VyronBuiltInComposerCommand(rawValue: name) == nil
                 ? name : skill.source.rawValue + "-" + skill.scope.rawValue + ":" + name
         }
         let qualifiedCounts = Dictionary(grouping: qualified, by: { $0 }).mapValues(\.count)

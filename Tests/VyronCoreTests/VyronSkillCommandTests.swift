@@ -3,14 +3,17 @@ import XCTest
 @testable import VyronCore
 
 final class VyronSkillCommandTests: XCTestCase {
-    func testBuiltinCompactReservesItsAliasWithoutHidingAnInstalledSkill() throws {
+    func testBuiltInCommandsReserveAliasesWithoutHidingInstalledSkills() throws {
         let root = try workspace()
         let compact = try skill(name: "compact", directory: root.appendingPathComponent("compact"))
-        let commands = VyronSkillCommands(skills: [compact])
+        let side = try skill(name: "side", directory: root.appendingPathComponent("side"))
+        let commands = VyronSkillCommands(skills: [compact, side])
 
-        XCTAssertEqual(commands.entries.map(\.name), ["codex-personal:compact"])
+        XCTAssertEqual(commands.entries.map(\.name), ["codex-personal:compact", "codex-personal:side"])
         XCTAssertTrue(commands.invoked(in: "/compact").isEmpty)
+        XCTAssertTrue(commands.invoked(in: "/side").isEmpty)
         XCTAssertEqual(commands.invoked(in: "/codex-personal:compact run").map(\.id), [compact.id])
+        XCTAssertEqual(commands.invoked(in: "/codex-personal:side run").map(\.id), [side.id])
     }
 
     func testUniqueSkillCommandsFilterByNameDescriptionAndPath() throws {

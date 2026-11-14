@@ -4,7 +4,8 @@ import VyronCore
 
 actor VyronComposerFileLoader {
     static var fileTypes: [UTType] {
-        [.image, .pdf] + VyronAudioAttachmentLoader.acceptedTypes + VyronDocumentAttachmentLoader.contentTypes
+        [.image, .pdf, .applicationBundle] + VyronAudioAttachmentLoader.acceptedTypes
+            + VyronDocumentAttachmentLoader.contentTypes
     }
 
     private let folders = VyronFolderAttachmentLoader()
@@ -29,7 +30,11 @@ actor VyronComposerFileLoader {
         let values = try url.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
         let filename = url.lastPathComponent
         let suffix = url.pathExtension.lowercased()
-        if values.isDirectory == true || values.isSymbolicLink == true {
+        if suffix == "app", values.isDirectory == true, values.isSymbolicLink != true {
+            guard result.applications.count < AppModel.maximumApplicationAttachments
+            else { throw VyronApplicationAttachmentError.tooMany }
+            result.applications.append(VyronApplicationAttachment(name: filename, path: url.standardizedFileURL.path))
+        } else if values.isDirectory == true || values.isSymbolicLink == true {
             guard result.folders.count < AppModel.maximumFolderAttachments
             else { throw VyronFolderAttachmentDraftError.tooMany }
             result.folders.append(try await folders.load(url))

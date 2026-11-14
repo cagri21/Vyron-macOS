@@ -42,14 +42,18 @@ extension AppModel {
         }
     }
 
-    func pasteScreenshotImage() {
-        guard canAttachScreenshots else { return }
-        let pasteboard = NSPasteboard.general
-        guard let data = pasteboard.data(forType: .png) ?? pasteboard.data(forType: .tiff) else {
-            errorMessage = VyronScreenshotText.clipboardEmpty
-            return
+    @discardableResult
+    func pasteScreenshotImage(
+        reportEmptyClipboard: Bool = true,
+        readData: (NSPasteboard.PasteboardType) -> Data? = { NSPasteboard.general.data(forType: $0) }
+    ) -> Bool {
+        guard canAttachScreenshots else { return false }
+        guard let data = readData(.png) ?? readData(.tiff) else {
+            if reportEmptyClipboard { errorMessage = VyronScreenshotText.clipboardEmpty }
+            return false
         }
         attachCapturedScreenshot(data, name: VyronScreenshotText.pastedImage)
+        return true
     }
 
     func attachCapturedScreenshot(_ data: Data, name: String) {

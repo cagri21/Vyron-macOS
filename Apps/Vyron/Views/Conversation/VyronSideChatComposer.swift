@@ -31,6 +31,9 @@ struct VyronSideChatComposer: View {
                     .disabled(model.isShuttingDown)
                     .accessibilityLabel(VyronWorkspaceText.placeholderChat)
                     .accessibilityHint(VyronWorkspaceText.composerKeyboardHint)
+                    .onAppear {
+                        if model.isTemporarySideChat(session.context.conversationID) { inputFocused = true }
+                    }
                     .onKeyPress(.return, phases: .down) { keyPress in
                         guard inputFocused, !model.isShuttingDown else { return .ignored }
                         return VyronComposerReturnKey.handle(

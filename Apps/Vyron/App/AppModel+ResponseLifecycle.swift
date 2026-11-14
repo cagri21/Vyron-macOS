@@ -8,7 +8,7 @@ extension AppModel {
     }
 
     func isResponseActivityLive(conversationID: UUID, messageID: UUID) -> Bool {
-        guard let conversation = conversations.first(where: { $0.id == conversationID }),
+        guard let conversation = sideChatConversation(with: conversationID),
             conversation.messages.first(where: { $0.id == messageID })?.activity?.state == .working
         else { return false }
         if isSideChatResponseLive(conversationID: conversationID, messageID: messageID) { return true }

@@ -235,6 +235,13 @@ so another reply may wait for the model. If a reply finishes while you're
 away, any queued follow-ups stay saved in that chat. Reopen it and choose
 **Send now** to send them.
 
+Type `/side` in an existing conversation and press Return to open a temporary
+side chat. Submit `/side <question>` to ask the first question immediately.
+The side chat opens in its own window and uses a bounded text snapshot of the
+original conversation. The original conversation stays selected, its task can
+keep running, and unsent attachments stay in its composer. Closing the side
+window stops its reply and discards the temporary conversation.
+
 **New side chat** opens an independent Chat conversation with a bounded text
 snapshot of the original. It keeps the captured model/connection and does not
 cancel the original task. Image pixels are not copied into that text snapshot.
@@ -1188,8 +1195,10 @@ the same task to list available apps, open or focus one, inspect its accessible
 windows and menu bar, and use real controls. The desktop pointer marks verified
 click and text targets in Work too. For example, ask “Open my project in
 Xcode, run it on an iPhone simulator, check the screen, and take a screenshot.”
-The app catalog includes running regular apps and supported installed apps;
-stopped third-party apps outside that catalog are not indexed yet.
+The app catalog includes running regular apps, supported installed apps, and apps
+you explicitly attach to the Work conversation. You can ask Vyron to open an
+attached app even when it is stopped. The native review shows the selected
+bundle's path before launch.
 The native project opener accepts an existing relative `.xcodeproj` or
 `.xcworkspace` inside the active project. The agent can then inspect Xcode's real
 run-destination controls and **Product → Run**, and inspect the visible result.
@@ -1241,8 +1250,10 @@ own windows, hides the cursor, and limits the longest image edge to 2048 pixels.
 Device capture requires an open Simulator or mirroring window; this feature does
 not connect directly to physical devices or boot simulators.
 
-You can also choose **Attach files…**, drag image files or image data from
-another app onto the composer, or use **Paste image** (**Command–Shift–V**).
+To attach a screenshot from the clipboard, click the message field and press
+**Command–V**. Use **Control–Shift–Command–4** to copy a selected area of the Mac
+screen to the clipboard. You can also choose **Attach files…**, drag images onto
+the composer, or use **+ → Paste image** (**Command–Shift–V**).
 The composer highlights when an image can be dropped. Attach up to four images to compare
 screens, inspect interface problems, explain an error, or read visible content.
 Each attachment shows a thumbnail, the file type, and the filename. Select the
@@ -1303,6 +1314,11 @@ macOS has on-device speech recognition available and you grant Speech
 Recognition access. The selected model receives the transcript and metadata. The audio
 recording stays on your Mac. File names and supplied excerpts remain available
 in chat history for follow-up questions.
+
+To attach a macOS app, copy it in Finder and press **Command–V** in the message
+field, or drag it onto the composer. Click the app card in the draft or sent
+message to open the app. Vyron saves the app's location in local chat history
+and includes its name in the model context.
 
 ## Folder analysis
 

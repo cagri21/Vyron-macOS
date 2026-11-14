@@ -5,4 +5,7 @@ struct VyronComposerAttachments: Sendable {
     var folders: [VyronFolderAttachment] = []
     var pdfs: [VyronPDFAttachment] = []
     var files: [VyronFileAttachment] = []
+    var applications: [VyronApplicationAttachment] = []
+
+    init() {}
 }

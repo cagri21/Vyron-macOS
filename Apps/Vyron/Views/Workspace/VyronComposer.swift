@@ -3,6 +3,7 @@ import VyronCore
 
 struct VyronComposer: View {
     @Environment(\.locale) private var localizationLocale
+    @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var model: AppModel
 
     private var isBusy: Bool { model.foregroundRun.isGenerating || model.computerWork.isComputerWorkActive }
@@ -18,7 +19,10 @@ struct VyronComposer: View {
             VyronComposerSkillPicker(
                 skills: model.composerSkills,
                 draft: Binding(get: { model.composer.draft }, set: { model.composer.draft = $0 }),
-                projectDirectory: model.workspaceState.workspaceURL
+                projectDirectory: model.workspaceState.workspaceURL,
+                submit: {
+                    if !model.composer.isEditingQueuedMessage { submit() }
+                }
             )
             if let request = model.selectedUserInputRequest {
                 VyronUserInputRequestView(request: request)
@@ -44,7 +48,7 @@ struct VyronComposer: View {
     private var input: some View {
         let draft = model.conversationDraftPrompt
         return VStack(alignment: .leading, spacing: VyronWorkspaceStyle.composerSpacing) {
-            if let filename = model.developmentTaskFilename(for: draft) {
+            if model.sideChatCommand == nil, let filename = model.developmentTaskFilename(for: draft) {
                 VyronDevelopmentTaskAttachmentView(filename: filename, content: draft)
             }
             if model.composerAttachments.hasDrafts { attachments }
@@ -64,21 +68,21 @@ struct VyronComposer: View {
             if model.isChatWorkspace {
                 HStack(spacing: VyronWorkspaceStyle.controlSpacing) {
                     addMenu
-                    VyronVoiceComposerInput(model: model, voice: model.voice, placeholder: placeholder)
+                    composerInput
                         .layoutPriority(1)
                     VyronEffortControl()
                     voiceControls
-                    if !showsLiveVoiceAction { VyronFollowUpActionsView() }
+                    if !showsLiveVoiceAction { VyronFollowUpActionsView(submit: submit) }
                 }
             } else {
-                VyronVoiceComposerInput(model: model, voice: model.voice, placeholder: placeholder)
+                composerInput
                 HStack(spacing: VyronWorkspaceStyle.controlSpacing) {
                     addMenu
                     VyronProjectAccessMenu()
                     Spacer(minLength: 0)
                     VyronEffortControl()
                     voiceControls
-                    if !showsLiveVoiceAction { VyronFollowUpActionsView() }
+                    if !showsLiveVoiceAction { VyronFollowUpActionsView(submit: submit) }
                 }
             }
         }
@@ -91,6 +95,16 @@ struct VyronComposer: View {
         ))
     }
 
+    private var composerInput: some View {
+        VyronVoiceComposerInput(model: model, voice: model.voice, placeholder: placeholder, submit: submit)
+    }
+
+    private func submit() {
+        if let sideID = model.submitComposer() {
+            openWindow(id: VyronAppWindow.conversation, value: sideID)
+        }
+    }
+
     private var attachments: some View {
         let connectionName = model.modelSelection.activeConnectionName
         let imageHelp = model.screenshotAnalysisHint + "\n\n" + VyronScreenshotText.privacyHint(connectionName)
@@ -101,6 +115,9 @@ struct VyronComposer: View {
             HStack(alignment: .top, spacing: VyronWorkspaceStyle.compactSpacing) {
                 ForEach(model.composerAttachments.folderAttachmentDraft.folders) { folder in
                     VyronFolderAttachmentCard(folder: folder, privacyHint: folderHelp, remove: model.removeFolderAttachment)
+                }
+                ForEach(model.composerAttachments.applications) { application in
+                    VyronApplicationAttachmentCard(attachment: application, remove: model.removeApplicationAttachment)
                 }
                 ForEach(model.composerAttachments.screenshotDraft.images) { image in
                     VyronScreenshotAttachmentCard(attachment: image, helpText: imageHelp, remove: model.removeScreenshot)

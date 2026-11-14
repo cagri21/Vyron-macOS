@@ -3,9 +3,11 @@ import SwiftUI
 struct VyronFollowUpActionsView: View {
     @Environment(\.locale) private var localizationLocale
     @EnvironmentObject private var model: AppModel
+    let submit: () -> Void
 
     var body: some View {
         let _ = localizationLocale
+        let canSubmit = model.canSubmitComposer
         HStack(spacing: VyronFollowUpStyle.controlSpacing) {
             if model.composer.isEditingQueuedMessage {
                 Button(VyronScheduledTaskText.cancel) { model.composer.cancelQueuedMessageEdit() }
@@ -46,18 +48,18 @@ struct VyronFollowUpActionsView: View {
                 .accessibilityLabel(VyronQueueText.stopTask)
             }
             if !model.computerWork.isComputerWorkActive {
-                Button { model.send() } label: {
+                Button(action: submit) {
                     Image(systemName: sendSymbol)
                         .font(VyronFollowUpStyle.sendIcon)
-                        .foregroundStyle(model.canSend ? Palette.text : Palette.muted)
+                        .foregroundStyle(canSubmit ? Palette.text : Palette.muted)
                         .frame(width: VyronFollowUpStyle.actionSize, height: VyronFollowUpStyle.actionSize)
                         .background(
-                            model.canSend ? Palette.controlAccent : Palette.field,
+                            canSubmit ? Palette.controlAccent : Palette.field,
                             in: Circle()
                         )
                 }
                 .buttonStyle(.plain)
-                .disabled(!model.canSend)
+                .disabled(!canSubmit)
                 .keyboardShortcut(model.selectedUserInputRequest == nil
                     ? KeyboardShortcut(.return, modifiers: .command) : nil)
                 .help(sendHelp)
@@ -68,6 +70,7 @@ struct VyronFollowUpActionsView: View {
 
     private var sendSymbol: String {
         if model.composer.isEditingQueuedMessage { return VyronSymbols.check }
+        if model.sideChatCommand != nil { return VyronSymbols.sideChat }
         if model.foregroundRun.isGenerating {
             return model.composer.queueMessages ? VyronSymbols.messageQueue : VyronSymbols.messageSteer
         }
@@ -76,6 +79,7 @@ struct VyronFollowUpActionsView: View {
 
     private var sendHelp: String {
         if model.composer.isEditingQueuedMessage { return VyronQueueText.saveEdit }
+        if model.sideChatCommand != nil { return VyronToolsText.sideChat }
         if model.foregroundRun.isGenerating {
             return model.composer.queueMessages ? VyronQueueText.message : VyronQueueText.steer
         }

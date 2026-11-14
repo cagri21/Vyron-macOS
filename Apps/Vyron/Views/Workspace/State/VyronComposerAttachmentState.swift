@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import VyronModelDomain
 
 @MainActor
 final class VyronComposerAttachmentState: ObservableObject {
@@ -8,6 +9,7 @@ final class VyronComposerAttachmentState: ObservableObject {
     @Published var folderAttachmentDraft = VyronFolderAttachmentDraft()
     @Published var pdfs: [VyronPDFAttachment] = []
     @Published var files: [VyronFileAttachment] = []
+    @Published var applications: [VyronApplicationAttachment] = []
     @Published var showScreenshotPicker = false
     @Published var pendingAttachments: Set<String> = []
 
@@ -18,7 +20,8 @@ final class VyronComposerAttachmentState: ObservableObject {
 
     var isImporting: Bool { screenshotDraft.isLoading || folderAttachmentDraft.isLoading }
     var hasDrafts: Bool {
-        !screenshotDraft.images.isEmpty || !folderAttachmentDraft.folders.isEmpty || !pdfs.isEmpty || !files.isEmpty
+        !screenshotDraft.images.isEmpty || !folderAttachmentDraft.folders.isEmpty || !pdfs.isEmpty
+            || !files.isEmpty || !applications.isEmpty
     }
 
     func resetDrafts() {
@@ -46,5 +49,6 @@ final class VyronComposerAttachmentState: ObservableObject {
         folderAttachmentDraft = VyronFolderAttachmentDraft()
         pdfs = []
         files = []
+        applications = []
     }
 }

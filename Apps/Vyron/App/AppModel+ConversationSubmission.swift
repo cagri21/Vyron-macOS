@@ -34,7 +34,8 @@ extension AppModel {
         let pdfs = composerAttachments.pdfs
         let files = composerAttachments.files
         let references = VyronConversationSubmissionReferences(
-            folders: Self.folderAttachmentContext(folders), pdfs: pdfs, files: files
+            folders: Self.folderAttachmentContext(folders), pdfs: pdfs, files: files,
+            applications: composerAttachments.applications
         )
         let referenceContext = references.context
         let prompt = enteredPrompt.isEmpty
@@ -110,6 +111,9 @@ extension AppModel {
             return VyronFolderAttachmentText.fileAnalysisPrompt
         }
         if !references.pdfs.isEmpty { return VyronFolderAttachmentText.pdfAnalysisPrompt }
+        if !includesImages, references.folders.isEmpty, !references.applications.isEmpty {
+            return VyronFolderAttachmentText.applicationAnalysisPrompt
+        }
         return references.folders.isEmpty ? VyronScreenshotText.analysisPrompt : VyronFolderAttachmentText.analysisPrompt
     }
 
@@ -140,6 +144,9 @@ extension AppModel {
         }
         if !submittedDraft.references.files.isEmpty {
             userMessage.fileAttachments = submittedDraft.references.files.map(\.info)
+        }
+        if !submittedDraft.references.applications.isEmpty {
+            userMessage.applicationAttachments = submittedDraft.references.applications
         }
         composerAttachments.resetDrafts()
         conversations[index].messages.append(userMessage)

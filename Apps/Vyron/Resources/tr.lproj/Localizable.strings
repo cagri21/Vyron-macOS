@@ -629,6 +629,10 @@
 "failedStatus" = "Başarısız";
 "folderAllow" = "İzin ver";
 "folderAttachmentAnalysisPrompt" = "Eklenen klasörleri analiz et. Yapılarını ve sağlanan dosya içeriklerini özetle, sorunları belirle ve iyileştirmeler öner. İncelemenin kapsam sınırlarını açıkça belirt.";
+"folderAttachmentApplicationAnalysisPrompt" = "Bir veya daha fazla uygulama ekledim.";
+"folderAttachmentApplicationOpen" = "%@ uygulamasını aç";
+"folderAttachmentApplicationReady" = "Uygulamalar eklemeye hazır";
+"folderAttachmentApplicationTooMany" = "Mesaj başına en fazla %d uygulama ekleyin.";
 "folderAttachmentChooseFolder" = "Klasör ekle…";
 "folderAttachmentContextTooLarge" = "Eklenen klasörler ve ileti analiz sınırını aşıyor. Bir klasörü kaldırın veya iletinizi kısaltın.";
 "folderAttachmentFileAnalysisPrompt" = "Ekli dosyaları analiz et. Çıkarabildiğin bilgileri özetle ve erişilemeyen içerikleri belirt.";
@@ -771,6 +775,7 @@
 "headerSideChatUnavailable" = "Yan sohbet başlatmadan önce bir modele bağlanın.";
 "headerSources" = "Kaynaklar";
 "headerSubagents" = "Alt ajanlar";
+"headerTemporarySideChatContext" = "%@ sohbetinden salt okunur bağlam içeren geçici sohbet.";
 "headerUnpin" = "Sabitlemeyi kaldır";
 "headerUnread" = "Okunmadı";
 "headerViewAll" = "Tümünü görüntüle";
@@ -1226,6 +1231,7 @@
 "skillsScanWarning" = "Bazı yetenek dosyaları veya bağlantıları atlandı. Diğer sonuçlar gösteriliyor.";
 "skillsSearch" = "Yeteneklerde ara";
 "skillsShared" = "Ortak";
+"skillsSideDescription" = "Mevcut sohbeti kesintiye uğratmadan geçici bir yan sohbet başlatın.";
 "skillsSubtitle" = "Claude, Codex ve projelerinizdeki yeteneklere göz atın.";
 "skillsTitle" = "Yetenekler";
 "skillsTruncated" = "Bu önizleme kısaltıldı. Yeteneğin tamamını okumak için dosyayı Finder’da açın.";

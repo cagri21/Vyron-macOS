@@ -4,6 +4,7 @@ import VyronCore
 struct VyronConversationWindowMessageView: View {
     let message: ChatMessage
     let isStreaming: Bool
+    let clarificationAnswers: [VyronClarificationAnswer]
 
     private var transcriptMessage: ChatMessage {
         var transcript = message
@@ -41,7 +42,9 @@ struct VyronConversationWindowMessageView: View {
                     }
                 }
             }
-            VyronConversationMessageView(message: transcriptMessage, isStreaming: isStreaming)
+            VyronConversationMessageView(
+                message: transcriptMessage, isStreaming: isStreaming, clarificationAnswers: clarificationAnswers
+            )
         }
     }
 }

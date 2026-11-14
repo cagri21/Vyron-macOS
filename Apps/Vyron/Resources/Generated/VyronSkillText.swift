@@ -95,6 +95,9 @@ enum VyronSkillText {
     static var shared: String {
         VyronResourceBundle.string("skillsShared", fallback: "Shared")
     }
+    static var sideDescription: String {
+        VyronResourceBundle.string("skillsSideDescription", fallback: "Start a temporary side chat without interrupting the current conversation.")
+    }
     static var subtitle: String {
         VyronResourceBundle.string("skillsSubtitle", fallback: "Browse skills from Claude, Codex, and your projects.")
     }

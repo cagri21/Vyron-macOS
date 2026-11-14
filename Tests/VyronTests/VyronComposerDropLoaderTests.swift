@@ -36,6 +36,26 @@ final class VyronComposerDropLoaderTests: XCTestCase {
         XCTAssertEqual(result.images.first?.mimeType, "image/png")
     }
 
+    func testApplicationDropPrefersBundleReferenceOverIcon() async throws {
+        let test = try VyronFeatureTestHarness()
+        defer { test.cleanUp() }
+        let application = test.directory.appendingPathComponent("Demo.app", isDirectory: true)
+        try FileManager.default.createDirectory(at: application, withIntermediateDirectories: true)
+        let item = provider(data: application.dataRepresentation, type: .fileURL)
+        item.suggestedName = application.lastPathComponent
+        let icon = try VyronScreenshotTestImage.jpeg()
+        item.registerDataRepresentation(forTypeIdentifier: UTType.jpeg.identifier, visibility: .all) { completion in
+            completion(icon, nil)
+            return nil
+        }
+
+        let result = try await VyronComposerDropLoader(providers: [item]).load()
+
+        XCTAssertEqual(result.applications.map(\.path), [application.path])
+        XCTAssertTrue(result.folders.isEmpty)
+        XCTAssertTrue(result.images.isEmpty)
+    }
+
     func testTextAndWebLinksAreRejectedBeforeLoading() {
         let text = provider(data: Data("hello".utf8), type: .plainText)
         let link = provider(data: Data("https://example.invalid".utf8), type: .url)

@@ -106,7 +106,9 @@ extension AppModel {
             copied.images = message.images
             copied.pdfPreviews = message.pdfPreviews
             copied.fileAttachments = message.fileAttachments
+            copied.applicationAttachments = message.applicationAttachments
             copied.parentResponseID = message.parentResponseID.flatMap { messageIDs[$0] }
+            copied.clarificationAnswers = message.clarificationAnswers
             return copied
         }
         if let originalContext = original.contextByMessageID {

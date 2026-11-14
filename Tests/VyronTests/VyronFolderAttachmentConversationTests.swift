@@ -127,7 +127,9 @@ final class VyronFolderAttachmentConversationTests: XCTestCase {
         let generation = test.model.composerAttachments.folderAttachmentDraft.generation
         test.model.loadComposerAttachments {
             await Task.yield()
-            return VyronComposerAttachments(folders: [folder])
+            var attachments = VyronComposerAttachments()
+            attachments.folders = [folder]
+            return attachments
         }
         XCTAssertTrue(test.model.composerAttachments.isImporting)
         XCTAssertFalse(test.model.canSelectComposerMode(.plan))

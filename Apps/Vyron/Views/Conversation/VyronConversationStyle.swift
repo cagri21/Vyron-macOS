@@ -13,6 +13,8 @@ enum VyronConversationStyle {
     static let userVerticalPadding: CGFloat = 11
     static let userRadius: CGFloat = 18
     static let maximumUserWidth: CGFloat = 520
+    static let clarificationAnswerSpacing: CGFloat = 7
+    static let clarificationPairSpacing: CGFloat = 12
     static let copyTopPadding: CGFloat = 4
     static let copyFeedbackDuration: Duration = .milliseconds(1_500)
     static let prose = Font.system(size: 14)

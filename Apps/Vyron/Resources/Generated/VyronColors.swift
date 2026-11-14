@@ -13,4 +13,7 @@ enum VyronColors {
     static let effortTrackInactive = VyronColorAssets.color(named: "EffortTrackInactive")
     static let effortTrackMiddle = VyronColorAssets.color(named: "EffortTrackMiddle")
     static let effortTrackStart = VyronColorAssets.color(named: "EffortTrackStart")
+    static let userMessageBackground = VyronColorAssets.color(named: "UserMessageBackground")
+    static let userMessageHint = VyronColorAssets.color(named: "UserMessageHint")
+    static let userMessageText = VyronColorAssets.color(named: "UserMessageText")
 }

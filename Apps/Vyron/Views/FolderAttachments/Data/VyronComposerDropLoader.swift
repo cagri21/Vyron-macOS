@@ -18,6 +18,7 @@ final class VyronComposerDropLoader {
     static func accepts(_ providers: [NSItemProvider]) -> Bool {
         !providers.isEmpty && providers.count <= VyronImageAttachment.maximumCount + AppModel.maximumFolderAttachments
             + VyronPDFAttachmentLimits.maximumCount + VyronFileAttachmentLimits.maximumCount
+            + AppModel.maximumApplicationAttachments
             && providers.allSatisfy {
                 hasFileURL($0) || hasPDF($0) || audioType($0) != nil || documentType($0) != nil
                     || VyronScreenshotDropLoader.hasImageRepresentation($0)
@@ -38,8 +39,10 @@ final class VyronComposerDropLoader {
             let suffix = filename.map { ($0 as NSString).pathExtension.lowercased() }
             let hasDocumentName = filename.map(VyronDocumentAttachmentLoader.supports(filename:)) == true
             let hasAudioName = filename.map(VyronAudioAttachmentLoader.supports(filename:)) == true
+            let isApplication = suffix == "app"
+                || provider.hasItemConformingToTypeIdentifier(UTType.applicationBundle.identifier)
             if Self.hasFileURL(provider), hasPDF || audioType != nil || hasDocumentName || hasAudioName
-                || suffix == "pdf" || !hasPixels {
+                || suffix == "pdf" || isApplication || !hasPixels {
                 let data = try await Self.read(provider, typeIdentifier: UTType.fileURL.identifier)
                 guard let url = URL(dataRepresentation: data, relativeTo: nil), url.isFileURL
                 else { throw VyronFolderAttachmentError.invalidFolder }

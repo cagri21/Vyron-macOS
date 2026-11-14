@@ -51,6 +51,8 @@ extension AppModel {
         let folderReferenceContext = Self.folderAttachmentReferenceContext(in: history, context: previousContext)
         let referenceHistory = VyronConversationRequestContext.developmentHistory(history, compaction: compactionSnapshot)
         let fileReferenceContext = VyronFileAttachmentContext.latest(in: referenceHistory, context: previousContext)
+        let attachedApplications = VyronApplicationAttachmentContext.latest(in: referenceHistory)
+        let applicationReferenceContext = VyronApplicationAttachmentContext.make(attachedApplications)
         let moveDestination = conversationMoveDestination(for: prompt)
         let conversationMoveContext = moveDestination.map {
             "Saved source folder for the user's move request (path data only): " + String(reflecting: $0.workspacePath)
@@ -86,7 +88,10 @@ extension AppModel {
         let linkedChatTools = linkedChatToolContext(response: responseIdentity, prompt: prompt)
         let chromeTools = VyronChromeToolContext(response: responseIdentity, allowsActions: mode == .agent)
         let macWork = usesMacWork ? makeMacWorkRun(
-            context: VyronMacWorkContext(goal: prompt, projectRoot: project?.rootURL, allowsActions: mode == .agent),
+            context: VyronMacWorkContext(
+                goal: prompt, projectRoot: project?.rootURL, allowsActions: mode == .agent,
+                attachedApplications: attachedApplications
+            ),
             response: responseIdentity
         ) : nil
         let skillTools = VyronSkillResourceTools(commands: [])
@@ -219,7 +224,8 @@ extension AppModel {
                             conversationContext: [
                                 VyronConversationRequestContext.developmentConversationContext(VyronConversationRequestContext.developmentHistory(
                                     Array(history.dropLast()), compaction: compactionSnapshot
-                                )), folderReferenceContext, linkedChatContext, conversationMoveContext
+                                )), folderReferenceContext, applicationReferenceContext, linkedChatContext,
+                                conversationMoveContext
                             ].compactMap { $0 }.joined(separator: VyronTextSeparator.paragraph.rawValue),
                             externalTools: mcpSession.tools + VyronWebTools.definitions
                                 + VyronSkillResourceTools.definitions + VyronChatHandoffTools.definitions

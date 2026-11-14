@@ -6,6 +6,7 @@ struct VyronComposerSkillPicker: View {
     @ObservedObject var skills: VyronComposerSkillsModel
     @Binding var draft: String
     let projectDirectory: URL?
+    let submit: () -> Void
 
     var body: some View {
         let _ = localizationLocale
@@ -103,6 +104,7 @@ struct VyronComposerSkillPicker: View {
                         ) {
                             if let replacement = skills.replacement(for: command, in: draft) {
                                 draft = replacement
+                                if case .side = command { submit() }
                             }
                         }
                         .id(command.id)

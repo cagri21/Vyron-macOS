@@ -5,6 +5,26 @@ enum VyronFolderAttachmentText {
     static var analysisPrompt: String {
         VyronResourceBundle.string("folderAttachmentAnalysisPrompt", fallback: "Analyze the attached folders. Summarize their structure and the supplied file contents, identify issues, and suggest improvements. Clearly state any coverage limits.")
     }
+    static var applicationAnalysisPrompt: String {
+        VyronResourceBundle.string("folderAttachmentApplicationAnalysisPrompt", fallback: "I’ve attached one or more applications.")
+    }
+    static func applicationOpen(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "folderAttachmentApplicationOpen",
+            fallback: "Open %@",
+            arguments: [p1]
+        )
+    }
+    static var applicationReady: String {
+        VyronResourceBundle.string("folderAttachmentApplicationReady", fallback: "Applications ready to attach")
+    }
+    static func applicationTooMany(_ p1: Int) -> String {
+        VyronResourceBundle.format(
+            "folderAttachmentApplicationTooMany",
+            fallback: "Attach up to %d applications per message.",
+            arguments: [p1]
+        )
+    }
     static var chooseFolder: String {
         VyronResourceBundle.string("folderAttachmentChooseFolder", fallback: "Attach a folder…")
     }
@@ -114,29 +134,5 @@ enum VyronFolderAttachmentText {
     }
     static var pdfNoText: String {
         VyronResourceBundle.string("folderAttachmentPdfNoText", fallback: "This PDF has no readable text within the analysis limits. Choose a PDF with selectable text.")
-    }
-    static func pdfPreview(_ p1: String) -> String {
-        VyronResourceBundle.format(
-            "folderAttachmentPdfPreview",
-            fallback: "Preview first page of %@",
-            arguments: [p1]
-        )
-    }
-    static func pdfPrivacyHint(_ p1: String) -> String {
-        VyronResourceBundle.format(
-            "folderAttachmentPdfPrivacyHint",
-            fallback: "When you send, %@ receives text extracted locally from the PDF. The preview and text are saved in this chat’s history.",
-            arguments: [p1]
-        )
-    }
-    static var pdfReady: String {
-        VyronResourceBundle.string("folderAttachmentPdfReady", fallback: "PDF ready to analyze")
-    }
-    static func pdfTooLarge(_ p1: Int) -> String {
-        VyronResourceBundle.format(
-            "folderAttachmentPdfTooLarge",
-            fallback: "This PDF exceeds the %d MiB import limit.",
-            arguments: [p1]
-        )
     }
 }

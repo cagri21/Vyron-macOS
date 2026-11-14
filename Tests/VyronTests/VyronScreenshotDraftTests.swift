@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import XCTest
 import VyronCore
@@ -5,6 +6,40 @@ import VyronCore
 
 @MainActor
 final class VyronScreenshotDraftTests: XCTestCase {
+    func testClipboardPNGAndTIFFBecomeDraftAttachments() async throws {
+        let test = try VyronFeatureTestHarness()
+        defer { test.cleanUp() }
+        let draft = "Describe this screenshot."
+        test.model.composer.draft = draft
+        let bitmap = try XCTUnwrap(NSBitmapImageRep(data: VyronScreenshotTestImage.jpeg()))
+
+        for type in [NSPasteboard.PasteboardType.png, .tiff] {
+            let data = try XCTUnwrap(bitmap.representation(using: type == .png ? .png : .tiff, properties: [:]))
+            XCTAssertTrue(test.model.pasteScreenshotImage(reportEmptyClipboard: false) { $0 == type ? data : nil })
+            try await test.waitUntil { !test.model.composerAttachments.screenshotDraft.isLoading }
+        }
+
+        let images = test.model.composerAttachments.screenshotDraft.images
+        XCTAssertEqual(images.map(\.name), Array(repeating: VyronScreenshotText.pastedImage, count: 2))
+        XCTAssertEqual(images.map(\.mimeType), ["image/png", "image/png"])
+        XCTAssertEqual(test.model.composer.draft, draft)
+        XCTAssertNil(test.model.errorMessage)
+    }
+
+    func testTextClipboardFallsThroughToStandardPaste() throws {
+        let test = try VyronFeatureTestHarness()
+        defer { test.cleanUp() }
+        let model = test.model
+        let readText: (NSPasteboard.PasteboardType) -> Data? = { $0 == .string ? Data("Pasted text".utf8) : nil }
+
+        XCTAssertFalse(model.pasteScreenshotImage(reportEmptyClipboard: false, readData: readText))
+        XCTAssertNil(model.errorMessage)
+        XCTAssertNil(model.composerAttachments.screenshotImportTask)
+
+        XCTAssertFalse(model.pasteScreenshotImage(readData: readText))
+        XCTAssertEqual(model.errorMessage, VyronScreenshotText.clipboardEmpty)
+    }
+
     func testImageImportPreservesPlanAndAllowsModeChoiceBeforeFirstMessage() async throws {
         let test = try VyronFeatureTestHarness()
         defer { test.cleanUp() }

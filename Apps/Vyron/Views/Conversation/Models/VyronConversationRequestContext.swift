@@ -90,6 +90,7 @@ enum VyronConversationRequestContext {
                 var contextual = message
                 contextual.pdfPreviews = nil
                 contextual.fileAttachments = nil
+                contextual.applicationAttachments = nil
                 guard let snapshot = context[message.id.uuidString], !includedSnapshots.contains(snapshot),
                     !newSnapshots.contains(snapshot)
                 else {

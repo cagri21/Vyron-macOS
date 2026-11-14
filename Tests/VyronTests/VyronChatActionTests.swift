@@ -100,8 +100,10 @@ final class VyronChatActionTests: XCTestCase {
             let response = try XCTUnwrap(original.messages.last)
             var question = ChatMessage(role: "assistant", content: "Which color?")
             question.parentResponseID = response.id
-            var answer = ChatMessage(role: "user", content: "Use blue.")
+            var answer = ChatMessage(role: "user", content: "Which color?\nUse blue.")
             answer.parentResponseID = response.id
+            let clarification = VyronClarificationAnswer(question: question.content, answer: "Use blue.")
+            answer.clarificationAnswers = [clarification]
             original.messages.insert(contentsOf: [question, answer], at: 1)
             original.contextByMessageID = [original.messages[0].id.uuidString: "Internal file context"]
             test.model.conversations = [original]
@@ -124,6 +126,7 @@ final class VyronChatActionTests: XCTestCase {
             XCTAssertTrue(Set(fork.messages.map(\.id)).isDisjoint(with: original.messages.map(\.id)))
             XCTAssertEqual(fork.messages[1].parentResponseID, fork.messages.last?.id)
             XCTAssertEqual(fork.messages[2].parentResponseID, fork.messages.last?.id)
+            XCTAssertEqual(fork.messages[2].clarificationAnswers, [clarification])
             XCTAssertEqual(fork.contextByMessageID, [fork.messages[0].id.uuidString: "Internal file context"])
             XCTAssertEqual(test.model.sidebarState.sidebarOrganization.folderID(for: .conversation(forkID)), folder)
             XCTAssertEqual(test.model.modelSelection.selectedModel, selectedModel)

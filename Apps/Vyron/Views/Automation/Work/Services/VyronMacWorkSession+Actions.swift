@@ -6,17 +6,26 @@ extension VyronMacWorkSession {
     func openApplication(_ call: DevelopmentToolCall) async throws -> DevelopmentExternalResult {
         try requireArguments(call, keys: ["application_id"])
         let id = try applicationID(call)
-        guard let app = dependencies.controller.availableApplications().first(where: { $0.id == id }) else {
-            throw argumentError()
-        }
+        guard let app = availableApplication(id: id) else { throw argumentError() }
         _ = try await authorize(call, application: app, element: nil)
         try validateCurrent()
-        guard dependencies.controller.availableApplications().contains(app) else { throw argumentError() }
+        guard availableApplication(id: id) == app else { throw argumentError() }
         let running: DesktopApplication
         if app.processIdentifier > 0 {
             running = try runningApplication(id: app.id)
             guard running.processIdentifier == app.processIdentifier else { throw argumentError() }
             try dependencies.controller.activate(application: running)
+        } else if let url = attachedApplicationURLs[id] {
+            do {
+                running = try await dependencies.controller.launch(
+                    attachedApplicationAt: url, expectedApplicationID: id
+                )
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                try Task.checkCancellation()
+                throw VyronMacWorkError(message: VyronToolsText.openFailed)
+            }
         } else {
             running = try await dependencies.controller.launch(applicationID: app.id)
         }

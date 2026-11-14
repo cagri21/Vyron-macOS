@@ -20,6 +20,8 @@ final class AppModel: ObservableObject {
         }
     }
     @Published var newSideChatSessions: [UUID: VyronSideChatSession] = [:]
+    // Temporary side chats are window-local history and never enter the saved conversation list.
+    @Published var temporarySideChatConversations: [UUID: Conversation] = [:]
     @Published var workspaceError: VyronWorkspaceError?
     @Published var statusMessage: String?
     @Published var isRunningScheduledTask = false

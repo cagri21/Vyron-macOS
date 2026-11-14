@@ -75,7 +75,42 @@ final class VyronClarificationHistoryTests: XCTestCase {
         XCTAssertEqual(context.originalGoal, goal)
         XCTAssertEqual(context.priorResponseIDs, [responseID])
         XCTAssertEqual(context.guidance, ["Which accent color?\nBlue"])
+        XCTAssertEqual(savedMessages[2].clarificationAnswers, [
+            VyronClarificationAnswer(question: "Which accent color?", answer: "Blue")
+        ])
         XCTAssertEqual(VyronConversationTimeline(messages: savedMessages).startDatesByMessageID[savedMessages[0].id], start)
+    }
+
+    func testSubmittedClarificationsKeepMultilineRepliesInQuestionOrder() async throws {
+        try await completeClarification(
+            questions: [
+                VyronUserInputQuestion(id: "accent", question: "Which accent color?\n\nGive one color."),
+                VyronUserInputQuestion(id: "settings", question: "Where should it appear?")
+            ],
+            answers: [
+                VyronUserInputAnswer(questionID: "settings", value: "Only in Settings."),
+                VyronUserInputAnswer(questionID: "accent", value: "Blue.\n\nMatch the icon.")
+            ]
+        )
+
+        let messages = model.messages
+        let transcript = VyronConversationTranscript(messages: messages)
+        XCTAssertEqual(transcript.rows.map(\.id), [messages[0].id, messages[2].id, messages[3].id])
+        XCTAssertEqual(transcript.rows[1].clarificationAnswers, [
+            VyronClarificationAnswer(question: "Which accent color?\n\nGive one color.", answer: "Blue.\n\nMatch the icon."),
+            VyronClarificationAnswer(question: "Where should it appear?", answer: "Only in Settings.")
+        ])
+        XCTAssertEqual(messages[2].content, """
+            Which accent color?
+
+            Give one color.
+            Blue.
+
+            Match the icon.
+
+            Where should it appear?
+            Only in Settings.
+            """)
     }
 
     func testRepeatedClarificationsKeepOneResponseOwnerAndOneTaskTimestamp() async throws {
@@ -219,10 +254,11 @@ final class VyronClarificationHistoryTests: XCTestCase {
     }
 
     @discardableResult
-    private func completeClarification() async throws -> VyronUserInputRequest {
-        let request = VyronUserInputRequest(questions: [
-            VyronUserInputQuestion(id: "accent", question: "Which accent color?")
-        ])
+    private func completeClarification(
+        questions: [VyronUserInputQuestion] = [VyronUserInputQuestion(id: "accent", question: "Which accent color?")],
+        answers: [VyronUserInputAnswer] = [VyronUserInputAnswer(questionID: "accent", value: "Blue")]
+    ) async throws -> VyronUserInputRequest {
+        let request = VyronUserInputRequest(questions: questions)
         let generationID = try XCTUnwrap(model.foregroundRun.activeGeneration)
         let waiting = Task { try await model.requestDevelopmentUserInput(request, generationID: generationID) }
         for _ in 0..<100 {
@@ -230,9 +266,7 @@ final class VyronClarificationHistoryTests: XCTestCase {
             try await Task.sleep(for: .milliseconds(10))
         }
         XCTAssertEqual(model.interactions.pendingUserInput?.id, request.id)
-        model.respondToUserInput(VyronUserInputResponse(requestID: request.id, answers: [
-            VyronUserInputAnswer(questionID: "accent", value: "Blue")
-        ]))
+        model.respondToUserInput(VyronUserInputResponse(requestID: request.id, answers: answers))
         _ = try await waiting.value
         return request
     }

@@ -4,7 +4,8 @@ import VyronCore
 extension AppModel {
     var canAttachFiles: Bool {
         canStartFileAttachmentImport && (canAttachScreenshots || canAttachPDFs
-            || composerAttachments.files.count < VyronFileAttachmentLimits.maximumCount)
+            || composerAttachments.files.count < VyronFileAttachmentLimits.maximumCount
+            || composerAttachments.applications.count < Self.maximumApplicationAttachments)
     }
 
     func chooseFileAttachments() {

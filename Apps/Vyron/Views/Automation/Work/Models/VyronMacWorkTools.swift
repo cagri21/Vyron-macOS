@@ -11,12 +11,12 @@ enum VyronMacWorkTools {
     static let openProject = "vyron_mac_open_project"
 
     static let definitions: [DevelopmentExternalTool] = [
-        tool(apps, description: "List available native Mac apps and current Mac-control permissions. "
+        tool(apps, description: "List available native Mac apps, attached apps, and current Mac-control permissions. "
             + "Use only returned application_id values. These native tools work separately "
             + "from protected project commands.",
             properties: [:], required: []),
         tool(openApp, description: "Open or focus one returned native Mac application. "
-            + "Known apps can open automatically; unfamiliar apps require native review. "
+            + "Known installed apps can open automatically. Attached and unfamiliar apps require native review to launch. "
             + "For Simulator requests use com.apple.iphonesimulator when listed, "
             + "otherwise Xcode Device Hub (com.apple.dt.Devices) when listed. "
             + "Inspect afterwards to verify actual state.",

@@ -7,6 +7,8 @@ import VyronCore
 final class VyronMacWorkSession {
     let context: VyronMacWorkContext
     let dependencies: VyronMacWorkDependencies
+    let attachedApplicationURLs: [String: URL]
+    private let ambiguousAttachedApplicationIDs: Set<String>
     private(set) var currentProjectRoot: URL?
     var snapshots: [String: VyronMacWorkSnapshot] = [:]
     var declinedActions: Set<String> = []
@@ -18,6 +20,21 @@ final class VyronMacWorkSession {
         self.context = context
         self.dependencies = dependencies
         currentProjectRoot = context.projectRoot
+        var attachedURLs: [String: URL] = [:]
+        var ambiguousIDs: Set<String> = []
+        for attachment in context.attachedApplications where attachment.path.hasPrefix("/") {
+            let url = attachment.url.standardizedFileURL
+            guard let app = dependencies.controller.attachedApplication(at: url) else { continue }
+            if let previousURL = attachedURLs[app.id], previousURL != url {
+                ambiguousIDs.insert(app.id)
+            }
+            attachedURLs[app.id] = url
+        }
+        for id in ambiguousIDs {
+            attachedURLs.removeValue(forKey: id)
+        }
+        attachedApplicationURLs = attachedURLs
+        ambiguousAttachedApplicationIDs = ambiguousIDs
     }
 
     func updateProjectRoot(_ root: URL) throws {
@@ -86,11 +103,29 @@ final class VyronMacWorkSession {
 
     func runningApplication(id: String) throws -> DesktopApplication {
         try validateCurrent()
-        guard let app = dependencies.controller.applications().first(where: { $0.id == id }),
+        let application = isAttachedApplicationID(id)
+            ? attachedApplication(id: id) : dependencies.controller.applications().first { $0.id == id }
+        guard let app = application,
             app.processIdentifier > 0 else {
             throw VyronMacWorkError(message: "Use a running application_id returned by vyron_mac_apps. "
                 + "Open the app first when it is installed but not running.")
         }
+        return app
+    }
+
+    func availableApplication(id: String) -> DesktopApplication? {
+        if isAttachedApplicationID(id) { return attachedApplication(id: id) }
+        return dependencies.controller.availableApplications().first { $0.id == id }
+    }
+
+    private func isAttachedApplicationID(_ id: String) -> Bool {
+        attachedApplicationURLs[id] != nil || ambiguousAttachedApplicationIDs.contains(id)
+    }
+
+    private func attachedApplication(id: String) -> DesktopApplication? {
+        guard let url = attachedApplicationURLs[id],
+            let app = dependencies.controller.attachedApplication(at: url), app.id == id
+        else { return nil }
         return app
     }
 
@@ -106,7 +141,11 @@ final class VyronMacWorkSession {
 
     private func applicationList() throws -> DevelopmentExternalResult {
         let permissions = dependencies.controller.permissions
-        let apps = dependencies.controller.availableApplications().prefix(128).map { app in
+        let attached = attachedApplicationURLs.keys.compactMap { attachedApplication(id: $0) }.sorted {
+            $0.name.localizedStandardCompare($1.name) == .orderedAscending
+        }
+        let catalog = dependencies.controller.availableApplications().filter { !isAttachedApplicationID($0.id) }
+        let apps = (attached + catalog).prefix(128).map { app in
             DevelopmentJSONValue.object([
                 "application_id": .string(app.id), "name": .string(app.name),
                 "is_running": .bool(app.processIdentifier > 0)

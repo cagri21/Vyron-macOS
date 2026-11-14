@@ -7,11 +7,9 @@ struct VyronConversationWindowView: View {
     @EnvironmentObject private var model: AppModel
     let conversationID: UUID
 
-    private var conversation: Conversation? {
-        model.conversations.first { $0.id == conversationID }
-    }
-
+    private var conversation: Conversation? { model.sideChatConversation(with: conversationID) }
     private var session: VyronSideChatSession? { model.newSideChatSessions[conversationID] }
+    private var isTemporary: Bool { model.isTemporarySideChat(conversationID) }
 
     var body: some View {
         let _ = localizationLocale
@@ -50,35 +48,42 @@ struct VyronConversationWindowView: View {
                     .font(VyronConversationWindowStyle.title)
                     .lineLimit(1)
                 if let session {
-                    Text(VyronHeaderText.sideChatContext(session.context.sourceTitle))
+                    Text(isTemporary
+                        ? VyronHeaderText.temporarySideChatContext(session.context.sourceTitle)
+                        : VyronHeaderText.sideChatContext(session.context.sourceTitle))
                         .font(VyronConversationWindowStyle.detail)
                         .foregroundStyle(Palette.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             Spacer(minLength: 0)
-            Button {
-                if model.openSideChatInMain(conversationID) { openWindow(id: VyronAppWindow.main) }
-            } label: {
-                Label(VyronHeaderText.openInMain, systemImage: VyronSymbols.openWindow)
-                    .font(VyronConversationWindowStyle.action)
+            if !isTemporary {
+                Button {
+                    if model.openSideChatInMain(conversationID) { openWindow(id: VyronAppWindow.main) }
+                } label: {
+                    Label(VyronHeaderText.openInMain, systemImage: VyronSymbols.openWindow)
+                        .font(VyronConversationWindowStyle.action)
+                }
+                .buttonStyle(QuietButtonStyle(foreground: Palette.text))
+                .disabled(!model.canOpenSideChatInMain(conversationID))
             }
-            .buttonStyle(QuietButtonStyle(foreground: Palette.text))
-            .disabled(!model.canOpenSideChatInMain(conversationID))
         }
         .padding(VyronConversationWindowStyle.headerInset)
     }
 
     private func transcript(_ conversation: Conversation) -> some View {
+        let transcript = VyronConversationTranscript(messages: conversation.messages)
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: VyronConversationWindowStyle.messageSpacing) {
-                    ForEach(conversation.messages) { message in
+                    ForEach(transcript.rows) { row in
+                        let message = row.message
                         VyronConversationWindowMessageView(
                             message: message,
                             isStreaming: model.isResponseActivityLive(
                                 conversationID: conversationID, messageID: message.id
-                            )
+                            ),
+                            clarificationAnswers: row.clarificationAnswers
                         )
                         .id(message.id)
                     }

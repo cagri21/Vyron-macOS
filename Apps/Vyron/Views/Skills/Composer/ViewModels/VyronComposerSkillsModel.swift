@@ -32,10 +32,11 @@ final class VyronComposerSkillsModel: ObservableObject {
 
     var visibleCommands: [VyronComposerCommand] {
         guard let query else { return [] }
-        let compact = VyronComposerCommand.compact
-        let includesCompact = query.isEmpty || compact.name.localizedStandardContains(query)
-            || compact.description.localizedStandardContains(query)
-        return (includesCompact ? [compact] : []) + commands.matching(query: query).map(VyronComposerCommand.skill)
+        let builtIns: [VyronComposerCommand] = [.compact, .side]
+        let matchingBuiltIns = builtIns.filter {
+            query.isEmpty || $0.name.localizedStandardContains(query) || $0.description.localizedStandardContains(query)
+        }
+        return matchingBuiltIns + commands.matching(query: query).map(VyronComposerCommand.skill)
     }
 
     var selectedCommand: VyronComposerCommand? {

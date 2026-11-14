@@ -429,7 +429,7 @@ public final class MacController {
         snapshots = snapshots.filter { $0.value.application.processIdentifier != running.processIdentifier }
     }
 
-    private static func descriptor(_ application: NSRunningApplication) -> DesktopApplication {
+    static func descriptor(_ application: NSRunningApplication) -> DesktopApplication {
         DesktopApplication(
             id: application.bundleIdentifier ?? "pid:\(application.processIdentifier)",
             name: application.localizedName ?? application.bundleIdentifier ?? "App \(application.processIdentifier)",

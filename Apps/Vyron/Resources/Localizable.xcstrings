@@ -1,6 +1,94 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "folderAttachmentApplicationAnalysisPrompt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I’ve attached one or more applications."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir veya daha fazla uygulama ekledim."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До повідомлення прикріплено одну або кілька програм."
+          }
+        }
+      }
+    },
+    "folderAttachmentApplicationOpen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ uygulamasını aç"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити %@"
+          }
+        }
+      }
+    },
+    "folderAttachmentApplicationReady": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applications ready to attach"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygulamalar eklemeye hazır"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Програми готові до прикріплення"
+          }
+        }
+      }
+    },
+    "folderAttachmentApplicationTooMany": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attach up to %d applications per message."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesaj başına en fazla %d uygulama ekleyin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прикріпіть не більше %d програм до одного повідомлення."
+          }
+        }
+      }
+    },
     "folderAttachmentChooseFolder": {
       "extractionState": "manual",
       "localizations": {
@@ -3619,6 +3707,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Скоротіть контекст розмови, зберігши повну історію чату."
+          }
+        }
+      }
+    },
+    "skillsSideDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a temporary side chat without interrupting the current conversation."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mevcut sohbeti kesintiye uğratmadan geçici bir yan sohbet başlatın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Почніть тимчасовий бічний чат, не перериваючи поточну розмову."
           }
         }
       }
@@ -31589,6 +31700,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Контекст лише для читання з %@. Цей чат працює окремо від початкового завдання."
+          }
+        }
+      }
+    },
+    "headerTemporarySideChatContext": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporary chat with read-only context from %@."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sohbetinden salt okunur bağlam içeren geçici sohbet."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тимчасовий чат із контекстом із %@, доступним лише для читання."
           }
         }
       }

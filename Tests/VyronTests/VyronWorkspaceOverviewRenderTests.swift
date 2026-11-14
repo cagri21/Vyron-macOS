@@ -59,6 +59,15 @@ final class VyronWorkspaceOverviewRenderTests: XCTestCase {
             size: CGSize(width: 1000, height: 760),
             to: directory.appendingPathComponent("window-new-side-chat.png")
         )
+        test.model.composer.draft = "/side"
+        let temporaryID = try XCTUnwrap(test.model.submitComposer())
+        try capture(
+            VyronConversationWindowView(conversationID: temporaryID),
+            model: test.model,
+            size: CGSize(width: 1000, height: 760),
+            to: directory.appendingPathComponent("window-temporary-side-chat.png")
+        )
+        test.model.closeSideChatWindow(temporaryID)
         XCTAssertFalse(test.model.foregroundRun.isGenerating)
         XCTAssertFalse(test.model.isSideChatGenerating(sideID))
         XCTAssertEqual(test.model.selectedConversationID, conversation.id)

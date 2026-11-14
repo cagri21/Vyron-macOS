@@ -122,7 +122,7 @@ final class VyronSideChatSession: ObservableObject {
     ) {
         guard owns(response) else { return }
         owner?.connectionBalances.responseCompleted(configuration.connection.id)
-        let conversation = owner?.conversations.first(where: { $0.id == response.conversationID })
+        let conversation = owner?.sideChatConversation(with: response.conversationID)
         let answer = content ?? conversation?.messages.first(where: { $0.id == response.messageID })?.content
         let saved = owner?.finishSideChatResponse(response, content: content, state: state, detail: detail) == true
         if saved {

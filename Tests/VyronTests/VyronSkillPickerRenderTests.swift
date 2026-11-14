@@ -34,7 +34,7 @@ final class VyronSkillPickerRenderTests: XCTestCase {
         model.updateDraft("/")
         XCTAssertEqual(model.visibleCommands.first?.name, "compact")
         let renderer = ImageRenderer(content: VyronComposerSkillPicker(
-            skills: model, draft: .constant("/"), projectDirectory: nil
+            skills: model, draft: .constant("/"), projectDirectory: nil, submit: {}
         )
             .environment(\.locale, Locale(identifier: "en"))
             .environment(\.colorScheme, .dark)

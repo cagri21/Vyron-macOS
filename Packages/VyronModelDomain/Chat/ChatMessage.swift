@@ -12,10 +12,14 @@ public struct ChatMessage: Identifiable, Codable, Sendable, Equatable {
     package var developmentTaskFilename: String?
     package var pdfPreviews: [VyronPDFPreview]?
     package var fileAttachments: [VyronFileAttachmentInfo]?
+    /// Local application references for transcript cards.
+    package var applicationAttachments: [VyronApplicationAttachment]?
     /// Screenshots produced by a Work response, retained as artifacts rather than future model inputs.
     public var capturedImages: [VyronImageAttachment]?
     /// Owning assistant response for a clarification child; absent in legacy conversation history.
     public var parentResponseID: UUID?
+    /// Structured display content for a user-input reply. `content` retains the plain transcript.
+    package var clarificationAnswers: [VyronClarificationAnswer]?
 
     public var conversationRole: VyronChatMessageRole? {
         VyronChatMessageRole(rawValue: role)

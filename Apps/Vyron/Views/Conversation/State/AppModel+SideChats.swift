@@ -12,6 +12,26 @@ extension AppModel {
 
     @discardableResult
     func newSideChat(from id: UUID) -> UUID? {
+        createSideChat(from: id, isTemporary: false)
+    }
+
+    func canCreateTemporarySideChat(from id: UUID) -> Bool {
+        canCreateSideChat(from: id)
+    }
+
+    func newTemporarySideChat(from id: UUID) -> UUID? {
+        createSideChat(from: id, isTemporary: true)
+    }
+
+    func isTemporarySideChat(_ id: UUID) -> Bool {
+        temporarySideChatConversations[id] != nil
+    }
+
+    func sideChatConversation(with id: UUID) -> Conversation? {
+        temporarySideChatConversations[id] ?? conversations.first { $0.id == id }
+    }
+
+    private func createSideChat(from id: UUID, isTemporary: Bool) -> UUID? {
         guard canCreateSideChat(from: id),
             let provider = modelSelection.inferenceProvider,
             let source = conversations.first(where: { $0.id == id })
@@ -43,20 +63,9 @@ extension AppModel {
         )
         conversation.projectPath = source.sidebarProjectPath
         conversation.mode = ComposerMode.chat.rawValue
-        let previousOrganization = sidebarState.sidebarOrganization
-        guard changeSidebar({ organization in
-            organization.registerConversation(id: conversation.id)
-            if let folderID = organization.folderID(for: .conversation(id)) {
-                try organization.move(.conversation(conversation.id), to: folderID)
-            }
-        }) else { return nil }
-        conversations.insert(conversation, at: 0)
-        guard saveHistory() else {
-            let historyError = errorMessage
-            conversations.removeAll { $0.id == conversation.id }
-            if changeSidebar({ $0 = previousOrganization }) {
-                errorMessage = historyError ?? VyronHeaderText.sideChatSaveFailed
-            }
+        if isTemporary {
+            temporarySideChatConversations[conversation.id] = conversation
+        } else if !saveNewSideChat(conversation, sourceID: id) {
             return nil
         }
         let context = VyronSideChatContext(
@@ -70,6 +79,26 @@ extension AppModel {
         return conversation.id
     }
 
+    private func saveNewSideChat(_ conversation: Conversation, sourceID: UUID) -> Bool {
+        let previousOrganization = sidebarState.sidebarOrganization
+        guard changeSidebar({ organization in
+            organization.registerConversation(id: conversation.id)
+            if let folderID = organization.folderID(for: .conversation(sourceID)) {
+                try organization.move(.conversation(conversation.id), to: folderID)
+            }
+        }) else { return false }
+        conversations.insert(conversation, at: 0)
+        guard saveHistory() else {
+            let historyError = errorMessage
+            conversations.removeAll { $0.id == conversation.id }
+            if changeSidebar({ $0 = previousOrganization }) {
+                errorMessage = historyError ?? VyronHeaderText.sideChatSaveFailed
+            }
+            return false
+        }
+        return true
+    }
+
     func isSideChatGenerating(_ id: UUID?) -> Bool {
         guard let id else { return false }
         return newSideChatSessions[id]?.isGenerating == true
@@ -81,9 +110,11 @@ extension AppModel {
     }
 
     func canSendSideChat(_ id: UUID) -> Bool {
-        !isShuttingDown && !modelDownloads.isChangingPrecision
-            && !sidebarState.sidebarOrganization.isConversationArchived(id)
-            && newSideChatSessions[id] != nil
+        guard !isShuttingDown, !modelDownloads.isChangingPrecision, newSideChatSessions[id] != nil else {
+            return false
+        }
+        if isTemporarySideChat(id) { return true }
+        return !sidebarState.sidebarOrganization.isConversationArchived(id)
             && foregroundRun.response(in: id) == nil && computerWork.pendingAgentGoal?.conversationID != id
             && !(selectedConversationID == id
                 && (foregroundRun.isGenerating || computerWork.isComputerWorkActive || foregroundRun.isStoppingDevelopment))
@@ -115,6 +146,9 @@ extension AppModel {
 
     func closeSideChatWindow(_ id: UUID) {
         newSideChatSessions[id]?.stop()
+        guard isTemporarySideChat(id) else { return }
+        temporarySideChatConversations.removeValue(forKey: id)
+        newSideChatSessions.removeValue(forKey: id)
     }
 
     func stopSideChatsForShutdown() -> [Task<Void, Never>] {
@@ -124,9 +158,8 @@ extension AppModel {
     func beginSideChatTurn(_ context: VyronSideChatContext, prompt: String) -> VyronSideChatTurn? {
         let id = context.conversationID
         guard canSendSideChat(id), !isSideChatGenerating(id),
-            let ci = conversations.firstIndex(where: { $0.id == id })
+            var conversation = sideChatConversation(with: id)
         else { return nil }
-        let previous = conversations[ci]
         let user = ChatMessage(role: .user, content: prompt)
         var activity = ResponseActivity()
         activity.record(
@@ -134,28 +167,25 @@ extension AppModel {
             detail: newSideChatSessions[id].map { VyronStatusText.responseModel($0.configuration.model) }
         )
         let assistant = ChatMessage(role: .assistant, content: "", activity: activity)
-        conversations[ci].messages.append(user)
+        conversation.messages.append(user)
         var requestContext: [String] = []
-        if !context.snapshot.isEmpty, conversations[ci].contextByMessageID?.isEmpty != false {
+        if !context.snapshot.isEmpty, conversation.contextByMessageID?.isEmpty != false {
             requestContext.append(context.snapshot)
         }
         if let linkedReference = linkedChatReferenceContext(in: prompt, excludingConversationID: id) {
             requestContext.append(linkedReference)
         }
         if !requestContext.isEmpty {
-            var snapshots = conversations[ci].contextByMessageID ?? [:]
+            var snapshots = conversation.contextByMessageID ?? [:]
             snapshots[user.id.uuidString] = requestContext.joined(separator: "\n\n")
-            conversations[ci].contextByMessageID = snapshots
+            conversation.contextByMessageID = snapshots
         }
         let request = VyronConversationRequestContext.boundedHistory(
-            conversations[ci].messages, context: conversations[ci].contextByMessageID ?? [:]
+            conversation.messages, context: conversation.contextByMessageID ?? [:]
         )
-        conversations[ci].messages.append(assistant)
-        conversations[ci].updatedAt = Date()
-        guard saveHistory() else {
-            conversations[ci] = previous
-            return nil
-        }
+        conversation.messages.append(assistant)
+        conversation.updatedAt = Date()
+        guard commitSideChatConversation(conversation) else { return nil }
         return VyronSideChatTurn(
             response: VyronSideChatResponse(generationID: UUID(), conversationID: id, messageID: assistant.id),
             messages: request.messages
@@ -163,11 +193,14 @@ extension AppModel {
     }
 
     func appendSideChatToken(_ token: String, response: VyronSideChatResponse) {
-        guard ownsSideChatResponse(response),
-            let ci = conversations.firstIndex(where: { $0.id == response.conversationID }),
-            let mi = conversations[ci].messages.firstIndex(where: { $0.id == response.messageID })
-        else { return }
-        conversations[ci].messages[mi].content += token
+        guard ownsSideChatResponse(response) else { return }
+        let id = response.conversationID
+        if let mi = temporarySideChatConversations[id]?.messages.firstIndex(where: { $0.id == response.messageID }) {
+            temporarySideChatConversations[id]?.messages[mi].content += token
+        } else if let ci = conversations.firstIndex(where: { $0.id == id }),
+            let mi = conversations[ci].messages.firstIndex(where: { $0.id == response.messageID }) {
+            conversations[ci].messages[mi].content += token
+        }
     }
 
     @discardableResult
@@ -178,16 +211,26 @@ extension AppModel {
         detail: String?
     ) -> Bool {
         guard ownsSideChatResponse(response),
-            let ci = conversations.firstIndex(where: { $0.id == response.conversationID }),
-            let mi = conversations[ci].messages.firstIndex(where: { $0.id == response.messageID })
+            var conversation = sideChatConversation(with: response.conversationID),
+            let mi = conversation.messages.firstIndex(where: { $0.id == response.messageID })
         else { return false }
-        let previous = conversations[ci]
-        if let content { conversations[ci].messages[mi].content = content }
+        if let content { conversation.messages[mi].content = content }
         let title = state == .completed ? VyronStatusText.responseReady
             : state == .stopped ? VyronHeaderText.sideChatStopped : VyronStatusText.responseFailed
-        conversations[ci].messages[mi].activity?.record(title, detail: detail)
-        conversations[ci].messages[mi].activity?.finish(state)
-        conversations[ci].updatedAt = Date()
+        conversation.messages[mi].activity?.record(title, detail: detail)
+        conversation.messages[mi].activity?.finish(state)
+        conversation.updatedAt = Date()
+        return commitSideChatConversation(conversation)
+    }
+
+    private func commitSideChatConversation(_ conversation: Conversation) -> Bool {
+        if isTemporarySideChat(conversation.id) {
+            temporarySideChatConversations[conversation.id] = conversation
+            return true
+        }
+        guard let ci = conversations.firstIndex(where: { $0.id == conversation.id }) else { return false }
+        let previous = conversations[ci]
+        conversations[ci] = conversation
         guard saveHistory() else {
             conversations[ci] = previous
             return false
@@ -197,7 +240,6 @@ extension AppModel {
 
     private func ownsSideChatResponse(_ response: VyronSideChatResponse) -> Bool {
         newSideChatSessions[response.conversationID]?.owns(response) == true
-            && conversations.contains { $0.id == response.conversationID }
     }
 
     private static func sideChatSnapshot(_ source: Conversation) -> String {

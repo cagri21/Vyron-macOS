@@ -12,6 +12,9 @@ enum Palette {
     static let selection = Color.white.opacity(0.052)
     static let text = rgb(0xDFDFDF)
     static let muted = Color.white.opacity(0.498)
+    static var userMessageBackground: Color { VyronColors.userMessageBackground }
+    static var userMessageText: Color { VyronColors.userMessageText }
+    static var userMessageHint: Color { VyronColors.userMessageHint }
     static let accent = text
     static let onAccent = field
     static let controlAccent = rgb(0x339CFF)

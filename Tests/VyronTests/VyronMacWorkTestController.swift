@@ -14,6 +14,7 @@ final class VyronMacWorkTestController: VyronMacWorkControlling {
     var permissions = MacPermissionState(accessibilityGranted: true, screenCaptureGranted: true)
     var catalog = [app]
     var running = [app]
+    var attachedCatalog: [URL: DesktopApplication] = [:]
     var elementTitle = "+"
     var elementRole = "AXButton"
     var elementIsSecure = false
@@ -24,6 +25,7 @@ final class VyronMacWorkTestController: VyronMacWorkControlling {
     var onActivate: (@MainActor () -> Void)?
     var onElementAction: (@MainActor () throws -> Void)?
     var launchedIDs: [String] = []
+    var launchedApplicationURLs: [URL] = []
     var clickedIDs: [Int] = []
     var typedTexts: [String] = []
     var keys: [String] = []
@@ -34,6 +36,7 @@ final class VyronMacWorkTestController: VyronMacWorkControlling {
     func requestAccessibility() { accessibilityRequests += 1 }
     func availableApplications() -> [DesktopApplication] { catalog }
     func applications() -> [DesktopApplication] { running }
+    func attachedApplication(at url: URL) -> DesktopApplication? { attachedCatalog[url] }
 
     func launch(applicationID: String) async throws -> DesktopApplication {
         launchedIDs.append(applicationID)
@@ -46,6 +49,20 @@ final class VyronMacWorkTestController: VyronMacWorkControlling {
         )
         running = [app]
         catalog = [app]
+        return app
+    }
+
+    func launch(attachedApplicationAt url: URL, expectedApplicationID: String) async throws -> DesktopApplication {
+        launchedApplicationURLs.append(url)
+        try await onLaunch?()
+        guard let installed = attachedCatalog[url], installed.id == expectedApplicationID else {
+            throw MacControlError.applicationUnavailable
+        }
+        let app = DesktopApplication(
+            id: installed.id, name: installed.name, bundleIdentifier: installed.bundleIdentifier, processIdentifier: 43
+        )
+        attachedCatalog[url] = app
+        running.append(app)
         return app
     }
 

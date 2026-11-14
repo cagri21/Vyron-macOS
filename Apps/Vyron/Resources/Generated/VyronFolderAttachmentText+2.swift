@@ -2,6 +2,30 @@
 import Foundation
 
 extension VyronFolderAttachmentText {
+    static func pdfPreview(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "folderAttachmentPdfPreview",
+            fallback: "Preview first page of %@",
+            arguments: [p1]
+        )
+    }
+    static func pdfPrivacyHint(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "folderAttachmentPdfPrivacyHint",
+            fallback: "When you send, %@ receives text extracted locally from the PDF. The preview and text are saved in this chat’s history.",
+            arguments: [p1]
+        )
+    }
+    static var pdfReady: String {
+        VyronResourceBundle.string("folderAttachmentPdfReady", fallback: "PDF ready to analyze")
+    }
+    static func pdfTooLarge(_ p1: Int) -> String {
+        VyronResourceBundle.format(
+            "folderAttachmentPdfTooLarge",
+            fallback: "This PDF exceeds the %d MiB import limit.",
+            arguments: [p1]
+        )
+    }
     static func pdfTooMany(_ p1: Int) -> String {
         VyronResourceBundle.format(
             "folderAttachmentPdfTooMany",

@@ -3,6 +3,7 @@ import VyronCore
 
 extension AppModel {
     nonisolated static let maximumFolderAttachments = 4
+    nonisolated static let maximumApplicationAttachments = 4
 
     var canAttachFolders: Bool {
         canStartFileAttachmentImport
@@ -61,6 +62,10 @@ extension AppModel {
         composerAttachments.folderAttachmentDraft.folders.removeAll { $0.id == id }
     }
 
+    func removeApplicationAttachment(_ id: UUID) {
+        composerAttachments.applications.removeAll { $0.id == id }
+    }
+
     func loadComposerAttachments(_ load: @escaping @Sendable () async throws -> VyronComposerAttachments) {
         guard canAcceptComposerDrop else { return }
         let generation = composerAttachments.folderAttachmentDraft.generation
@@ -84,6 +89,7 @@ extension AppModel {
                 let images = composerAttachments.screenshotDraft.images + result.images
                 let pdfs = composerAttachments.pdfs + result.pdfs
                 let files = composerAttachments.files + result.files
+                let applications = composerAttachments.applications + result.applications
                 guard folders.count <= Self.maximumFolderAttachments else {
                     throw VyronFolderAttachmentDraftError.tooMany
                 }
@@ -94,6 +100,8 @@ extension AppModel {
                 else { throw VyronPDFAttachmentError.tooMany }
                 guard files.count <= VyronFileAttachmentLimits.maximumCount
                 else { throw VyronComposerFileImportError.tooMany }
+                guard applications.count <= Self.maximumApplicationAttachments
+                else { throw VyronApplicationAttachmentError.tooMany }
                 guard Self.folderAttachmentContext(folders).utf8.count + VyronPDFAttachmentContext.make(pdfs).utf8.count
                     + VyronFileAttachmentContext.make(files).utf8.count
                     + VyronConversationRequestContext.systemPrompt.utf8.count
@@ -108,10 +116,13 @@ extension AppModel {
                 composerAttachments.screenshotDraft.images = images
                 composerAttachments.pdfs = pdfs
                 composerAttachments.files = files
+                composerAttachments.applications = applications
                 if !result.files.isEmpty {
                     statusMessage = VyronFolderAttachmentText.fileReady
                 } else if !result.pdfs.isEmpty {
                     statusMessage = VyronFolderAttachmentText.pdfReady
+                } else if !result.applications.isEmpty {
+                    statusMessage = VyronFolderAttachmentText.applicationReady
                 } else {
                     statusMessage = result.folders.isEmpty ? VyronScreenshotText.readyToAnalyze : VyronFolderAttachmentText.ready
                 }

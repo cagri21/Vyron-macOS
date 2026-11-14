@@ -2,7 +2,7 @@ import Foundation
 import VyronCore
 
 struct VyronConversationCompactionCommand {
-    static let name = "compact"
+    static let name = VyronBuiltInComposerCommand.compact.rawValue
     static let invocation = "/" + name
     static let maximumFocusBytes = 1_500
 

@@ -629,6 +629,10 @@
 "failedStatus" = "Помилка";
 "folderAllow" = "Дозволити";
 "folderAttachmentAnalysisPrompt" = "Проаналізуй додані папки. Підсумуй їхню структуру та наданий вміст файлів, визнач проблеми й запропонуй поліпшення. Чітко зазнач обмеження охоплення.";
+"folderAttachmentApplicationAnalysisPrompt" = "До повідомлення прикріплено одну або кілька програм.";
+"folderAttachmentApplicationOpen" = "Відкрити %@";
+"folderAttachmentApplicationReady" = "Програми готові до прикріплення";
+"folderAttachmentApplicationTooMany" = "Прикріпіть не більше %d програм до одного повідомлення.";
 "folderAttachmentChooseFolder" = "Додати папку…";
 "folderAttachmentContextTooLarge" = "Додані папки та повідомлення перевищують обмеження обсягу аналізу. Вилучіть папку або скоротіть повідомлення.";
 "folderAttachmentFileAnalysisPrompt" = "Проаналізуй прикріплені файли. Підсумуй те, що вдалося визначити, і зазнач, який вміст був недоступний.";
@@ -771,6 +775,7 @@
 "headerSideChatUnavailable" = "Підключіть модель перед початком бічного чату.";
 "headerSources" = "Джерела";
 "headerSubagents" = "Підлеглі агенти";
+"headerTemporarySideChatContext" = "Тимчасовий чат із контекстом із %@, доступним лише для читання.";
 "headerUnpin" = "Відкріпити";
 "headerUnread" = "Непрочитане";
 "headerViewAll" = "Переглянути все";
@@ -1226,6 +1231,7 @@
 "skillsScanWarning" = "Деякі файли навичок або посилання пропущено. Інші результати показано.";
 "skillsSearch" = "Пошук навичок";
 "skillsShared" = "Спільні";
+"skillsSideDescription" = "Почніть тимчасовий бічний чат, не перериваючи поточну розмову.";
 "skillsSubtitle" = "Переглядайте навички Claude, Codex і своїх проєктів.";
 "skillsTitle" = "Навички";
 "skillsTruncated" = "Цей попередній перегляд скорочено. Відкрийте файл у Finder, щоб прочитати навичку повністю.";

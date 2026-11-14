@@ -629,6 +629,10 @@
 "failedStatus" = "Failed";
 "folderAllow" = "Allow";
 "folderAttachmentAnalysisPrompt" = "Analyze the attached folders. Summarize their structure and the supplied file contents, identify issues, and suggest improvements. Clearly state any coverage limits.";
+"folderAttachmentApplicationAnalysisPrompt" = "I’ve attached one or more applications.";
+"folderAttachmentApplicationOpen" = "Open %@";
+"folderAttachmentApplicationReady" = "Applications ready to attach";
+"folderAttachmentApplicationTooMany" = "Attach up to %d applications per message.";
 "folderAttachmentChooseFolder" = "Attach a folder…";
 "folderAttachmentContextTooLarge" = "The attached folders and message exceed the analysis limit. Remove a folder or shorten your message.";
 "folderAttachmentFileAnalysisPrompt" = "Analyze the attached files. Summarize what you can determine and mention any unavailable content.";
@@ -771,6 +775,7 @@
 "headerSideChatUnavailable" = "Connect a model before starting a side chat.";
 "headerSources" = "Sources";
 "headerSubagents" = "Subagents";
+"headerTemporarySideChatContext" = "Temporary chat with read-only context from %@.";
 "headerUnpin" = "Unpin";
 "headerUnread" = "Unread";
 "headerViewAll" = "View all";
@@ -1226,6 +1231,7 @@
 "skillsScanWarning" = "Some skill files or links were skipped. Other results are shown.";
 "skillsSearch" = "Search skills";
 "skillsShared" = "Shared";
+"skillsSideDescription" = "Start a temporary side chat without interrupting the current conversation.";
 "skillsSubtitle" = "Browse skills from Claude, Codex, and your projects.";
 "skillsTitle" = "Skills";
 "skillsTruncated" = "This preview is shortened. Open the file in Finder to read the full skill.";

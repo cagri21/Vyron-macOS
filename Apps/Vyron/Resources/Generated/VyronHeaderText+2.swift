@@ -73,6 +73,13 @@ extension VyronHeaderText {
     static var subagents: String {
         VyronResourceBundle.string("headerSubagents", fallback: "Subagents")
     }
+    static func temporarySideChatContext(_ p1: String) -> String {
+        VyronResourceBundle.format(
+            "headerTemporarySideChatContext",
+            fallback: "Temporary chat with read-only context from %@.",
+            arguments: [p1]
+        )
+    }
     static var unpin: String {
         VyronResourceBundle.string("headerUnpin", fallback: "Unpin")
     }

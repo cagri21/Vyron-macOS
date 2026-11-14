@@ -1,11 +1,13 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct VyronVoiceComposerInput: View {
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var model: AppModel
     @ObservedObject var voice: VyronVoiceModel
     let placeholder: String
+    let submit: () -> Void
     @FocusState private var inputFocused: Bool
 
     private var isInputDisabled: Bool {
@@ -43,13 +45,24 @@ struct VyronVoiceComposerInput: View {
                         + "\n" + VyronSkillText.composerHint
                 )
                 .focused($inputFocused)
+                .onPasteCommand(of: [.fileURL]) { providers in
+                    guard inputFocused, !isInputDisabled else { return }
+                    _ = model.acceptComposerDrop(providers)
+                }
+                .background {
+                    VyronComposerPasteShortcut(isEnabled: inputFocused && !isInputDisabled) {
+                        model.pasteComposerAttachments()
+                    }
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
                 .onKeyPress(.return, phases: .down) { keyPress in
                     guard inputFocused, !isInputDisabled else { return .ignored }
                     return VyronComposerReturnKey.handle(
                         modifiers: keyPress.modifiers,
                         editor: NSApp.keyWindow?.firstResponder as? NSTextInputClient
                     ) {
-                        if !acceptSkillSelection() { model.send() }
+                        if model.sideChatCommand != nil || !acceptSkillSelection(runsSideChat: true) { submit() }
                     }
                 }
                 .onKeyPress(.tab, phases: .down) { keyPress in
@@ -105,13 +118,14 @@ struct VyronVoiceComposerInput: View {
         }
     }
 
-    private func acceptSkillSelection() -> Bool {
+    private func acceptSkillSelection(runsSideChat: Bool = false) -> Bool {
         let skills = model.composerSkills
         skills.updateDraft(model.composer.draft)
         guard skills.isPresented else { return false }
         if let command = skills.selectedCommand,
             let replacement = skills.replacement(for: command, in: model.composer.draft) {
             model.composer.draft = replacement
+            if runsSideChat, case .side = command, model.sideChatCommand != nil { submit() }
         }
         return true
     }

@@ -7,6 +7,7 @@ struct VyronConversationMessageView: View {
     let message: ChatMessage
     let isStreaming: Bool
     var showsResponseChanges = false
+    var clarificationAnswers: [VyronClarificationAnswer] = []
     @State private var copied = false
     private var isUser: Bool { message.conversationRole == .user }
     private var displayContent: String {
@@ -57,17 +58,7 @@ struct VyronConversationMessageView: View {
                 if let filename = message.developmentTaskFilename {
                     VyronDevelopmentTaskAttachmentView(filename: filename, content: message.content)
                 } else {
-                    Text(verbatim: message.content)
-                        .font(VyronConversationStyle.prose)
-                        .lineSpacing(VyronConversationStyle.proseLineSpacing)
-                        .foregroundStyle(Palette.text)
-                        .textSelection(.enabled)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, VyronConversationStyle.userHorizontalPadding)
-                        .padding(.vertical, VyronConversationStyle.userVerticalPadding)
-                        .background(
-                            Palette.surface, in: RoundedRectangle(cornerRadius: VyronConversationStyle.userRadius)
-                        )
+                    VyronUserMessageBubble(content: message.content, clarificationAnswers: clarificationAnswers)
                         .frame(maxWidth: VyronConversationStyle.maximumUserWidth, alignment: .trailing)
                 }
             }
@@ -79,7 +70,8 @@ struct VyronConversationMessageView: View {
     private var userAttachments: some View {
         let pdfs = message.pdfPreviews ?? []
         let files = message.fileAttachments ?? []
-        if !pdfs.isEmpty || !files.isEmpty {
+        let applications = message.applicationAttachments ?? []
+        if !pdfs.isEmpty || !files.isEmpty || !applications.isEmpty {
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: VyronWorkspaceStyle.controlSpacing) {
                     ForEach(message.images ?? []) { image in
@@ -90,6 +82,9 @@ struct VyronConversationMessageView: View {
                     }
                     ForEach(files) { file in
                         VyronFileAttachmentCard(info: file)
+                    }
+                    ForEach(applications) { application in
+                        VyronApplicationAttachmentCard(attachment: application, remove: nil)
                     }
                 }
             }

@@ -8,7 +8,11 @@ extension VyronMacWorkSession {
     ) -> AutomationDecision {
         let kind: String
         switch call.function.name {
-        case VyronMacWorkTools.openApp: kind = application.processIdentifier > 0 ? "activate" : "launch"
+        case VyronMacWorkTools.openApp:
+            if application.processIdentifier <= 0, attachedApplicationURLs[application.id] != nil {
+                return .review("Review opening this attached application before the agent continues.")
+            }
+            kind = application.processIdentifier > 0 ? "activate" : "launch"
         case VyronMacWorkTools.openProject: kind = "launch"
         case VyronMacWorkTools.click: kind = "click"
         case VyronMacWorkTools.typeText: kind = "typeText"
@@ -46,6 +50,9 @@ extension VyronMacWorkSession {
                 "application": .string(application.name), "application_id": .string(application.id),
                 "reason": .string(reason), "request": .object(call.function.arguments)
             ]
+            if call.function.name == VyronMacWorkTools.openApp, let url = attachedApplicationURLs[application.id] {
+                verified["attached_application_path"] = .string(url.path)
+            }
             if let element {
                 verified["native_target"] = .object([
                     "role": .string(element.role), "title": .string(element.title),

@@ -25,8 +25,10 @@ final class VyronComposerSkillsModelTests: XCTestCase {
         await model.load(projectDirectory: nil)
         model.updateDraft("/")
         XCTAssertTrue(model.isPresented)
-        XCTAssertEqual(model.visibleCommands.count, 4)
+        XCTAssertEqual(model.visibleCommands.map(\.name), ["compact", "side", "alpha", "beta", "vyron"])
         XCTAssertEqual(model.selectedCommand?.name, "compact")
+        model.moveSelection(by: 1)
+        XCTAssertEqual(model.selectedCommand?.name, "side")
         model.moveSelection(by: 1)
         XCTAssertEqual(model.selectedCommand?.name, "alpha")
         model.moveSelection(by: 100)
@@ -44,12 +46,12 @@ final class VyronComposerSkillsModelTests: XCTestCase {
         XCTAssertNil(model.selectedCommand)
     }
 
-    func testCompactIsAvailableWithoutSkillsAndSelectionOnlyInsertsCommand() throws {
+    func testBuiltInCommandsProvideInsertionTextWithoutInstalledSkills() throws {
         let model = VyronComposerSkillsModel()
         model.updateDraft("/")
         XCTAssertNil(model.inventory)
         XCTAssertTrue(model.commands.entries.isEmpty)
-        XCTAssertEqual(model.visibleCommands.map(\.name), ["compact"])
+        XCTAssertEqual(model.visibleCommands.map(\.name), ["compact", "side"])
         let compact = try XCTUnwrap(model.selectedCommand)
         XCTAssertNil(compact.skill)
         XCTAssertEqual(compact.scopeLabel, VyronSkillText.commandLabel)
@@ -58,6 +60,15 @@ final class VyronComposerSkillsModelTests: XCTestCase {
         model.updateDraft("/comp")
         XCTAssertEqual(model.selectedCommand?.name, "compact")
         model.updateDraft("/compact ")
+        XCTAssertFalse(model.isPresented)
+
+        model.updateDraft("/sid")
+        let side = try XCTUnwrap(model.selectedCommand)
+        XCTAssertEqual(side.name, "side")
+        XCTAssertNil(side.skill)
+        XCTAssertEqual(side.scopeLabel, VyronSkillText.commandLabel)
+        XCTAssertEqual(model.replacement(for: side, in: "/sid"), "/side ")
+        model.updateDraft("/side ")
         XCTAssertFalse(model.isPresented)
     }
 
@@ -88,7 +99,7 @@ final class VyronComposerSkillsModelTests: XCTestCase {
         await loader.waitForRequestCount(1)
         await loader.complete(0, result: .success(inventory([skill("old")])))
         await oldLoad.value
-        XCTAssertEqual(model.visibleCommands.map(\.name), ["compact", "old"])
+        XCTAssertEqual(model.visibleCommands.map(\.name), ["compact", "side", "old"])
 
         let refresh = Task { await model.load(projectDirectory: URL(fileURLWithPath: "/old")) }
         await loader.waitForRequestCount(2)
