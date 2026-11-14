@@ -7,28 +7,7 @@ extension VyronMacWorkSession {
         try requireArguments(call, keys: ["application_id"])
         let id = try applicationID(call)
         guard let app = availableApplication(id: id) else { throw argumentError() }
-        _ = try await authorize(call, application: app, element: nil)
-        try validateCurrent()
-        guard availableApplication(id: id) == app else { throw argumentError() }
-        let running: DesktopApplication
-        if app.processIdentifier > 0 {
-            running = try runningApplication(id: app.id)
-            guard running.processIdentifier == app.processIdentifier else { throw argumentError() }
-            try dependencies.controller.activate(application: running)
-        } else if let url = attachedApplicationURLs[id] {
-            do {
-                running = try await dependencies.controller.launch(
-                    attachedApplicationAt: url, expectedApplicationID: id
-                )
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                try Task.checkCancellation()
-                throw VyronMacWorkError(message: VyronToolsText.openFailed)
-            }
-        } else {
-            running = try await dependencies.controller.launch(application: app)
-        }
+        let running = try await openWithFocusRetry(app, call: call)
         try validateCurrent()
         guard running.id == app.id else { throw argumentError() }
         snapshots.removeValue(forKey: app.id)
@@ -37,6 +16,54 @@ extension VyronMacWorkSession {
             "message": .string("The application was opened or focused. Inspect its actual state next; this does "
                 + "not establish a simulator boot or project launch.")
         ])
+    }
+
+    private func openWithFocusRetry(
+        _ app: DesktopApplication, call: DevelopmentToolCall
+    ) async throws -> DesktopApplication {
+        do {
+            return try await openSelectedApplication(app, call: call)
+        } catch let error as MacControlError {
+            switch error {
+            case .applicationUnavailable, .activationFailed:
+                guard app.processIdentifier > 0 else { throw error }
+            default:
+                throw error
+            }
+            // AppKit refreshes the running-app list across main run-loop turns.
+            try await Task.sleep(for: VyronAutomationActionTiming.activationSettleDelay)
+            try validateCurrent()
+            guard let latest = availableApplication(id: app.id), latest.bundleIdentifier == app.bundleIdentifier,
+                latest.processIdentifier != app.processIdentifier
+            else { throw error }
+            return try await openSelectedApplication(latest, call: call)
+        }
+    }
+
+    private func openSelectedApplication(
+        _ app: DesktopApplication, call: DevelopmentToolCall
+    ) async throws -> DesktopApplication {
+        _ = try await authorize(call, application: app, element: nil)
+        try validateCurrent()
+        guard availableApplication(id: app.id) == app else {
+            if app.processIdentifier > 0 { throw MacControlError.applicationUnavailable }
+            throw argumentError()
+        }
+        if app.processIdentifier > 0 {
+            try dependencies.controller.activate(application: app)
+            return app
+        }
+        guard let url = attachedApplicationURLs[app.id] else {
+            return try await dependencies.controller.launch(application: app)
+        }
+        do {
+            return try await dependencies.controller.launch(attachedApplicationAt: url, expectedApplicationID: app.id)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            try Task.checkCancellation()
+            throw VyronMacWorkError(message: VyronToolsText.openFailed)
+        }
     }
 
     func openProject(_ call: DevelopmentToolCall) async throws -> DevelopmentExternalResult {
