@@ -28,8 +28,11 @@ struct VyronProjectAccessMenu: View {
         .buttonStyle(.plain)
         .fixedSize()
         .disabled(!model.canChangeProjectApprovalMode)
-        .help(VyronWorkspaceText.approvalQuestion)
-        .accessibilityLabel(VyronProjectApprovalPresentation.title(model.interactions.projectApprovalMode))
+        .help(VyronWorkspaceText.changePermissions)
+        .accessibilityLabel(
+            VyronWorkspaceText.changePermissions + ": "
+                + VyronProjectApprovalPresentation.title(model.interactions.projectApprovalMode)
+        )
         .popover(isPresented: $showsApprovalChoices, arrowEdge: .top) {
             VyronProjectAccessChoices { showsApprovalChoices = false }
         }

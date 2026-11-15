@@ -7,6 +7,17 @@ struct MCPActionReview: Identifiable, Sendable {
     let connectionName: String
     let toolName: String
     let arguments: String
+    let responseOwner: VyronNotificationResponseID?
+
+    init(
+        connectionName: String, toolName: String, arguments: String,
+        responseOwner: VyronNotificationResponseID? = nil
+    ) {
+        self.connectionName = connectionName
+        self.toolName = toolName
+        self.arguments = arguments
+        self.responseOwner = responseOwner
+    }
 }
 
 struct MCPToolSession: Sendable {
@@ -32,6 +43,8 @@ final class MCPConnectionsModel: ObservableObject {
     private var revisions: [UUID: UUID] = [:]
     private var connectionTasks: [UUID: Task<Void, Never>] = [:]
     private var reviewContinuation: CheckedContinuation<Bool, Never>?
+    private let reviews = VyronSerialActionQueue()
+    private var isShuttingDown = false
     private var writable = true
     private let store: MCPConnectionStore
     private let credentials: MCPCredentialStore
@@ -206,7 +219,7 @@ final class MCPConnectionsModel: ObservableObject {
                 toolName: binding.tool.name,
                 arguments: arguments
             )
-            let approved = await review(request)
+            let approved = await review(request, isCurrent: { revisions[binding.profile.id] == binding.revision })
             try Task.checkCancellation()
             guard approved else {
                 return .init(
@@ -229,13 +242,26 @@ final class MCPConnectionsModel: ObservableObject {
     }
 
     // Local Office tools share the same native review and cancellation owner.
-    func review(_ request: MCPActionReview) async -> Bool {
+    func review(_ request: MCPActionReview, isCurrent: @MainActor () -> Bool = { true }) async -> Bool {
+        do {
+            return try await reviews.perform {
+                guard !isShuttingDown, isCurrent() else { return false }
+                return await presentReview(request)
+            }
+        } catch is CancellationError {
+            return false
+        } catch {
+            self.error = error.localizedDescription
+            return false
+        }
+    }
+
+    private func presentReview(_ request: MCPActionReview) async -> Bool {
         await withTaskCancellationHandler {
             guard !Task.isCancelled else { return false }
             return await withCheckedContinuation { continuation in
-                respondToReview(false)
-                pendingReview = request
                 reviewContinuation = continuation
+                pendingReview = request
             }
         } onCancel: {
             Task { @MainActor [weak self] in
@@ -252,6 +278,7 @@ final class MCPConnectionsModel: ObservableObject {
     }
 
     func shutdown() {
+        isShuttingDown = true
         respondToReview(false)
         for id in Set(clients.keys).union(connectionTasks.keys) { disconnect(id) }
     }

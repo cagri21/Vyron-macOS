@@ -54,6 +54,9 @@ enum VyronWorkspaceText {
     static var balancedEffort: String {
         VyronResourceBundle.string("workspaceBalancedEffort", fallback: "Balanced")
     }
+    static var changePermissions: String {
+        VyronResourceBundle.string("workspaceChangePermissions", fallback: "Change permissions")
+    }
     static var chat: String {
         VyronResourceBundle.string("workspaceChat", fallback: "Chat")
     }
@@ -107,12 +110,5 @@ enum VyronWorkspaceText {
     }
     static var highEffortDescription: String {
         VyronResourceBundle.string("workspaceHighEffortDescription", fallback: "Complex debugging, multi-file changes, and production risks.")
-    }
-    static func inferenceSelection(_ p1: String, _ p2: String, _ p3: String) -> String {
-        VyronResourceBundle.format(
-            "workspaceInferenceSelection",
-            fallback: "Model: %@. Effort: %@. Speed: %@.",
-            arguments: [p1, p2, p3]
-        )
     }
 }

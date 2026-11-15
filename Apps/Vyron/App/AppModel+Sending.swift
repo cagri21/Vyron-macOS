@@ -84,6 +84,7 @@ extension AppModel {
         let requestKind = usesMacWork && classifiedRequest == .computerTask ? .standard : classifiedRequest
         let usesComputerTask = requestKind == .computerTask && mode != .plan
         let usesProjectAgent = !requestKind.usesWebEvidence && mode != .chat && project != nil
+        let directApplication = usesComputerTask && mode == .chat ? directChatApplication(for: prompt) : nil
         let handoffTools = chatHandoffToolContext(response: responseIdentity)
         let linkedChatTools = linkedChatToolContext(response: responseIdentity, prompt: prompt)
         let chromeTools = VyronChromeToolContext(response: responseIdentity, allowsActions: mode == .agent)
@@ -98,7 +99,9 @@ extension AppModel {
         let route: VyronForegroundRunRoute
         if compaction == nil, !usesComputerTask, usesProjectAgent {
             route = .steerableDevelopment(.init(inbox: steeringInbox, skills: skillTools))
-        } else if !voice.isSendingTurn && (compaction != nil || (!usesComputerTask && !usesProjectAgent)) {
+        } else if !voice.isSendingTurn && (
+            directApplication != nil || compaction != nil || (!usesComputerTask && !usesProjectAgent)
+        ) {
             route = .backgroundCapable
         } else {
             route = .foregroundOnly
@@ -135,7 +138,11 @@ extension AppModel {
                     saveHistory()
                 }
                 if usesComputerTask {
-                    startComputerWork(prompt: prompt, effort: requestedEffort, response: responseIdentity)
+                    if let directApplication {
+                        try await openChatApplication(directApplication, prompt: prompt, response: responseIdentity)
+                    } else {
+                        startComputerWork(prompt: prompt, effort: requestedEffort, response: responseIdentity)
+                    }
                     return
                 }
                 if usesProjectAgent, let project {

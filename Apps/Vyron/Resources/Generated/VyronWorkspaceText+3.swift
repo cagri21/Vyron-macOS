@@ -2,6 +2,9 @@
 import Foundation
 
 extension VyronWorkspaceText {
+    static var showSidebar: String {
+        VyronResourceBundle.string("workspaceShowSidebar", fallback: "Show sidebar")
+    }
     static var speedChangeFailed: String {
         VyronResourceBundle.string("workspaceSpeedChangeFailed", fallback: "Could not change speed. Open model settings for details.")
     }

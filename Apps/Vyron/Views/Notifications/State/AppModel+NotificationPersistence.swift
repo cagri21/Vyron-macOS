@@ -9,14 +9,19 @@ extension AppModel {
         notifications.observe(
             mcpConnections,
             scheduledTasks: scheduledTasks,
-            recordReview: { [weak self] id in self?.recordNotificationReview(id) },
+            recordReview: { [weak self] review in
+                self?.recordNotificationReview(review?.id, owner: review?.responseOwner)
+            },
             isActive: { [weak self] in self?.isShuttingDown == false }
         )
     }
 
-    func recordNotificationReview(_ id: UUID?) {
+    func recordNotificationReview(_ id: UUID?, owner: VyronNotificationResponseID? = nil) {
         guard !isShuttingDown else { return }
-        notifications.recordReview(id, owners: { notificationDevelopmentOwners })
+        notifications.recordReview(id) {
+            if let owner { return [owner] }
+            return notificationDevelopmentOwners
+        }
     }
 
     func notificationDidSaveHistory() {

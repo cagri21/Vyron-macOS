@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 @testable import Vyron
+@testable import VyronAutomation
 import VyronCore
 
 @MainActor
@@ -144,12 +145,130 @@ final class VyronAppModelMacRoutingTests: XCTestCase {
         XCTAssertTrue(test.model.canSend)
     }
 
+    func testRemoteChatOpensPhotosAfterAWorkActionEvenWhenSwitchingToWork() async throws {
+        let test = try configuredHarness()
+        defer { test.cleanUp() }
+        let model = test.model
+        test.select(test.profile(endpoint: "https://models.example.com/v1"), provider: test.provider)
+        model.skillContextLoader = { _ in .empty }
+        let controller = VyronMacWorkTestController()
+        let photos = DesktopApplication(
+            id: "com.apple.Photos", name: "Photos", bundleIdentifier: "com.apple.Photos", processIdentifier: 43
+        )
+        controller.catalog = [photos]
+        controller.running = [photos]
+        model.computerWork.macWorkController = controller
+
+        let pendingWork = AsyncStream<Void>.makeStream()
+        defer {
+            pendingWork.continuation.finish()
+            _ = model.foregroundRun.shutdown()
+        }
+        let work = startBackgroundWork(in: model, waitingOn: pendingWork.stream)
+        let releaseMutation = AsyncStream<Void>.makeStream()
+        var mutationStarted = false
+        var mutationFinished = false
+        let workMutation = Task {
+            try await model.computerWork.macActions.perform {
+                mutationStarted = true
+                for await _ in releaseMutation.stream {}
+                mutationFinished = true
+            }
+        }
+        defer {
+            releaseMutation.continuation.finish()
+            workMutation.cancel()
+        }
+        try await test.waitUntil { mutationStarted }
+
+        var focusCount = 0
+        controller.onActivate = { [weak model] in
+            XCTAssertEqual(model?.foregroundRun.response(in: work.conversationID), work)
+            XCTAssertTrue(mutationFinished)
+            focusCount += 1
+        }
+
+        model.composer.draft = "open photos app"
+        XCTAssertTrue(model.canSend)
+        model.send()
+        let photoChat = try XCTUnwrap(model.foregroundRun.activeResponse)
+        try await test.waitUntil {
+            model.messages.last?.activity?.entries.contains {
+                $0.title == VyronControlText.startingComputerTask
+            } == true
+        }
+        XCTAssertEqual(focusCount, 0)
+        model.selectConversation(work.conversationID, loadProject: false)
+        XCTAssertEqual(model.foregroundRun.activeResponse, work)
+        XCTAssertEqual(model.foregroundRun.response(in: photoChat.conversationID), photoChat)
+
+        releaseMutation.continuation.finish()
+        try await workMutation.value
+        try await test.waitUntil { !model.foregroundRun.owns(photoChat) }
+
+        XCTAssertEqual(focusCount, 1)
+        let completedChat = model.conversations.first { $0.id == photoChat.conversationID }
+        XCTAssertEqual(completedChat?.messages.last?.activity?.state, .completed)
+        XCTAssertFalse(model.computerWork.isComputerWorkActive)
+        XCTAssertNil(model.computerWork.pendingAgentGoal)
+        XCTAssertEqual(model.foregroundRun.response(in: work.conversationID), work)
+        let chatRequests = await test.provider.chatRequests
+        XCTAssertEqual(chatRequests, 0)
+    }
+
+    func testStoppedPhotosReviewBelongsToItsChatWhileWorkContinuesInBackground() async throws {
+        let test = try configuredHarness()
+        defer { test.cleanUp() }
+        let model = test.model
+        test.select(test.profile(endpoint: "https://models.example.com/v1"), provider: test.provider)
+        model.skillContextLoader = { _ in .empty }
+        let controller = VyronMacWorkTestController()
+        let id = "com.apple.Photos"
+        let url = URL(fileURLWithPath: "/System/Applications/Photos.app")
+        controller.catalog = [DesktopApplication(installedAt: url, name: "Photos", bundleIdentifier: id)]
+        controller.running = []
+        model.computerWork.macWorkController = controller
+
+        let pendingWork = AsyncStream<Void>.makeStream()
+        defer {
+            model.mcpConnections.respondToReview(false)
+            pendingWork.continuation.finish()
+            _ = model.foregroundRun.shutdown()
+        }
+        let work = startBackgroundWork(in: model, waitingOn: pendingWork.stream)
+
+        model.composer.draft = "open photos app"
+        XCTAssertTrue(model.canSend)
+        model.send()
+        try await test.waitUntil { model.mcpConnections.pendingReview != nil || !model.foregroundRun.isGenerating }
+
+        let review = try XCTUnwrap(model.mcpConnections.pendingReview, model.messages.last?.content ?? "")
+        let photoChat = try XCTUnwrap(model.foregroundRun.activeResponse)
+        let owner = VyronNotificationResponseID(conversationID: photoChat.conversationID, responseID: photoChat.messageID)
+        let details = try JSONDecoder().decode([String: DevelopmentJSONValue].self, from: Data(review.arguments.utf8))
+        XCTAssertEqual(details["application_path"], .string(url.path))
+        XCTAssertEqual(model.notifications.reviewObservation?.requestID, review.id)
+        XCTAssertEqual(model.notifications.reviewObservation?.target, .response(owner))
+        XCTAssertTrue(model.canPresentMCPReview)
+        XCTAssertTrue(controller.launchedIDs.isEmpty)
+        XCTAssertEqual(model.foregroundRun.response(in: work.conversationID), work)
+
+        model.mcpConnections.respondToReview(true)
+        try await test.waitUntil { !model.foregroundRun.isGenerating }
+
+        XCTAssertEqual(controller.launchedIDs, [id])
+        XCTAssertEqual(model.messages.last?.activity?.state, .completed)
+        XCTAssertEqual(model.foregroundRun.response(in: work.conversationID), work)
+        let chatRequests = await test.provider.chatRequests
+        XCTAssertEqual(chatRequests, 0)
+    }
+
     func testRemoteModelDoesNotTransferAComputerTaskOrCallItsProvider() async throws {
         let test = try configuredHarness()
         defer { test.cleanUp() }
         let profile = test.profile(endpoint: "https://models.example.com/v1")
         test.select(profile, provider: test.provider)
-        test.model.composer.draft = "Open Safari"
+        test.model.composer.draft = "Click the Safari address bar"
         XCTAssertTrue(test.model.canSend)
         test.model.send()
         try await test.waitUntil { !test.model.foregroundRun.isGenerating }
@@ -194,6 +313,25 @@ final class VyronAppModelMacRoutingTests: XCTestCase {
         test.model.computerWork.automaticRequestRouting = true
         test.model.modelSelection.isConnected = true
         return test
+    }
+
+    private func startBackgroundWork(in model: AppModel, waitingOn stream: AsyncStream<Void>) -> VyronResponseIdentity {
+        var conversation = Conversation(title: "Background Work", workspacePath: nil)
+        conversation.mode = ComposerMode.agent.rawValue
+        let message = ChatMessage(role: .assistant, content: "", activity: ResponseActivity())
+        conversation.messages = [message]
+        model.conversations.append(conversation)
+        let work = VyronResponseIdentity(
+            generationID: UUID(), conversationID: conversation.id, messageID: message.id
+        )
+        let steering = VyronForegroundSteering(inbox: VyronSteeringInbox(), skills: VyronSkillResourceTools(commands: []))
+        model.foregroundRun.begin(work)
+        model.foregroundRun.start(work, route: .steerableDevelopment(steering)) {
+            for await _ in stream {}
+        }
+        model.foregroundRun.beginDevelopment(work)
+        XCTAssertTrue(model.foregroundRun.moveResponseToBackground())
+        return work
     }
 
     private func transferGoal(_ test: VyronFeatureTestHarness) async throws -> PendingAgentGoal {

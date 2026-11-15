@@ -14,10 +14,15 @@ struct VyronProjectAccessChoices: View {
     var body: some View {
         let _ = localizationLocale
         VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
-            Text(VyronWorkspaceText.approvalQuestion)
-                .font(VyronWorkspaceStyle.controlFont)
-                .foregroundStyle(palette.muted)
-                .padding(.horizontal, VyronWorkspaceStyle.approvalRowPadding)
+            VStack(alignment: .leading, spacing: VyronWorkspaceStyle.compactSpacing) {
+                Text(VyronWorkspaceText.changePermissions)
+                    .font(VyronWorkspaceStyle.controlFont)
+                    .foregroundStyle(palette.text)
+                Text(VyronWorkspaceText.approvalQuestion)
+                    .font(VyronWorkspaceStyle.captionFont)
+                    .foregroundStyle(palette.muted)
+            }
+            .padding(.horizontal, VyronWorkspaceStyle.approvalRowPadding)
             ForEach(
                 [VyronProjectApprovalMode.askForApproval, .approveForMe, .fullAccess],
                 id: \.self

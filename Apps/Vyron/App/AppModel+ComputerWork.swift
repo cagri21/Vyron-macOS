@@ -1,4 +1,5 @@
 import Foundation
+import VyronAutomation
 import VyronCore
 import VyronModelDomain
 
@@ -9,14 +10,6 @@ extension AppModel {
         response: VyronResponseIdentity
     ) {
         guard foregroundRun.activeResponse == response else { return }
-        guard foregroundRun.developmentResponse == nil else {
-            updateMessage(
-                conversationID: response.conversationID, messageID: response.messageID,
-                content: VyronControlText.stopBeforeManual
-            )
-            finishGeneration(response.generationID, activityState: .failed)
-            return
-        }
         guard prompt.count <= VyronTaskPromptLimits.maximumCharacters else {
             updateMessage(
                 conversationID: response.conversationID, messageID: response.messageID,
@@ -48,6 +41,47 @@ extension AppModel {
             conversationID: response.conversationID, messageID: response.messageID
         )
         appNavigation.showAutomation = true
+    }
+
+    func directChatApplication(for prompt: String) -> DesktopApplication? {
+        guard !isRunningScheduledTask, prompt.count <= VyronTaskPromptLimits.maximumCharacters,
+            !modelSelection.isBuiltinConnection || foregroundRun.developmentResponse != nil
+        else { return nil }
+        return VyronChatAppOpenRequest.resolve(
+            prompt, applications: computerWork.macWorkController.availableApplications()
+        )
+    }
+
+    func openChatApplication(
+        _ app: DesktopApplication, prompt: String, response: VyronResponseIdentity
+    ) async throws {
+        recordActivity(
+            VyronControlText.startingComputerTask, detail: app.name,
+            conversationID: response.conversationID, messageID: response.messageID
+        )
+        let run = makeMacWorkRun(
+            context: VyronMacWorkContext(goal: prompt, projectRoot: nil, allowsActions: true),
+            response: response, allowsBackgroundChat: true
+        )
+        let result: DevelopmentExternalResult
+        if let current = VyronChatAppOpenRequest.resolve(
+            prompt, applications: computerWork.macWorkController.availableApplications()
+        ), current.id == app.id {
+            result = try await run.execute(DevelopmentToolCall(
+                name: VyronMacWorkTools.openApp, arguments: ["application_id": .string(app.id)]
+            ))
+        } else {
+            result = DevelopmentExternalResult(text: VyronToolsText.openFailed, isError: true)
+        }
+        try Task.checkCancellation()
+        guard foregroundRun.owns(response) else { return }
+        updateMessage(
+            conversationID: response.conversationID, messageID: response.messageID,
+            content: result.isError ? result.text : VyronControlText.actionOpen
+        )
+        finishConversationResponse(
+            response, activityState: result.isError ? .failed : .completed, detail: app.name
+        )
     }
 
     func agentGoalStarted(_ requestID: UUID) {

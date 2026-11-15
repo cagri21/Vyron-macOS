@@ -2,6 +2,13 @@
 import Foundation
 
 extension VyronWorkspaceText {
+    static func inferenceSelection(_ p1: String, _ p2: String, _ p3: String) -> String {
+        VyronResourceBundle.format(
+            "workspaceInferenceSelection",
+            fallback: "Model: %@. Effort: %@. Speed: %@.",
+            arguments: [p1, p2, p3]
+        )
+    }
     static var inferenceSettings: String {
         VyronResourceBundle.string("workspaceInferenceSettings", fallback: "Model, effort, and speed")
     }
@@ -111,8 +118,5 @@ extension VyronWorkspaceText {
     }
     static var selectEffort: String {
         VyronResourceBundle.string("workspaceSelectEffort", fallback: "Select effort")
-    }
-    static var showSidebar: String {
-        VyronResourceBundle.string("workspaceShowSidebar", fallback: "Show sidebar")
     }
 }

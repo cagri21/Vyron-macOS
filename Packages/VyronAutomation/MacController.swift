@@ -182,20 +182,9 @@ public final class MacController {
     }
 
     public func openBrowser(url: URL, browser: DesktopApplication? = nil) throws {
-        guard let parts = URLComponents(url: url, resolvingAgainstBaseURL: false),
-            ["http", "https"].contains(parts.scheme?.lowercased() ?? ""),
-            let host = parts.host, !host.isEmpty,
-            parts.user == nil, parts.password == nil,
-            url.absoluteString.count <= 8_192
-        else {
-            throw MacControlError.invalidURL
-        }
+        try validateBrowserURL(url)
         if let browser {
-            let running = try resolve(browser)
-            guard Self.browserIdentifiers.contains(running.bundleIdentifier ?? ""), let appURL = running.bundleURL
-            else {
-                throw MacControlError.browserRequired
-            }
+            let appURL = try browserApplicationURL(for: browser)
             let configuration = NSWorkspace.OpenConfiguration()
             configuration.activates = true
             NSWorkspace.shared.open([url], withApplicationAt: appURL, configuration: configuration)
@@ -204,6 +193,39 @@ public final class MacController {
                 throw MacControlError.actionFailed("The default browser could not open the address.")
             }
         }
+    }
+
+    public func openBrowserAndWait(url: URL, browser: DesktopApplication? = nil) async throws {
+        try Task.checkCancellation()
+        try validateBrowserURL(url)
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+        if let browser {
+            let appURL = try browserApplicationURL(for: browser)
+            _ = try await NSWorkspace.shared.open([url], withApplicationAt: appURL, configuration: configuration)
+        } else {
+            _ = try await NSWorkspace.shared.open(url, configuration: configuration)
+        }
+        try Task.checkCancellation()
+    }
+
+    private func validateBrowserURL(_ url: URL) throws {
+        guard let parts = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            ["http", "https"].contains(parts.scheme?.lowercased() ?? ""),
+            let host = parts.host, !host.isEmpty,
+            parts.user == nil, parts.password == nil,
+            url.absoluteString.count <= 8_192
+        else {
+            throw MacControlError.invalidURL
+        }
+    }
+
+    private func browserApplicationURL(for browser: DesktopApplication) throws -> URL {
+        let running = try resolve(browser)
+        guard Self.browserIdentifiers.contains(running.bundleIdentifier ?? ""), let appURL = running.bundleURL else {
+            throw MacControlError.browserRequired
+        }
+        return appURL
     }
 
     public func inspect(application: DesktopApplication) throws -> AutomationSnapshot {

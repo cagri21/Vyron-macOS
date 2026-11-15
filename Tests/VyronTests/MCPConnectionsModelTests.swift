@@ -229,6 +229,36 @@ final class MCPConnectionsModelTests: XCTestCase {
         XCTAssertTrue(test.state.toolCalls.isEmpty, "A late approval must not revive the cancelled action")
     }
 
+    func testConcurrentReviewsEachReceiveTheirOwnDecision() async throws {
+        let test = try harness()
+        defer { test.cleanUp() }
+        let workReview = MCPActionReview(connectionName: "Work", toolName: "Change design", arguments: "{}")
+        let chatReview = MCPActionReview(connectionName: "Chat", toolName: "Open Photos", arguments: "{}")
+        let work = Task { await test.model.review(workReview) }
+        defer { work.cancel() }
+        try await waitUntil { test.model.pendingReview?.id == workReview.id }
+
+        let chatRequestedReview = AsyncStream<Void>.makeStream()
+        let chat = Task {
+            chatRequestedReview.continuation.yield()
+            chatRequestedReview.continuation.finish()
+            return await test.model.review(chatReview)
+        }
+        defer { chat.cancel() }
+        for await _ in chatRequestedReview.stream { break }
+
+        XCTAssertEqual(test.model.pendingReview?.id, workReview.id)
+        test.model.respondToReview(true)
+        let workApproved = await work.value
+        XCTAssertTrue(workApproved)
+
+        try await waitUntil { test.model.pendingReview?.id == chatReview.id }
+        test.model.respondToReview(false)
+        let chatApproved = await chat.value
+        XCTAssertFalse(chatApproved)
+        XCTAssertNil(test.model.pendingReview)
+    }
+
     func testDisconnectedAndStaleSnapshotsCannotExecuteButFreshReadSessionCan() async throws {
         let test = try harness()
         defer { test.cleanUp() }

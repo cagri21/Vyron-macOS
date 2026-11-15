@@ -9591,6 +9591,29 @@
         }
       }
     },
+    "workspaceChangePermissions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change permissions"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İzinleri değiştir"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінити дозволи"
+          }
+        }
+      }
+    },
     "workspaceApprovalReviewReason": {
       "extractionState": "manual",
       "localizations": {

@@ -1205,6 +1205,12 @@ images stay in memory on the Mac and are not sent to the model. Controls use
 native accessibility actions, so a successful click does not necessarily move
 the physical pointer. **Stop** cancels the task and clears its feedback.
 
+An explicit request for one installed app, such as “Open Photos,” can run from
+Chat with a remote model or while Work continues in another conversation. Vyron
+resolves the app locally. App observations can run in parallel. Controls that
+change desktop focus or send input wait for the preceding native action to
+finish. Launch approvals belong to the chat that requested them.
+
 With a project open in **Work**, the selected model can use native app tools in
 the same task to list available apps, open or focus one, inspect its accessible
 windows and menu bar, and use real controls. The desktop pointer marks verified

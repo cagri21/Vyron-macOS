@@ -7,6 +7,7 @@ import VyronCore
 final class VyronMacWorkSession {
     let context: VyronMacWorkContext
     let dependencies: VyronMacWorkDependencies
+    let actions: VyronSerialActionQueue
     let attachedApplicationURLs: [String: URL]
     private let ambiguousAttachedApplicationIDs: Set<String>
     private(set) var currentProjectRoot: URL?
@@ -16,9 +17,13 @@ final class VyronMacWorkSession {
     let maximumSnapshotAge: TimeInterval = 30
     let maximumSnapshots = 8
 
-    init(context: VyronMacWorkContext, dependencies: VyronMacWorkDependencies) {
+    init(
+        context: VyronMacWorkContext, dependencies: VyronMacWorkDependencies,
+        actions: VyronSerialActionQueue = VyronSerialActionQueue()
+    ) {
         self.context = context
         self.dependencies = dependencies
+        self.actions = actions
         currentProjectRoot = context.projectRoot
         var attachedURLs: [String: URL] = [:]
         var ambiguousIDs: Set<String> = []

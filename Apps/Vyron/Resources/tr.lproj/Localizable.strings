@@ -1549,6 +1549,7 @@
 "workspaceAutomaticModel" = "Otomatik model";
 "workspaceAutomaticSelectedModel" = "Otomatik · %@";
 "workspaceBalancedEffort" = "Dengeli";
+"workspaceChangePermissions" = "İzinleri değiştir";
 "workspaceChat" = "Sohbet";
 "workspaceChatAccessDescription" = "Sohbet · Salt okunur sohbet";
 "workspaceChooseAutomaticModel" = "Otomatik — yüklü bir model seç";

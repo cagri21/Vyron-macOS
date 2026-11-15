@@ -7,7 +7,7 @@ extension AppModel {
         switch item.id.target {
         case .response(let response):
             guard canOpenSideChatInMain(response.conversationID)
-                || (item.kind.isAttention && canOpenWorkAttention(response)) else { return false }
+                || (item.kind.isAttention && canOpenTaskAttention(response)) else { return false }
             if selectedConversationID != response.conversationID { selectConversation(response.conversationID) }
             guard selectedConversationID == response.conversationID else { return false }
             appNavigation.destination = .workspace
@@ -27,9 +27,10 @@ extension AppModel {
         return true
     }
 
-    private func canOpenWorkAttention(_ response: VyronNotificationResponseID) -> Bool {
-        guard let work = foregroundRun.developmentResponse,
-            work.conversationID == response.conversationID, work.messageID == response.responseID else { return false }
+    private func canOpenTaskAttention(_ response: VyronNotificationResponseID) -> Bool {
+        guard let owner = foregroundRun.response(in: response.conversationID), owner.messageID == response.responseID,
+            foregroundRun.isDevelopmentResponse(owner) || mcpConnections.pendingReview?.responseOwner == response
+        else { return false }
         return (!foregroundRun.isGenerating || foregroundRun.canContinueInBackground)
             && computerWork.isIdle && !voice.isActive && !isRunningScheduledTask && scheduledTasks.activeTaskID == nil
             && !composer.isEditingQueuedMessage && composer.pendingSteeringIDs.isEmpty

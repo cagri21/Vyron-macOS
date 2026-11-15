@@ -30,13 +30,13 @@ final class VyronNotificationsModel: ObservableObject {
     func observe(
         _ connections: MCPConnectionsModel,
         scheduledTasks: VyronScheduledTasksModel,
-        recordReview: @escaping @MainActor (UUID?) -> Void,
+        recordReview: @escaping @MainActor (MCPActionReview?) -> Void,
         isActive: @escaping @MainActor () -> Bool
     ) {
         subscriptions.removeAll()
         connections.$pendingReview.sink { [weak self, weak connections] review in
             let id = review?.id
-            recordReview(id)
+            recordReview(review)
             Task { @MainActor [weak self, weak connections] in
                 guard let self, isActive(), connections?.pendingReview?.id == id else { return }
                 self.objectWillChange.send()

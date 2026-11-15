@@ -1549,6 +1549,7 @@
 "workspaceAutomaticModel" = "Автовибір моделі";
 "workspaceAutomaticSelectedModel" = "Авто · %@";
 "workspaceBalancedEffort" = "Збалансовано";
+"workspaceChangePermissions" = "Змінити дозволи";
 "workspaceChat" = "Чат";
 "workspaceChatAccessDescription" = "Чат · Розмова без змін";
 "workspaceChooseAutomaticModel" = "Авто — вибрати встановлену модель";

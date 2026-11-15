@@ -1549,6 +1549,7 @@
 "workspaceAutomaticModel" = "Auto model";
 "workspaceAutomaticSelectedModel" = "Auto · %@";
 "workspaceBalancedEffort" = "Balanced";
+"workspaceChangePermissions" = "Change permissions";
 "workspaceChat" = "Chat";
 "workspaceChatAccessDescription" = "Chat · Read-only conversation";
 "workspaceChooseAutomaticModel" = "Auto — choose an installed model";

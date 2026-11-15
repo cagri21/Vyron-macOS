@@ -10,6 +10,7 @@ final class VyronComputerWorkState: ObservableObject {
     var agentConversation: PendingAgentGoal?
     var stopAutomation: (@MainActor () -> Void)?
     let macWorkOverlay = VyronComputerActionOverlay()
+    let macActions = VyronSerialActionQueue()
     var macWorkController: any VyronMacWorkControlling
     var macWorkScreenshotCapture: any VyronScreenshotCapturing
 

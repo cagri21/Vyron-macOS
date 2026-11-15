@@ -44,6 +44,10 @@ extension VyronMacWorkSession {
         _ app: DesktopApplication, call: DevelopmentToolCall
     ) async throws -> DesktopApplication {
         _ = try await authorize(call, application: app, element: nil)
+        return try await actions.perform { try await openVerifiedApplication(app) }
+    }
+
+    private func openVerifiedApplication(_ app: DesktopApplication) async throws -> DesktopApplication {
         try validateCurrent()
         guard availableApplication(id: app.id) == app else {
             if app.processIdentifier > 0 { throw MacControlError.applicationUnavailable }
@@ -75,11 +79,13 @@ extension VyronMacWorkSession {
         })
         else { throw VyronMacWorkError(message: "Installed Xcode is unavailable in the native application catalog.") }
         _ = try await authorize(call, application: xcode, element: nil)
-        try validateCurrent()
-        guard try VyronMacWorkProject.resolve(path: path, root: currentProjectRoot) == url else {
-            throw argumentError()
+        let running = try await actions.perform {
+            try validateCurrent()
+            guard try VyronMacWorkProject.resolve(path: path, root: currentProjectRoot) == url else {
+                throw argumentError()
+            }
+            return try await dependencies.controller.openProject(url)
         }
-        let running = try await dependencies.controller.openProject(url)
         try validateCurrent()
         guard running.id == xcode.id else { throw argumentError() }
         snapshots.removeValue(forKey: xcode.id)
@@ -102,13 +108,22 @@ extension VyronMacWorkSession {
         let record = try snapshot(for: selection)
         let info = try element(for: selection)
         let reviewed = try await authorize(call, application: record.application, element: info)
-        _ = try snapshot(for: selection)
+        return try await actions.perform {
+            try await performVerifiedControl(call, selection: selection, inspectedElement: info, reviewed: reviewed)
+        }
+    }
+
+    private func performVerifiedControl(
+        _ call: DevelopmentToolCall, selection: VyronMacWorkTarget, inspectedElement: NativeElementInfo?, reviewed: Bool
+    ) async throws -> DevelopmentExternalResult {
+        let record = try snapshot(for: selection)
+        guard try element(for: selection) == inspectedElement else { throw argumentError() }
         try dependencies.controller.activate(application: record.application)
         try await Task.sleep(for: .milliseconds(150))
         try validateCurrent()
         _ = try snapshot(for: selection)
         let currentInfo = try element(for: selection)
-        guard currentInfo == info else { throw argumentError() }
+        guard currentInfo == inspectedElement else { throw argumentError() }
         switch policy(call, application: record.application, element: currentInfo) {
         case .refused(let reason): throw VyronMacWorkError(message: reason)
         case .review where !reviewed:

@@ -356,50 +356,22 @@ final class AutomationModel: ObservableObject {
                 }
             }
             do {
+                let sendAction: @MainActor @Sendable () async throws -> CGRect? = { [self] in
+                    try await sendReviewedAction(action, executionID: id, automatic: automatic)
+                }
+                let preservesSnapshot: Bool
+                if case .inspect = action.action {
+                    preservesSnapshot = true
+                } else {
+                    preservesSnapshot = false
+                }
+                let controlTargetFrame = if !preservesSnapshot, let actions = chat?.computerWork.macActions {
+                    try await actions.perform(sendAction)
+                } else {
+                    try await sendAction()
+                }
                 try Task.checkCancellation()
                 guard executionID == id else { return }
-                var preservesSnapshot = false
-                var controlTargetFrame: CGRect?
-                switch action.action {
-                case .launch(let app):
-                    try validatePolicyBeforeMutation(action, automatic: automatic)
-                    let running = try await controller.launch(application: app)
-                    try Task.checkCancellation()
-                    guard executionID == id else { return }
-                    routeAgent(to: running)
-                case .openURL(let url, let browser):
-                    try validatePolicyBeforeMutation(action, automatic: automatic)
-                    try controller.openBrowser(url: url, browser: browser)
-                    if !automatic, let origin = AutomationPolicy.origin(for: url) { approvedOrigins.insert(origin) }
-                case .activate(let app):
-                    try validatePolicyBeforeMutation(action, automatic: automatic)
-                    try controller.activate(application: app)
-                case .inspect(let app):
-                    snapshot = try controller.inspect(application: app)
-                    preservesSnapshot = true
-                case .key(let app, let key):
-                    try controller.activate(application: app)
-                    try await Task.sleep(for: VyronAutomationActionTiming.activationSettleDelay)
-                    try validateQueuedAction(id, application: app, snapshotID: action.requiredSnapshotID)
-                    try validatePolicyBeforeMutation(action, automatic: automatic)
-                    try controller.pressKey(key, application: app)
-                case .click(let app, let snapshotID, let elementID):
-                    guard requireFreshSnapshot(), snapshot?.id == snapshotID else { return }
-                    try controller.activate(application: app)
-                    try await Task.sleep(for: VyronAutomationActionTiming.activationSettleDelay)
-                    try validateQueuedAction(id, application: app, snapshotID: snapshotID)
-                    try validatePolicyBeforeMutation(action, automatic: automatic)
-                    controlTargetFrame = try controller.elementFrame(elementID: elementID, snapshotID: snapshotID)
-                    try controller.click(elementID: elementID, snapshotID: snapshotID)
-                case .type(let app, let snapshotID, let elementID, let text):
-                    guard requireFreshSnapshot(), snapshot?.id == snapshotID else { return }
-                    try controller.activate(application: app)
-                    try await Task.sleep(for: VyronAutomationActionTiming.activationSettleDelay)
-                    try validateQueuedAction(id, application: app, snapshotID: snapshotID)
-                    try validatePolicyBeforeMutation(action, automatic: automatic)
-                    controlTargetFrame = try controller.elementFrame(elementID: elementID, snapshotID: snapshotID)
-                    try controller.typeText(text, elementID: elementID, snapshotID: snapshotID)
-                }
                 recordSuccessfulControlAction(action.action, targetFrame: controlTargetFrame)
                 error = nil
                 status =
@@ -431,6 +403,65 @@ final class AutomationModel: ObservableObject {
                 }
             }
         }
+    }
+
+    private func sendReviewedAction(
+        _ review: MacActionReview, executionID id: UUID, automatic: Bool
+    ) async throws -> CGRect? {
+        try Task.checkCancellation()
+        guard executionID == id, review.taskRunID.map({ isFollowingTask && taskRunID == $0 }) ?? true else {
+            throw CancellationError()
+        }
+        if let snapshotID = review.requiredSnapshotID {
+            guard requireFreshSnapshot(), snapshot?.id == snapshotID else { throw MacControlError.snapshotExpired }
+        }
+        try validatePolicyBeforeMutation(review, automatic: automatic)
+
+        switch review.action {
+        case .launch(let app):
+            let running = try await controller.launch(application: app)
+            try Task.checkCancellation()
+            guard executionID == id else { throw CancellationError() }
+            routeAgent(to: running)
+        case .openURL(let url, let browser):
+            try await controller.openBrowserAndWait(url: url, browser: browser)
+            guard executionID == id else { throw CancellationError() }
+            if !automatic, let origin = AutomationPolicy.origin(for: url) { approvedOrigins.insert(origin) }
+        case .activate(let app):
+            try controller.activate(application: app)
+        case .inspect(let app):
+            snapshot = try controller.inspect(application: app)
+        case .key(let app, let key):
+            try await focusForInput(to: app, executionID: id, snapshotID: review.requiredSnapshotID)
+            if let snapshotID = review.requiredSnapshotID {
+                guard let expected = snapshot, expected.id == snapshotID,
+                    try controller.inspect(application: app).text == expected.text
+                else { throw MacControlError.snapshotExpired }
+                try validateQueuedAction(id, application: app, snapshotID: snapshotID)
+            }
+            try validatePolicyBeforeMutation(review, automatic: automatic)
+            try controller.pressKey(key, application: app)
+        case .click(let app, let snapshotID, let elementID):
+            try await focusForInput(to: app, executionID: id, snapshotID: snapshotID)
+            try validatePolicyBeforeMutation(review, automatic: automatic)
+            let frame = try controller.elementFrame(elementID: elementID, snapshotID: snapshotID)
+            try controller.click(elementID: elementID, snapshotID: snapshotID)
+            return frame
+        case .type(let app, let snapshotID, let elementID, let text):
+            try await focusForInput(to: app, executionID: id, snapshotID: snapshotID)
+            try validatePolicyBeforeMutation(review, automatic: automatic)
+            let frame = try controller.elementFrame(elementID: elementID, snapshotID: snapshotID)
+            try controller.typeText(text, elementID: elementID, snapshotID: snapshotID)
+            return frame
+        }
+        return nil
+    }
+
+    private func focusForInput(to app: DesktopApplication, executionID: UUID, snapshotID: UUID?) async throws {
+        try validateQueuedAction(executionID, application: app, snapshotID: snapshotID)
+        try controller.activate(application: app)
+        try await Task.sleep(for: VyronAutomationActionTiming.activationSettleDelay)
+        try validateQueuedAction(executionID, application: app, snapshotID: snapshotID)
     }
 
     private func validateQueuedAction(_ id: UUID, application: DesktopApplication, snapshotID: UUID?) throws {

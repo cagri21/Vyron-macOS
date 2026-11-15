@@ -3,25 +3,37 @@ import VyronCore
 import VyronDevelopment
 
 extension AppModel {
-    func makeMacWorkRun(context: VyronMacWorkContext, response: VyronResponseIdentity) -> VyronMacWorkRun {
+    func makeMacWorkRun(
+        context: VyronMacWorkContext, response: VyronResponseIdentity, allowsBackgroundChat: Bool = false
+    ) -> VyronMacWorkRun {
         let session = VyronMacWorkSession(
             context: context,
             dependencies: VyronMacWorkDependencies(
                 controller: computerWork.macWorkController,
                 validateCurrent: { [weak self] in
-                    guard let self, self.isCurrentMacWorkResponse(response) else { throw CancellationError() }
+                    guard let self, self.isCurrentMacWorkResponse(response, allowsBackgroundChat: allowsBackgroundChat)
+                    else { throw CancellationError() }
                 },
                 review: { [weak self] request in
-                    guard let self, self.isCurrentMacWorkResponse(response) else { return false }
-                    let approved = await self.mcpConnections.review(request)
-                    return self.isCurrentMacWorkResponse(response) && approved
+                    guard let self, self.isCurrentMacWorkResponse(response, allowsBackgroundChat: allowsBackgroundChat)
+                    else { return false }
+                    let ownedReview = MCPActionReview(
+                        connectionName: request.connectionName, toolName: request.toolName, arguments: request.arguments,
+                        responseOwner: VyronNotificationResponseID(
+                            conversationID: response.conversationID, responseID: response.messageID
+                        )
+                    )
+                    let approved = await self.mcpConnections.review(ownedReview)
+                    return self.isCurrentMacWorkResponse(response, allowsBackgroundChat: allowsBackgroundChat)
+                        && approved
                 },
                 onTargetAction: { [weak self] feedback in
                     self?.computerWork.macWorkOverlay.show(
                         title: feedback.title, targetFrame: feedback.targetFrame, owner: response.generationID
                     )
                 }
-            )
+            ),
+            actions: computerWork.macActions
         )
         let screenshots = VyronMacWorkScreenshots(
             captureService: computerWork.macWorkScreenshotCapture,
@@ -34,8 +46,9 @@ extension AppModel {
         return VyronMacWorkRun(session: session, screenshots: screenshots)
     }
 
-    func isCurrentMacWorkResponse(_ response: VyronResponseIdentity) -> Bool {
-        !isRunningScheduledTask && ownsInteractiveWorkResponse(response)
+    func isCurrentMacWorkResponse(_ response: VyronResponseIdentity, allowsBackgroundChat: Bool = false) -> Bool {
+        guard !isRunningScheduledTask, !isShuttingDown, !Task.isCancelled else { return false }
+        return ownsInteractiveWorkResponse(response) || (allowsBackgroundChat && foregroundRun.owns(response))
     }
 
     func recordMacWorkScreenshot(_ image: VyronImageAttachment, response: VyronResponseIdentity) throws {
