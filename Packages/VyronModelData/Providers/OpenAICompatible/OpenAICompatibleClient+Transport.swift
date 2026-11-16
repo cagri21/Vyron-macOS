@@ -19,13 +19,19 @@ extension OpenAICompatibleClient {
         return configured
     }
 
-    func requestedBudget(limits: VyronDeepSeekModelBudget?, effort: AgentEffort) throws -> VyronDevelopmentContextBudget {
+    func requestedBudget(
+        limits: VyronDeepSeekModelBudget?,
+        model: String,
+        effort: AgentEffort
+    ) throws -> VyronDevelopmentContextBudget {
         // A per-call model ID may differ from the model used to validate the saved profile.
-        let effective = limits == nil ? try settings.validated() : settings
+        let effective = limits == nil ? try connection.validatedCompatibleSettings(for: model) : settings
         let messageBudget = limits == nil ? .standard : VyronDeepSeekModelBudget.developmentMessages
+        let desired = effective.maxOutputTokens ?? effort.developmentBudget.outputTokens
+        let ceiling = VyronHostedCompatibleOutputLimit.published(for: connection, model: model) ?? desired
         return VyronDevelopmentContextBudget(
             contextTokens: effective.contextTokens ?? limits?.contextTokens ?? 32_768,
-            outputTokens: effective.maxOutputTokens ?? effort.developmentBudget.outputTokens,
+            outputTokens: min(desired, ceiling),
             maximumMessageBytes: messageBudget.maximumBytes
         )
     }

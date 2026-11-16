@@ -45,7 +45,7 @@ extension OpenAICompatibleClient {
         let maximum = try outputBudget(
             messages: wire,
             tools: [],
-            budget: requestedBudget(limits: limits, effort: input.configuration.effort),
+            budget: requestedBudget(limits: limits, model: model, effort: input.configuration.effort),
             minimum: 1
         )
         let body = VyronCompatibleChatRequest(

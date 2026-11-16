@@ -9,10 +9,13 @@ extension VyronMacWorkSession {
         let kind: String
         switch call.function.name {
         case VyronMacWorkTools.openApp:
-            if application.processIdentifier <= 0, attachedApplicationURLs[application.id] != nil {
-                return .review("Review opening this attached application before the agent continues.")
+            if application.processIdentifier <= 0 {
+                if attachedApplicationURLs[application.id] != nil {
+                    return .review("Review opening this attached application before the agent continues.")
+                }
+                return AutomationPolicy.evaluateLaunch(of: application)
             }
-            kind = application.processIdentifier > 0 ? "activate" : "launch"
+            kind = "activate"
         case VyronMacWorkTools.openProject: kind = "launch"
         case VyronMacWorkTools.click: kind = "click"
         case VyronMacWorkTools.typeText: kind = "typeText"

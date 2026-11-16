@@ -36,6 +36,13 @@ public struct ModelSettings: Codable, Equatable, Sendable {
         )
     }
 
+    package func validated(maximumOutput: Int, preservesLegacyOutputRange: Bool = false) throws -> ModelSettings {
+        let limit = preservesLegacyOutputRange
+            ? max(maximumOutput, VyronModelSettingsLimits.defaultMaximumOutputTokens)
+            : maximumOutput
+        return try validated(maximumContext: VyronModelSettingsLimits.defaultMaximumContextTokens, maximumOutput: limit)
+    }
+
     package func validated(maximumContext: Int, maximumOutput: Int) throws -> ModelSettings {
         let language = VyronResourceLanguage.selection
         let locale = Locale(identifier: language.resolved().rawValue)

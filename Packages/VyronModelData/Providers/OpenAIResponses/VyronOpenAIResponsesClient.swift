@@ -87,8 +87,10 @@ public actor VyronOpenAIResponsesClient: ModelProvider, VyronEffortChatProviding
             }
             let options = VyronOpenAIResponsesOptions(
                 generation: .init(
-                    maximumOutputTokens: settings.maxOutputTokens
-                        ?? inference.configuration.effort.developmentBudget.outputTokens,
+                    maximumOutputTokens: VyronOpenAIResponsesModelBudget.outputTokens(
+                        for: model,
+                        requested: settings.maxOutputTokens ?? inference.configuration.effort.developmentBudget.outputTokens
+                    ),
                     stream: true
                 )
             )
@@ -199,7 +201,10 @@ public actor VyronOpenAIResponsesClient: ModelProvider, VyronEffortChatProviding
         effort: AgentEffort,
         tools: [DevelopmentToolDefinition]
     ) async throws -> Data {
-        let desired = settings.maxOutputTokens ?? effort.developmentBudget.outputTokens
+        let desired = VyronOpenAIResponsesModelBudget.outputTokens(
+            for: model,
+            requested: settings.maxOutputTokens ?? effort.developmentBudget.outputTokens
+        )
         let maximumMessageBytes = developmentMessageBudget(for: model).maximumBytes
         let options = VyronOpenAIResponsesOptions(
             generation: .init(maximumOutputTokens: desired, stream: false),

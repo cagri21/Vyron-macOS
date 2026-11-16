@@ -6,6 +6,29 @@ import VyronModelDomain
 
 @MainActor
 final class VyronUserMessageBubbleRenderTests: XCTestCase {
+    func testSentImageIsSquareAndSharesTheBubbleTrailingEdge() throws {
+        let content = "What's in this image?"
+        let plain = ChatMessage(role: .user, content: content)
+        let message = ChatMessage(role: .user, content: content, images: [try VyronScreenshotTestImage.attachment()])
+
+        for width: CGFloat in [568, 260] {
+            let baseline = try render(plain, width: width)
+            let rendered = try render(message, width: width)
+            XCTAssertEqual(rendered.height - baseline.height, (80 + 8) * 2)
+
+            let bitmap = NSBitmapImageRep(cgImage: rendered)
+            let centerY = (8 + 40) * 2
+            let background = try XCTUnwrap(bitmap.colorAt(x: 0, y: centerY)?.usingColorSpace(.sRGB))
+            let imageColumns = (0..<bitmap.pixelsWide).filter { x in
+                guard let color = bitmap.colorAt(x: x, y: centerY)?.usingColorSpace(.sRGB) else { return false }
+                return abs(color.redComponent - background.redComponent) > 0.03
+            }
+            let trailingEdge = bitmap.pixelsWide - 8 * 2
+            XCTAssertEqual(imageColumns.first, trailingEdge - 80 * 2)
+            XCTAssertEqual(imageColumns.last, trailingEdge - 1)
+        }
+    }
+
     func testCapturePlainAndClarificationMessages() async throws {
         guard ProcessInfo.processInfo.environment["VYRON_CAPTURE_USER_MESSAGE_BUBBLES"] == "1" else {
             throw XCTSkip("Set VYRON_CAPTURE_USER_MESSAGE_BUBBLES=1 for offscreen message bubble verification.")
@@ -34,6 +57,14 @@ final class VyronUserMessageBubbleRenderTests: XCTestCase {
     }
 
     private func capture(_ message: ChatMessage, width: CGFloat, to destination: URL) throws -> CGImage {
+        let image = try render(message, width: width)
+        let bitmap = NSBitmapImageRep(cgImage: image)
+        let data = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+        try data.write(to: destination, options: .atomic)
+        return image
+    }
+
+    private func render(_ message: ChatMessage, width: CGFloat) throws -> CGImage {
         let renderer = ImageRenderer(content: VyronConversationMessageView(
             message: message,
             isStreaming: false,
@@ -48,9 +79,6 @@ final class VyronUserMessageBubbleRenderTests: XCTestCase {
             throw XCTSkip("BLOCKED: offscreen ImageRenderer is unavailable.")
         }
         XCTAssertEqual(image.width, Int(width * renderer.scale))
-        let bitmap = NSBitmapImageRep(cgImage: image)
-        let data = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
-        try data.write(to: destination, options: .atomic)
         return image
     }
 }

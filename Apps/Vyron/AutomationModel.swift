@@ -1226,7 +1226,7 @@ final class AutomationModel: ObservableObject {
         var key: String?
         var url: URL?
         switch review.action {
-        case .launch(let target): app = target; kind = "launch"
+        case .launch(let target): return AutomationPolicy.evaluateLaunch(of: target)
         case .activate(let target): app = target; kind = "activate"
         case .openURL(let targetURL, let browser):
             guard let browser else { return .review(VyronControlText.defaultBrowserReview) }

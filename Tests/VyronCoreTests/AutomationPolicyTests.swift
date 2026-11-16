@@ -21,6 +21,25 @@ final class AutomationPolicyTests: XCTestCase {
         if case .refused = decision { return true }; return false
     }
 
+    func testRoutineSystemAppLaunchesRequireMatchingBundleIDAndSystemPath() {
+        let apps = [
+            "com.apple.Photos": "Photos",
+            "com.apple.Preview": "Preview",
+            "com.apple.QuickTimePlayerX": "QuickTime Player"
+        ]
+        for (id, name) in apps {
+            let systemURL = URL(fileURLWithPath: "/System/Applications/\(name).app")
+            let otherURL = URL(fileURLWithPath: "/Applications/\(name).app")
+            let systemApp = DesktopApplication(installedAt: systemURL, name: name, bundleIdentifier: id)
+            let otherApp = DesktopApplication(installedAt: otherURL, name: name, bundleIdentifier: id)
+            let wrongID = DesktopApplication(installedAt: systemURL, name: name, bundleIdentifier: "com.example.App")
+
+            XCTAssertTrue(isAutomatic(AutomationPolicy.evaluateLaunch(of: systemApp)), id)
+            XCTAssertTrue(isReview(AutomationPolicy.evaluateLaunch(of: otherApp)), id)
+            XCTAssertTrue(isReview(AutomationPolicy.evaluateLaunch(of: wrongID)), id)
+        }
+    }
+
     func testVerifiedNavigationIsRoutineAndUnknownControlsNeedReview() {
         XCTAssertTrue(isAutomatic(AutomationPolicy.evaluate(kind: "click", applicationID: browser, element: element("Back"), goal: "Read documentation")))
         XCTAssertTrue(isReview(AutomationPolicy.evaluate(kind: "click", applicationID: browser, element: element("Do it"), goal: "Read documentation")))

@@ -2,8 +2,14 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsFindingModelFiles: String {
+        VyronResourceBundle.string("appSettingsFindingModelFiles", fallback: "Finding model files…")
+    }
     static var settingsFindingVariants: String {
         VyronResourceBundle.string("appSettingsFindingVariants", fallback: "Finding published variants…")
+    }
+    static var settingsFindVariants: String {
+        VyronResourceBundle.string("appSettingsFindVariants", fallback: "Find variants")
     }
     static var settingsFinishingSetup: String {
         VyronResourceBundle.string("appSettingsFinishingSetup", fallback: "Finishing local setup…")
@@ -15,11 +21,20 @@ extension VyronAppText {
             arguments: [p1]
         )
     }
+    static var settingsGeminiAPIKey: String {
+        VyronResourceBundle.string("appSettingsGeminiAPIKey", fallback: "Gemini API key")
+    }
+    static var settingsGeminiPrivacy: String {
+        VyronResourceBundle.string("appSettingsGeminiPrivacy", fallback: "Your prompts and selected project context are sent to Google. Your API key is stored in macOS Keychain.")
+    }
     static var settingsGenericModel: String {
         VyronResourceBundle.string("appSettingsGenericModel", fallback: "a model")
     }
     static var settingsGetOllama: String {
         VyronResourceBundle.string("appSettingsGetOllama", fallback: "Get Ollama ↗")
+    }
+    static var settingsHostedOutputLimitUnverified: String {
+        VyronResourceBundle.string("appSettingsHostedOutputLimitUnverified", fallback: "Vyron has no verified output limit for this model.")
     }
     static func settingsImportingNotice(_ p1: String) -> String {
         VyronResourceBundle.format(
@@ -78,6 +93,12 @@ extension VyronAppText {
     static var settingsMemoryExplanation: String {
         VyronResourceBundle.string("appSettingsMemoryExplanation", fallback: "Download sizes describe model weights, not total running memory. Context, Xcode, Simulator, and other apps need additional memory. Agent tasks require working native tool calls; Chat can use models without tools.")
     }
+    static var settingsMetaAPIKey: String {
+        VyronResourceBundle.string("appSettingsMetaAPIKey", fallback: "Meta Model API key")
+    }
+    static var settingsMetaPrivacy: String {
+        VyronResourceBundle.string("appSettingsMetaPrivacy", fallback: "Your prompts and selected project context are sent to Meta. Your API key is stored in macOS Keychain.")
+    }
     static var settingsMissingFileDetails: String {
         VyronResourceBundle.string("appSettingsMissingFileDetails", fallback: "Size and precision are not published for this file.")
     }
@@ -101,26 +122,5 @@ extension VyronAppText {
     }
     static var settingsModelPrecision: String {
         VyronResourceBundle.string("appSettingsModelPrecision", fallback: "Model and precision")
-    }
-    static var settingsModelsDescription: String {
-        VyronResourceBundle.string("appSettingsModelsDescription", fallback: "Use local models, connect a server by URL, or choose published model variants.")
-    }
-    static var settingsModelsHeading: String {
-        VyronResourceBundle.string("appSettingsModelsHeading", fallback: "Your models, your settings")
-    }
-    static var settingsModelSourceURLPlaceholder: String {
-        VyronResourceBundle.string("appSettingsModelSourceURLPlaceholder", fallback: "https://huggingface.co/owner/model-GGUF")
-    }
-    static var settingsMyModelServer: String {
-        VyronResourceBundle.string("appSettingsMyModelServer", fallback: "My model server")
-    }
-    static var settingsNewConnection: String {
-        VyronResourceBundle.string("appSettingsNewConnection", fallback: "New connection")
-    }
-    static var settingsNoModelsFromServer: String {
-        VyronResourceBundle.string("appSettingsNoModelsFromServer", fallback: "The server did not list any models. Enter an exact model ID to test it.")
-    }
-    static var settingsNoReplacementVariants: String {
-        VyronResourceBundle.string("appSettingsNoReplacementVariants", fallback: "No other precision variants are available for this model.")
     }
 }

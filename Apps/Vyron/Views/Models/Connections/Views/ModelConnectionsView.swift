@@ -17,32 +17,7 @@ struct ModelConnectionsView: View {
     var body: some View {
         let _ = localizationLocale
         VStack(alignment: .leading, spacing: 18) {
-            HStack {
-                Eyebrow(text: VyronAppText.settingsConnections)
-                Spacer()
-                Button(VyronAppText.settingsAddDeepSeek) {
-                    editingProfile = VyronDeepSeekConnectionPreset.makeProfile()
-                }
-                .font(.system(size: 11)).buttonStyle(QuietButtonStyle())
-                .disabled(!canChangeConnection)
-                Button(VyronAppText.settingsAddClaude) {
-                    editingProfile = VyronClaudeConnectionPreset.makeProfile()
-                }
-                .font(.system(size: 11)).buttonStyle(QuietButtonStyle())
-                .disabled(!canChangeConnection)
-                Button(VyronAppText.settingsAddOpenAI) {
-                    editingProfile = VyronOpenAIConnectionPreset.makeProfile()
-                }
-                .font(.system(size: 11)).buttonStyle(QuietButtonStyle())
-                .disabled(!canChangeConnection)
-                Button {
-                    editingProfile = ModelConnectionProfile(name: "", kind: .openAICompatible, endpoint: "")
-                } label: {
-                    Label(VyronAppText.settingsAddServer, systemImage: VyronSymbols.plus)
-                }
-                .font(.system(size: 11)).buttonStyle(QuietButtonStyle())
-                .disabled(!canChangeConnection)
-            }
+            connectionsHeader
             VStack(spacing: 0) {
                 connectionRow(
                     id: nil,
@@ -89,6 +64,48 @@ struct ModelConnectionsView: View {
         .sheet(item: $editingProfile) { profile in
             VyronModelConnectionEditor(profile: profile).environmentObject(model)
         }
+    }
+
+    private var connectionsHeader: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                Eyebrow(text: VyronAppText.settingsConnections)
+                Spacer(minLength: 0)
+                connectionActions.fixedSize(horizontal: true, vertical: false)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Eyebrow(text: VyronAppText.settingsConnections)
+                connectionActions
+            }
+        }
+    }
+
+    private var connectionActions: some View {
+        HStack(spacing: 4) {
+            Button(VyronAppText.settingsAddDeepSeek) {
+                editingProfile = VyronDeepSeekConnectionPreset.makeProfile()
+            }
+            Button(VyronAppText.settingsAddGemini) {
+                editingProfile = VyronGeminiConnectionPreset.makeProfile()
+            }
+            Button(VyronAppText.settingsAddMeta) {
+                editingProfile = VyronMetaConnectionPreset.makeProfile()
+            }
+            Button(VyronAppText.settingsAddClaude) {
+                editingProfile = VyronClaudeConnectionPreset.makeProfile()
+            }
+            Button(VyronAppText.settingsAddOpenAI) {
+                editingProfile = VyronOpenAIConnectionPreset.makeProfile()
+            }
+            Button {
+                editingProfile = ModelConnectionProfile(name: "", kind: .openAICompatible, endpoint: "")
+            } label: {
+                Label(VyronAppText.settingsAddServer, systemImage: VyronSymbols.plus)
+            }
+        }
+        .font(.system(size: 11))
+        .buttonStyle(QuietButtonStyle())
+        .disabled(!canChangeConnection)
     }
 
     private var canChangeConnection: Bool {

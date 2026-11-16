@@ -1181,6 +1181,52 @@
         }
       }
     },
+    "appSettingsAddGemini": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Gemini"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini ekle"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати Gemini"
+          }
+        }
+      }
+    },
+    "appSettingsAddMeta": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Meta"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meta ekle"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати Meta"
+          }
+        }
+      }
+    },
     "appSettingsAddOpenAI": {
       "extractionState": "manual",
       "localizations": {
@@ -1246,6 +1292,121 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ваші запити та вибраний контекст проєкту надсилаються до DeepSeek. Ключ API зберігається у В'язці ключів macOS."
+          }
+        }
+      }
+    },
+    "appSettingsReplacementAPIKey": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replacement API key"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni API anahtarı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новий ключ API"
+          }
+        }
+      }
+    },
+    "appSettingsGeminiAPIKey": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini API key"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini API anahtarı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ API Gemini"
+          }
+        }
+      }
+    },
+    "appSettingsGeminiPrivacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your prompts and selected project context are sent to Google. Your API key is stored in macOS Keychain."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İstemleriniz ve seçili proje bağlamı Google'a gönderilir. API anahtarınız macOS Anahtar Zinciri'nde saklanır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваші запити та вибраний контекст проєкту надсилаються до Google. Ключ API зберігається у В'язці ключів macOS."
+          }
+        }
+      }
+    },
+    "appSettingsMetaAPIKey": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meta Model API key"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meta Model API anahtarı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ API Meta Model"
+          }
+        }
+      }
+    },
+    "appSettingsMetaPrivacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your prompts and selected project context are sent to Meta. Your API key is stored in macOS Keychain."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İstemleriniz ve seçili proje bağlamı Meta'ya gönderilir. API anahtarınız macOS Anahtar Zinciri'nde saklanır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваші запити та вибраний контекст проєкту надсилаються до Meta. Ключ API зберігається у В'язці ключів macOS."
           }
         }
       }
@@ -16158,19 +16319,42 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This model supports up to %@ output tokens."
+            "value": "This model supports up to %@ output tokens. The available context can lower the response limit."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bu model, en fazla %@ çıktı belirtecini destekler."
+            "value": "Bu model en fazla %@ çıktı belirtecini destekler. Kullanılabilir bağlam, yanıt sınırını düşürebilir."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ця модель підтримує до %@ вихідних токенів."
+            "value": "Ця модель підтримує до %@ вихідних токенів. Доступний контекст може зменшити ліміт відповіді."
+          }
+        }
+      }
+    },
+    "appSettingsHostedOutputLimitUnverified": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron has no verified output limit for this model."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyron’da bu model için doğrulanmış bir çıktı sınırı bulunmuyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У Vyron немає підтвердженого ліміту вихідних токенів для цієї моделі."
           }
         }
       }

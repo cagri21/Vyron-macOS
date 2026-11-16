@@ -49,8 +49,14 @@ extension VyronAppText {
     static var settingsAddDeepSeek: String {
         VyronResourceBundle.string("appSettingsAddDeepSeek", fallback: "Add DeepSeek")
     }
+    static var settingsAddGemini: String {
+        VyronResourceBundle.string("appSettingsAddGemini", fallback: "Add Gemini")
+    }
     static var settingsAddLocalModel: String {
         VyronResourceBundle.string("appSettingsAddLocalModel", fallback: "Add another local model")
+    }
+    static var settingsAddMeta: String {
+        VyronResourceBundle.string("appSettingsAddMeta", fallback: "Add Meta")
     }
     static var settingsAddOpenAI: String {
         VyronResourceBundle.string("appSettingsAddOpenAI", fallback: "Add OpenAI")
@@ -124,11 +130,5 @@ extension VyronAppText {
     }
     static var settingsCheckAgain: String {
         VyronResourceBundle.string("appSettingsCheckAgain", fallback: "Check again")
-    }
-    static var settingsCheckingConnection: String {
-        VyronResourceBundle.string("appSettingsCheckingConnection", fallback: "Checking model connection…")
-    }
-    static var settingsCheckingFiles: String {
-        VyronResourceBundle.string("appSettingsCheckingFiles", fallback: "Checking downloaded files…")
     }
 }

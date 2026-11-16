@@ -87,7 +87,7 @@ the conversation. [Long project prompts](docs/user-guide.md#long-project-prompts
 | Connection | Setup |
 | --- | --- |
 | **On this Mac** | Install Ollama and choose an installed model. Vyron uses a loopback connection at `127.0.0.1:11434`. Initial model downloads require internet access. |
-| **OpenAI, Claude, or DeepSeek** | Choose the provider preset in **Manage Models…**, supply your API key, and choose a model. |
+| **OpenAI, Claude, DeepSeek, Gemini, or Meta** | Choose the provider preset in **Manage Models…**, supply your API key, and choose a model. |
 | **Custom server** | Use **Add server URL** for a compatible Ollama, Anthropic, or OpenAI-compatible endpoint. Remote endpoints use HTTPS. HTTP is available for loopback connections. |
 
 Use **Test response** or **Check model features** to check a connection. Work

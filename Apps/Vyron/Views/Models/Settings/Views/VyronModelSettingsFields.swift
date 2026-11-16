@@ -27,11 +27,14 @@ struct VyronModelSettingsFields: View {
         return VyronAppText.settingsAutomaticContextTokens(tokens.formatted(.number.locale(localizationLocale)))
     }
 
-    private var publishedOutputTokenLimit: Int? {
-        if let claudeModelID, VyronClaudeModelBudget.hasPublishedLimits(for: claudeModelID) {
-            return VyronClaudeModelBudget.maximumOutputTokens(for: claudeModelID)
-        }
-        return deepSeekBudget?.maximumOutputTokens
+    private var showsUnverifiedOutputLimit: Bool {
+        guard let profile,
+            !profile.selectedModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else { return false }
+        return profile.kind == .anthropic
+            || VyronGeminiConnectionPreset.matches(profile)
+            || VyronMetaConnectionPreset.matches(profile)
+            || VyronOpenAIConnectionPreset.matches(profile)
     }
 
     private var thinkingChoices: [VyronModelThinkingChoice] {
@@ -57,8 +60,11 @@ struct VyronModelSettingsFields: View {
                 placeholder: VyronAppText.settingsAutomatic,
                 text: $draft.budget.maxOutputTokens
             )
-            if let tokens = publishedOutputTokenLimit {
+            if let tokens = profile?.publishedOutputTokenLimit {
                 Text(VyronAppText.settingsClaudeOutputLimit(tokens.formatted(.number.locale(localizationLocale))))
+                    .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
+            } else if showsUnverifiedOutputLimit {
+                Text(VyronAppText.settingsHostedOutputLimitUnverified)
                     .font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
             }
             if profile == nil { ollamaTimeoutField }

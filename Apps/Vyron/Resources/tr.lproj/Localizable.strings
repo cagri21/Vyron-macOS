@@ -188,7 +188,9 @@
 "appSettingsActiveConnection" = "Etkin bağlantı";
 "appSettingsAddClaude" = "Claude ekle";
 "appSettingsAddDeepSeek" = "DeepSeek ekle";
+"appSettingsAddGemini" = "Gemini ekle";
 "appSettingsAddLocalModel" = "Başka bir yerel model ekle";
+"appSettingsAddMeta" = "Meta ekle";
 "appSettingsAddOpenAI" = "OpenAI ekle";
 "appSettingsAddServer" = "Sunucu URL’si ekle";
 "appSettingsAgentToolsAdvertised" = "Ajan araçları bildirildi";
@@ -212,7 +214,7 @@
 "appSettingsChooseLocalHint" = "Ağırlıkları yerel olarak indirmek veya içe aktarmak için yukarıdan Bu Mac’te seçeneğini seçin.";
 "appSettingsChooseModel" = "Model seçin";
 "appSettingsClaudeAPIKey" = "Anthropic API anahtarı";
-"appSettingsClaudeOutputLimit" = "Bu model, en fazla %@ çıktı belirtecini destekler.";
+"appSettingsClaudeOutputLimit" = "Bu model en fazla %@ çıktı belirtecini destekler. Kullanılabilir bağlam, yanıt sınırını düşürebilir.";
 "appSettingsClaudePrivacy" = "Yukarıdaki sunucu bu bağlantı üzerinden gönderilen iletileri ve proje alıntılarını alır. Anahtarınız macOS Anahtar Zinciri’nde saklanır.";
 "appSettingsCloseConnection" = "Bağlantı düzenleyicisini kapat";
 "appSettingsCloseModels" = "Model yöneticisini kapat";
@@ -247,8 +249,11 @@
 "appSettingsFindingVariants" = "Yayımlanmış sürümler aranıyor…";
 "appSettingsFinishingSetup" = "Yerel kurulum tamamlanıyor…";
 "appSettingsFreeStorage" = "%@ boş";
+"appSettingsGeminiAPIKey" = "Gemini API anahtarı";
+"appSettingsGeminiPrivacy" = "İstemleriniz ve seçili proje bağlamı Google'a gönderilir. API anahtarınız macOS Anahtar Zinciri'nde saklanır.";
 "appSettingsGenericModel" = "bir model";
 "appSettingsGetOllama" = "Ollama’yı edin ↗";
+"appSettingsHostedOutputLimitUnverified" = "Vyron’da bu model için doğrulanmış bir çıktı sınırı bulunmuyor.";
 "appSettingsImportModelTagPlaceholder" = "my-model:latest";
 "appSettingsImportingNotice" = "%@ içe aktarılıyor. Başka bir işlem başlatmadan önce içe aktarmayı iptal edin; iptal edilen dosya aktarmaları baştan başlar.";
 "appSettingsInUse" = "Kullanımda";
@@ -264,6 +269,8 @@
 "appSettingsMaxResponseTokens" = "En fazla yanıt belirteci";
 "appSettingsMemoryAmount" = "%@ bellek";
 "appSettingsMemoryExplanation" = "İndirme boyutları, toplam çalışma belleğini değil model ağırlıklarını gösterir. Bağlam, Xcode, Simulator ve diğer uygulamalar ek bellek gerektirir. Ajan görevleri çalışan yerel araç çağrıları gerektirir; Sohbet, araçsız modelleri kullanabilir.";
+"appSettingsMetaAPIKey" = "Meta Model API anahtarı";
+"appSettingsMetaPrivacy" = "İstemleriniz ve seçili proje bağlamı Meta'ya gönderilir. API anahtarınız macOS Anahtar Zinciri'nde saklanır.";
 "appSettingsMissingFileDetails" = "Bu dosyanın boyutu ve hassasiyeti yayımlanmamış.";
 "appSettingsMissingServerDetails" = "Sunucu, model boyutunu veya hassasiyetini yayımlamıyor.";
 "appSettingsModelConnection" = "Model bağlantısı";
@@ -319,6 +326,7 @@
 "appSettingsRemoteServer" = "Uzak sunucu";
 "appSettingsRemoveConnection" = "%@ bağlantısını kaldır";
 "appSettingsRemovingPreviousVariant" = "%@ kaldırılıyor…";
+"appSettingsReplacementAPIKey" = "Yeni API anahtarı";
 "appSettingsRequestBudgetHint" = "Bu ayar, Vyron’un istek bütçesini sınırlar. Modelin gerçek bağlam kapasitesini sunucu belirler.";
 "appSettingsResume" = "Sürdür";
 "appSettingsSaveTestHint" = "Kaydetmeden önce bu bağlantıyla kısa bir yanıt sınanır.";

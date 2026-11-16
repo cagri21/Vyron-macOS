@@ -2,6 +2,12 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsCheckingConnection: String {
+        VyronResourceBundle.string("appSettingsCheckingConnection", fallback: "Checking model connection…")
+    }
+    static var settingsCheckingFiles: String {
+        VyronResourceBundle.string("appSettingsCheckingFiles", fallback: "Checking downloaded files…")
+    }
     static var settingsChooseLocalHint: String {
         VyronResourceBundle.string("appSettingsChooseLocalHint", fallback: "Choose On this Mac above to download or import weights locally.")
     }
@@ -14,7 +20,7 @@ extension VyronAppText {
     static func settingsClaudeOutputLimit(_ p1: String) -> String {
         VyronResourceBundle.format(
             "appSettingsClaudeOutputLimit",
-            fallback: "This model supports up to %@ output tokens.",
+            fallback: "This model supports up to %@ output tokens. The available context can lower the response limit.",
             arguments: [p1]
         )
     }
@@ -124,11 +130,5 @@ extension VyronAppText {
     }
     static var settingsExactModelID: String {
         VyronResourceBundle.string("appSettingsExactModelID", fallback: "Exact model ID from your server")
-    }
-    static var settingsFindingModelFiles: String {
-        VyronResourceBundle.string("appSettingsFindingModelFiles", fallback: "Finding model files…")
-    }
-    static var settingsFindVariants: String {
-        VyronResourceBundle.string("appSettingsFindVariants", fallback: "Find variants")
     }
 }

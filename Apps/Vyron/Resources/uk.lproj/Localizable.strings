@@ -188,7 +188,9 @@
 "appSettingsActiveConnection" = "Активне підключення";
 "appSettingsAddClaude" = "Додати Claude";
 "appSettingsAddDeepSeek" = "Додати DeepSeek";
+"appSettingsAddGemini" = "Додати Gemini";
 "appSettingsAddLocalModel" = "Додати іншу локальну модель";
+"appSettingsAddMeta" = "Додати Meta";
 "appSettingsAddOpenAI" = "Додати OpenAI";
 "appSettingsAddServer" = "Додати URL сервера";
 "appSettingsAgentToolsAdvertised" = "Заявлено інструменти агента";
@@ -212,7 +214,7 @@
 "appSettingsChooseLocalHint" = "Виберіть вище «На цьому Mac», щоб завантажити або імпортувати ваги локально.";
 "appSettingsChooseModel" = "Виберіть модель";
 "appSettingsClaudeAPIKey" = "Ключ API Anthropic";
-"appSettingsClaudeOutputLimit" = "Ця модель підтримує до %@ вихідних токенів.";
+"appSettingsClaudeOutputLimit" = "Ця модель підтримує до %@ вихідних токенів. Доступний контекст може зменшити ліміт відповіді.";
 "appSettingsClaudePrivacy" = "Зазначений вище сервер отримує повідомлення й фрагменти проєкту, надіслані через це з’єднання. Ключ зберігається у в’язці ключів macOS.";
 "appSettingsCloseConnection" = "Закрити редактор підключення";
 "appSettingsCloseModels" = "Закрити менеджер моделей";
@@ -247,8 +249,11 @@
 "appSettingsFindingVariants" = "Пошук опублікованих варіантів…";
 "appSettingsFinishingSetup" = "Завершення локального налаштування…";
 "appSettingsFreeStorage" = "%@ вільно";
+"appSettingsGeminiAPIKey" = "Ключ API Gemini";
+"appSettingsGeminiPrivacy" = "Ваші запити та вибраний контекст проєкту надсилаються до Google. Ключ API зберігається у В'язці ключів macOS.";
 "appSettingsGenericModel" = "модель";
 "appSettingsGetOllama" = "Завантажити Ollama ↗";
+"appSettingsHostedOutputLimitUnverified" = "У Vyron немає підтвердженого ліміту вихідних токенів для цієї моделі.";
 "appSettingsImportModelTagPlaceholder" = "my-model:latest";
 "appSettingsImportingNotice" = "Імпортується %@. Скасуйте імпорт перед початком іншого; скасований імпорт файлу починається спочатку.";
 "appSettingsInUse" = "Використовується";
@@ -264,6 +269,8 @@
 "appSettingsMaxResponseTokens" = "Максимум токенів відповіді";
 "appSettingsMemoryAmount" = "%@ пам’яті";
 "appSettingsMemoryExplanation" = "Розміри завантажень стосуються ваг моделі, а не загальної оперативної пам’яті. Контексту, Xcode, Simulator та іншим програмам потрібна додаткова пам’ять. Завдання агента потребують робочих нативних викликів інструментів; чат може використовувати моделі без інструментів.";
+"appSettingsMetaAPIKey" = "Ключ API Meta Model";
+"appSettingsMetaPrivacy" = "Ваші запити та вибраний контекст проєкту надсилаються до Meta. Ключ API зберігається у В'язці ключів macOS.";
 "appSettingsMissingFileDetails" = "Для цього файлу не опубліковано розмір і точність.";
 "appSettingsMissingServerDetails" = "Сервер не публікує розмір або точність моделі.";
 "appSettingsModelConnection" = "Підключення моделі";
@@ -319,6 +326,7 @@
 "appSettingsRemoteServer" = "Віддалений сервер";
 "appSettingsRemoveConnection" = "Видалити %@";
 "appSettingsRemovingPreviousVariant" = "Видалення %@…";
+"appSettingsReplacementAPIKey" = "Новий ключ API";
 "appSettingsRequestBudgetHint" = "Це обмежує обсяг запиту Vyron. Фактичну місткість контексту моделі визначає сервер.";
 "appSettingsResume" = "Продовжити";
 "appSettingsSaveTestHint" = "Перед збереженням підключення перевіряється коротка відповідь.";

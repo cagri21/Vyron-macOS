@@ -2,6 +2,27 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsQwen38Summary: String {
+        VyronResourceBundle.string("appSettingsQwen38Summary", fallback: "Newer coding and reasoning model; recommended to try locally.")
+    }
+    static var settingsQwenCoderMemory: String {
+        VyronResourceBundle.string("appSettingsQwenCoderMemory", fallback: "19 GB weights; start with a 32K context.")
+    }
+    static var settingsQwenCoderSummary: String {
+        VyronResourceBundle.string("appSettingsQwenCoderSummary", fallback: "The coding baseline used for the app's initial build-and-repair proof.")
+    }
+    static var settingsQwenHelperMemory: String {
+        VyronResourceBundle.string("appSettingsQwenHelperMemory", fallback: "2.5 GB download. Kept separate from coding-model selection.")
+    }
+    static var settingsQwenHelperSummary: String {
+        VyronResourceBundle.string("appSettingsQwenHelperSummary", fallback: "Lightweight intent routing and chat helper; not a development model.")
+    }
+    static var settingsQwenNextMemory: String {
+        VyronResourceBundle.string("appSettingsQwenNextMemory", fallback: "52 GB weights leave little headroom on a 64 GB Mac. Excluded from Auto.")
+    }
+    static var settingsQwenNextSummary: String {
+        VyronResourceBundle.string("appSettingsQwenNextSummary", fallback: "Large agentic coding model. Optional, explicit selection only.")
+    }
     static var settingsRecommended: String {
         VyronResourceBundle.string("appSettingsRecommended", fallback: "Recommended to try")
     }
@@ -24,6 +45,9 @@ extension VyronAppText {
             fallback: "Removing %@…",
             arguments: [p1]
         )
+    }
+    static var settingsReplacementAPIKey: String {
+        VyronResourceBundle.string("appSettingsReplacementAPIKey", fallback: "Replacement API key")
     }
     static var settingsRequestBudgetHint: String {
         VyronResourceBundle.string("appSettingsRequestBudgetHint", fallback: "This limits Vyron’s request budget. The server determines its model’s actual context capacity.")
@@ -98,29 +122,5 @@ extension VyronAppText {
     }
     static var settingsThinkingLow: String {
         VyronResourceBundle.string("appSettingsThinkingLow", fallback: "Low")
-    }
-    static var settingsThinkingMedium: String {
-        VyronResourceBundle.string("appSettingsThinkingMedium", fallback: "Medium")
-    }
-    static var settingsThinkingOff: String {
-        VyronResourceBundle.string("appSettingsThinkingOff", fallback: "Off, when supported")
-    }
-    static var settingsThinkingOn: String {
-        VyronResourceBundle.string("appSettingsThinkingOn", fallback: "On, when supported")
-    }
-    static var settingsThinkingSelectionUnavailable: String {
-        VyronResourceBundle.string("appSettingsThinkingSelectionUnavailable", fallback: "Choose an available thinking option for this model.")
-    }
-    static var settingsThisMac: String {
-        VyronResourceBundle.string("appSettingsThisMac", fallback: "On this Mac")
-    }
-    static var settingsTopP: String {
-        VyronResourceBundle.string("appSettingsTopP", fallback: "Top P")
-    }
-    static var settingsUse: String {
-        VyronResourceBundle.string("appSettingsUse", fallback: "Use")
-    }
-    static var settingsUseAuto: String {
-        VyronResourceBundle.string("appSettingsUseAuto", fallback: "Use Auto")
     }
 }

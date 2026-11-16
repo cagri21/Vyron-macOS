@@ -56,7 +56,7 @@ extension OpenAICompatibleClient {
     ) async throws -> DevelopmentStep {
         try ModelEndpoint.validateModelID(model)
         let limits = VyronDeepSeekModelBudget.published(for: connection, model: model)
-        let requested = try requestedBudget(limits: limits, effort: effort)
+        let requested = try requestedBudget(limits: limits, model: model, effort: effort)
         let scope = VyronDeepSeekReplayScope(connection: connection, model: model)
         let messages = scope?.scoped(messages) ?? messages.map { $0.discardingContinuation() }
         try VyronDevelopmentImageContext.validate(messages)

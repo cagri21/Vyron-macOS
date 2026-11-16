@@ -17,6 +17,10 @@ enum VyronOpenAIResponsesModelBudget {
         usesExpandedBudget(for: model) ? expandedDevelopmentMessages : .standard
     }
 
+    static func outputTokens(for model: String, requested: Int) -> Int {
+        min(requested, VyronOpenAIModelOutputLimit.published(for: model) ?? requested)
+    }
+
     private static func usesExpandedBudget(for model: String) -> Bool {
         switch VyronOpenAIResponsesRoute.modelFamily(for: model) {
         case .gpt61Sol, .gpt6Sol, .gpt6Astra: true

@@ -2,6 +2,27 @@
 import Foundation
 
 extension VyronAppText {
+    static var settingsModelsDescription: String {
+        VyronResourceBundle.string("appSettingsModelsDescription", fallback: "Use local models, connect a server by URL, or choose published model variants.")
+    }
+    static var settingsModelsHeading: String {
+        VyronResourceBundle.string("appSettingsModelsHeading", fallback: "Your models, your settings")
+    }
+    static var settingsModelSourceURLPlaceholder: String {
+        VyronResourceBundle.string("appSettingsModelSourceURLPlaceholder", fallback: "https://huggingface.co/owner/model-GGUF")
+    }
+    static var settingsMyModelServer: String {
+        VyronResourceBundle.string("appSettingsMyModelServer", fallback: "My model server")
+    }
+    static var settingsNewConnection: String {
+        VyronResourceBundle.string("appSettingsNewConnection", fallback: "New connection")
+    }
+    static var settingsNoModelsFromServer: String {
+        VyronResourceBundle.string("appSettingsNoModelsFromServer", fallback: "The server did not list any models. Enter an exact model ID to test it.")
+    }
+    static var settingsNoReplacementVariants: String {
+        VyronResourceBundle.string("appSettingsNoReplacementVariants", fallback: "No other precision variants are available for this model.")
+    }
     static var settingsNoSupportedVariant: String {
         VyronResourceBundle.string("appSettingsNoSupportedVariant", fallback: "This source did not publish a supported model variant.")
     }
@@ -117,26 +138,5 @@ extension VyronAppText {
     }
     static var settingsQwen38Memory: String {
         VyronResourceBundle.string("appSettingsQwen38Memory", fallback: "Start with one loaded model and a 32K context.")
-    }
-    static var settingsQwen38Summary: String {
-        VyronResourceBundle.string("appSettingsQwen38Summary", fallback: "Newer coding and reasoning model; recommended to try locally.")
-    }
-    static var settingsQwenCoderMemory: String {
-        VyronResourceBundle.string("appSettingsQwenCoderMemory", fallback: "19 GB weights; start with a 32K context.")
-    }
-    static var settingsQwenCoderSummary: String {
-        VyronResourceBundle.string("appSettingsQwenCoderSummary", fallback: "The coding baseline used for the app's initial build-and-repair proof.")
-    }
-    static var settingsQwenHelperMemory: String {
-        VyronResourceBundle.string("appSettingsQwenHelperMemory", fallback: "2.5 GB download. Kept separate from coding-model selection.")
-    }
-    static var settingsQwenHelperSummary: String {
-        VyronResourceBundle.string("appSettingsQwenHelperSummary", fallback: "Lightweight intent routing and chat helper; not a development model.")
-    }
-    static var settingsQwenNextMemory: String {
-        VyronResourceBundle.string("appSettingsQwenNextMemory", fallback: "52 GB weights leave little headroom on a 64 GB Mac. Excluded from Auto.")
-    }
-    static var settingsQwenNextSummary: String {
-        VyronResourceBundle.string("appSettingsQwenNextSummary", fallback: "Large agentic coding model. Optional, explicit selection only.")
     }
 }

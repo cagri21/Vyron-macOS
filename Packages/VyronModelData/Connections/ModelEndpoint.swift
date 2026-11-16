@@ -27,6 +27,16 @@ public enum ModelEndpoint {
         return url
     }
 
+    static func matchesOfficialCompatibleEndpoint(_ endpoint: String, profile: ModelConnectionProfile) -> Bool {
+        guard profile.kind == .openAICompatible,
+            let url = try? validated(profile.endpoint, kind: profile.kind),
+            url.port == nil || url.port == 443,
+            var parts = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else { return false }
+        parts.port = nil
+        return parts.string == endpoint
+    }
+
     public static func validateModelID(_ model: String) throws {
         guard !model.isEmpty, model.utf8.count <= VyronModelEndpointPolicy.maximumModelIDBytes,
             !model.unicodeScalars.contains(where: {

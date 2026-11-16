@@ -913,6 +913,35 @@ DeepSeek only when requested. The key is stored in the existing macOS Keychain
 entry for that connection. Existing saved connection IDs and API keys are
 preserved; no profile migration is required.
 
+For Gemini, choose **Add Gemini**. The preset uses Gemini's OpenAI-compatible
+endpoint, `https://generativelanguage.googleapis.com/v1beta/openai`, and starts
+with `gemini-3.8-flash`. Enter a Gemini API key, choose another exact model ID
+or use **Discover models**, then select **Save & use**. Gemini's
+OpenAI-compatible API is used for Chat and for Vyron's native tool verification;
+provider-specific Gemini features are not enabled by this connection.
+
+For Meta, choose **Add Meta**. The preset uses the Meta Model API endpoint,
+`https://api.meta.ai/v1`, and starts with `muse-spark-1.3`. Enter a Meta Model
+API key, choose another exact model ID or use **Discover models**, then select
+**Save & use**. The connection uses Meta's OpenAI-compatible Chat Completions
+API and keeps its key in macOS Keychain.
+
+You can also choose **Gemini** or **Meta** from **Server type** in the connection
+editor. Selecting either fills in its official endpoint and default model.
+
+In **Customized settings**, **Maximum response tokens** shows the published
+output ceiling when Vyron recognizes the selected model. Gemini 3.8 Flash
+supports up to 65,536 output tokens, Meta Muse Spark 1.3 up to 131,072, and
+Meta Muse Ember 1.0 up to 524,288. GPT-6.1 Sol supports up to 128,000 output
+tokens. Recognized Claude and other OpenAI models show their own published
+limits. Leave the field blank for the automatic response budget. The input
+and available context can reduce the output allowance.
+[Gemini model limits](https://aistudio.google.com/docs/models/gemini-3.8-flash) ·
+[Meta Spark limits](https://dev.meta.ai/docs/coding-agents#set-up-opencode) ·
+[Meta Ember limits](https://dev.meta.ai/docs/muse-ember) ·
+[OpenAI model limits](https://developers.openai.com/api/docs/models/gpt-6.1-sol) ·
+[Claude output limits](https://platform.claude.com/docs/en/build-with-claude/thinking#output-limits)
+
 For Claude, choose **Add Claude** in **Manage Models…**. Paste your Anthropic
 API key and use `claude-sonnet-5-5` or select another model with **Discover models**.
 The preset uses `https://api.anthropic.com/v1`. **Customized settings** lets you
@@ -1220,8 +1249,9 @@ The app catalog includes running regular apps, installed apps from macOS system,
 shared, and user Applications folders, and apps you explicitly attach to the
 Work conversation. Ask “Open QuickTime Player” to launch an installed app by
 name, even if it is closed. If an app is stored elsewhere, you can attach it to
-the conversation. Launches that require review show the selected bundle's path
-before asking for approval.
+the conversation. Photos, Preview, and QuickTime Player open without a launch
+confirmation when Vyron finds their macOS system bundles. Launches that require
+review show the selected bundle's path before asking for approval.
 The native project opener accepts an existing relative `.xcodeproj` or
 `.xcworkspace` inside the active project. The agent can then inspect Xcode's real
 run-destination controls and **Product → Run**, and inspect the visible result.

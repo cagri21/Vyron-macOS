@@ -216,7 +216,7 @@ final class VyronAppModelMacRoutingTests: XCTestCase {
         XCTAssertEqual(chatRequests, 0)
     }
 
-    func testStoppedPhotosReviewBelongsToItsChatWhileWorkContinuesInBackground() async throws {
+    func testRemoteChatLaunchesClosedSystemPhotosWithoutReview() async throws {
         let test = try configuredHarness()
         defer { test.cleanUp() }
         let model = test.model
@@ -229,6 +229,31 @@ final class VyronAppModelMacRoutingTests: XCTestCase {
         controller.running = []
         model.computerWork.macWorkController = controller
 
+        model.composer.draft = "open photos app"
+        XCTAssertTrue(model.canSend)
+        model.send()
+        try await test.waitUntil { model.mcpConnections.pendingReview != nil || !model.foregroundRun.isGenerating }
+
+        XCTAssertNil(model.mcpConnections.pendingReview)
+        XCTAssertEqual(controller.launchedIDs, [id])
+        XCTAssertEqual(model.messages.last?.activity?.state, .completed)
+        let chatRequests = await test.provider.chatRequests
+        XCTAssertEqual(chatRequests, 0)
+    }
+
+    func testUnfamiliarAppLaunchReviewBelongsToItsChatWhileWorkContinuesInBackground() async throws {
+        let test = try configuredHarness()
+        defer { test.cleanUp() }
+        let model = test.model
+        test.select(test.profile(endpoint: "https://models.example.com/v1"), provider: test.provider)
+        model.skillContextLoader = { _ in .empty }
+        let controller = VyronMacWorkTestController()
+        let id = "com.spotify.client"
+        let url = URL(fileURLWithPath: "/Applications/Spotify.app")
+        controller.catalog = [DesktopApplication(installedAt: url, name: "Spotify", bundleIdentifier: id)]
+        controller.running = []
+        model.computerWork.macWorkController = controller
+
         let pendingWork = AsyncStream<Void>.makeStream()
         defer {
             model.mcpConnections.respondToReview(false)
@@ -237,14 +262,14 @@ final class VyronAppModelMacRoutingTests: XCTestCase {
         }
         let work = startBackgroundWork(in: model, waitingOn: pendingWork.stream)
 
-        model.composer.draft = "open photos app"
+        model.composer.draft = "open spotify app"
         XCTAssertTrue(model.canSend)
         model.send()
         try await test.waitUntil { model.mcpConnections.pendingReview != nil || !model.foregroundRun.isGenerating }
 
         let review = try XCTUnwrap(model.mcpConnections.pendingReview, model.messages.last?.content ?? "")
-        let photoChat = try XCTUnwrap(model.foregroundRun.activeResponse)
-        let owner = VyronNotificationResponseID(conversationID: photoChat.conversationID, responseID: photoChat.messageID)
+        let appChat = try XCTUnwrap(model.foregroundRun.activeResponse)
+        let owner = VyronNotificationResponseID(conversationID: appChat.conversationID, responseID: appChat.messageID)
         let details = try JSONDecoder().decode([String: DevelopmentJSONValue].self, from: Data(review.arguments.utf8))
         XCTAssertEqual(details["application_path"], .string(url.path))
         XCTAssertEqual(model.notifications.reviewObservation?.requestID, review.id)

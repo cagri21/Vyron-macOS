@@ -9,7 +9,7 @@ struct VyronModelConnectionEditor: View {
     @State private var profile: ModelConnectionProfile
     @State private var settings: VyronModelSettingsDraft
     @State private var showsCustomizedSettings: Bool
-    @State private var apiKey = ""
+    @State private var credential = VyronModelConnectionCredentialDraft()
     @State private var discoveredModels: [LocalModel] = []
     @State private var precision = ""
     @State private var busy = false
@@ -77,7 +77,8 @@ struct VyronModelConnectionEditor: View {
                 Button(VyronAppText.settingsCancel) { dismiss() }.buttonStyle(QuietButtonStyle())
                 Button(VyronAppText.settingsSaveUse) { save() }.buttonStyle(AccentButtonStyle())
                     .disabled(
-                        !canOperate || profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        !canOperate || !credential.canSave
+                            || profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                             || profile.selectedModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     )
             }.padding(18)
@@ -85,16 +86,10 @@ struct VyronModelConnectionEditor: View {
         .frame(width: 570, height: 700)
         .background(palette.canvas).foregroundStyle(palette.text).tint(palette.controlAccent)
         .onAppear {
-            do { apiKey = try model.savedAPIKey(for: profile.id) } catch { self.error = error.localizedDescription }
-        }
-        .onChange(of: profile.kind) { _, kind in
-            if kind == .anthropic {
-                if profile.endpoint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    profile.endpoint = VyronClaudeConnectionPreset.endpoint
-                }
-                if profile.selectedModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    profile.selectedModel = VyronClaudeConnectionPreset.defaultModel
-                }
+            do {
+                credential.loadSavedKey(try model.savedAPIKey(for: profile.id))
+            } catch {
+                self.error = error.localizedDescription
             }
         }
         .onChange(of: endpointFingerprint) { _, _ in
@@ -126,24 +121,50 @@ struct VyronModelConnectionEditor: View {
                 placeholder: VyronAppText.settingsMyModelServer,
                 text: $profile.name
             )
-            Picker(VyronAppText.settingsServerType, selection: $profile.kind) {
-                Text(VyronAppText.settingsOllama).tag(ModelProviderKind.ollama)
-                Text(VyronAppText.settingsCompatibleAPI).tag(ModelProviderKind.openAICompatible)
-                Text(verbatim: ModelProviderKind.anthropic.displayName).tag(ModelProviderKind.anthropic)
+            Picker(VyronAppText.settingsServerType, selection: serverChoiceBinding) {
+                ForEach(VyronModelConnectionServerChoice.allCases, id: \.self) { choice in
+                    Text(verbatim: choice.title).tag(choice)
+                }
             }.font(.system(size: 11))
             labeledField(
                 VyronAppText.settingsServerURL,
                 placeholder: endpointPlaceholder,
-                text: $profile.endpoint
+                text: serverEndpointBinding
             )
             VStack(alignment: .leading, spacing: 6) {
                 Text(apiKeyTitle).font(.system(size: 11))
-                SecureField(VyronAppText.settingsKeychainPlaceholder, text: $apiKey)
+                SecureField(VyronAppText.settingsKeychainPlaceholder, text: $credential.key)
                     .textFieldStyle(.roundedBorder).font(.system(size: 11))
                     .accessibilityLabel(apiKeyTitle)
             }
             Text(apiKeyPrivacy).font(.system(size: 10)).foregroundStyle(palette.muted).lineSpacing(3)
         }
+    }
+
+    private var serverChoice: VyronModelConnectionServerChoice { .init(profile: profile) }
+
+    private var serverChoiceBinding: Binding<VyronModelConnectionServerChoice> {
+        Binding(get: { serverChoice }, set: { choice in
+            let previousChoice = serverChoice
+            guard choice != previousChoice else { return }
+            if choice.isHostedPreset || previousChoice.isHostedPreset {
+                credential.clearForServerChange()
+            }
+            profile = choice.applying(to: profile)
+        })
+    }
+
+    private var serverEndpointBinding: Binding<String> {
+        Binding(get: { profile.endpoint }, set: { endpoint in
+            let previousChoice = serverChoice
+            var updated = profile
+            updated.endpoint = endpoint
+            let updatedChoice = VyronModelConnectionServerChoice(profile: updated)
+            if updatedChoice != previousChoice, updatedChoice.isHostedPreset || previousChoice.isHostedPreset {
+                credential.clearForServerChange()
+            }
+            profile = updated
+        })
     }
 
     private var endpointPlaceholder: String {
@@ -157,12 +178,17 @@ struct VyronModelConnectionEditor: View {
     private var apiKeyTitle: String {
         if isClaude { return VyronAppText.settingsClaudeAPIKey }
         if isDeepSeek { return VyronAppText.settingsDeepSeekAPIKey }
+        if isGemini { return VyronAppText.settingsGeminiAPIKey }
+        if isMeta { return VyronAppText.settingsMetaAPIKey }
+        if credential.needsReplacement { return VyronAppText.settingsReplacementAPIKey }
         return VyronAppText.settingsOptionalAPIKey
     }
 
     private var apiKeyPrivacy: String {
         if isClaude { return VyronAppText.settingsClaudePrivacy }
         if isDeepSeek { return VyronAppText.settingsDeepSeekPrivacy }
+        if isGemini { return VyronAppText.settingsGeminiPrivacy }
+        if isMeta { return VyronAppText.settingsMetaPrivacy }
         return VyronAppText.settingsServerPrivacy
     }
 
@@ -248,13 +274,17 @@ struct VyronModelConnectionEditor: View {
         )
     }
 
-    private var endpointFingerprint: String { "\(profile.kind.rawValue)\u{0}\(profile.endpoint)\u{0}\(apiKey)" }
+    private var endpointFingerprint: String {
+        "\(profile.kind.rawValue)\u{0}\(profile.endpoint)\u{0}\(credential.key)"
+    }
     private var isDeepSeek: Bool { VyronDeepSeekRoute.matches(profile) }
     private var isClaude: Bool { profile.kind == .anthropic }
+    private var isGemini: Bool { serverChoice == .gemini }
+    private var isMeta: Bool { serverChoice == .meta }
     private var canOperate: Bool {
         !busy && model.canManageModelSelection && !model.modelDownloads.isActive
             && !model.modelSelection.connectionOperationInProgress
-            && (!(isDeepSeek || isClaude) || !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            && (!(isDeepSeek || isClaude || serverChoice.isHostedPreset) || credential.hasKey)
     }
     private var precisions: [String] { Array(Set(discoveredModels.compactMap(\.quantization))).sorted() }
     private var filteredModels: [LocalModel] {
@@ -289,7 +319,7 @@ struct VyronModelConnectionEditor: View {
         value.endpoint = value.endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
         value.selectedModel = value.selectedModel.trimmingCharacters(in: .whitespacesAndNewlines)
         value.settings = try settings.settings(thinkingSupport: thinkingSupport, includesSampling: !isClaude)
-        return try value.validated()
+        return try value.validatedForEditing()
     }
 
     private func discoverModels() {
@@ -314,6 +344,7 @@ struct VyronModelConnectionEditor: View {
     }
 
     private func save() {
+        guard credential.canSave else { return }
         perform { value, key in
             try await model.saveConnection(value, apiKey: key)
             try Task.checkCancellation()
@@ -331,7 +362,7 @@ struct VyronModelConnectionEditor: View {
         guard canOperate else { return }
         do {
             let value = try snapshot()
-            let key = apiKey
+            let key = credential.key
             cancelTask()
             let requestID = UUID()
             operationID = requestID

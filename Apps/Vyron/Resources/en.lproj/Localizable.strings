@@ -188,7 +188,9 @@
 "appSettingsActiveConnection" = "Active connection";
 "appSettingsAddClaude" = "Add Claude";
 "appSettingsAddDeepSeek" = "Add DeepSeek";
+"appSettingsAddGemini" = "Add Gemini";
 "appSettingsAddLocalModel" = "Add another local model";
+"appSettingsAddMeta" = "Add Meta";
 "appSettingsAddOpenAI" = "Add OpenAI";
 "appSettingsAddServer" = "Add server URL";
 "appSettingsAgentToolsAdvertised" = "Agent tools advertised";
@@ -212,7 +214,7 @@
 "appSettingsChooseLocalHint" = "Choose On this Mac above to download or import weights locally.";
 "appSettingsChooseModel" = "Choose a model";
 "appSettingsClaudeAPIKey" = "Anthropic API key";
-"appSettingsClaudeOutputLimit" = "This model supports up to %@ output tokens.";
+"appSettingsClaudeOutputLimit" = "This model supports up to %@ output tokens. The available context can lower the response limit.";
 "appSettingsClaudePrivacy" = "The server above receives messages and project excerpts sent through this connection. Your key is stored in macOS Keychain.";
 "appSettingsCloseConnection" = "Close connection editor";
 "appSettingsCloseModels" = "Close model manager";
@@ -247,8 +249,11 @@
 "appSettingsFindingVariants" = "Finding published variants…";
 "appSettingsFinishingSetup" = "Finishing local setup…";
 "appSettingsFreeStorage" = "%@ free";
+"appSettingsGeminiAPIKey" = "Gemini API key";
+"appSettingsGeminiPrivacy" = "Your prompts and selected project context are sent to Google. Your API key is stored in macOS Keychain.";
 "appSettingsGenericModel" = "a model";
 "appSettingsGetOllama" = "Get Ollama ↗";
+"appSettingsHostedOutputLimitUnverified" = "Vyron has no verified output limit for this model.";
 "appSettingsImportModelTagPlaceholder" = "my-model:latest";
 "appSettingsImportingNotice" = "Importing %@. Cancel the import before starting another; canceled file imports restart from the beginning.";
 "appSettingsInUse" = "In use";
@@ -264,6 +269,8 @@
 "appSettingsMaxResponseTokens" = "Maximum response tokens";
 "appSettingsMemoryAmount" = "%@ memory";
 "appSettingsMemoryExplanation" = "Download sizes describe model weights, not total running memory. Context, Xcode, Simulator, and other apps need additional memory. Agent tasks require working native tool calls; Chat can use models without tools.";
+"appSettingsMetaAPIKey" = "Meta Model API key";
+"appSettingsMetaPrivacy" = "Your prompts and selected project context are sent to Meta. Your API key is stored in macOS Keychain.";
 "appSettingsMissingFileDetails" = "Size and precision are not published for this file.";
 "appSettingsMissingServerDetails" = "Server does not publish model size or precision.";
 "appSettingsModelConnection" = "Model connection";
@@ -319,6 +326,7 @@
 "appSettingsRemoteServer" = "Remote server";
 "appSettingsRemoveConnection" = "Remove %@";
 "appSettingsRemovingPreviousVariant" = "Removing %@…";
+"appSettingsReplacementAPIKey" = "Replacement API key";
 "appSettingsRequestBudgetHint" = "This limits Vyron’s request budget. The server determines its model’s actual context capacity.";
 "appSettingsResume" = "Resume";
 "appSettingsSaveTestHint" = "Saving tests a short response before storing this connection.";

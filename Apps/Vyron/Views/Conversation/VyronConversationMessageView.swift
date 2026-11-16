@@ -55,12 +55,17 @@ struct VyronConversationMessageView: View {
         HStack {
             Spacer(minLength: 0)
             VStack(alignment: .trailing, spacing: VyronWorkspaceStyle.controlSpacing) {
-                userAttachments
-                if let filename = message.developmentTaskFilename {
-                    VyronDevelopmentTaskAttachmentView(filename: filename, content: message.content)
-                } else {
-                    VyronUserMessageBubble(content: message.content, clarificationAnswers: clarificationAnswers)
-                        .frame(maxWidth: VyronConversationStyle.maximumUserWidth, alignment: .trailing)
+                userFileAttachments
+                VStack(alignment: .trailing, spacing: VyronConversationStyle.sentImageSpacing) {
+                    if let images = message.images, !images.isEmpty {
+                        userImageAttachments(images)
+                    }
+                    if let filename = message.developmentTaskFilename {
+                        VyronDevelopmentTaskAttachmentView(filename: filename, content: message.content)
+                    } else {
+                        VyronUserMessageBubble(content: message.content, clarificationAnswers: clarificationAnswers)
+                            .frame(maxWidth: VyronConversationStyle.maximumUserWidth, alignment: .trailing)
+                    }
                 }
             }
             .frame(maxWidth: VyronConversationStyle.maximumUserWidth, alignment: .trailing)
@@ -68,16 +73,13 @@ struct VyronConversationMessageView: View {
     }
 
     @ViewBuilder
-    private var userAttachments: some View {
+    private var userFileAttachments: some View {
         let pdfs = message.pdfPreviews ?? []
         let files = message.fileAttachments ?? []
         let applications = message.applicationAttachments ?? []
         if !pdfs.isEmpty || !files.isEmpty || !applications.isEmpty {
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: VyronWorkspaceStyle.controlSpacing) {
-                    ForEach(message.images ?? []) { image in
-                        VyronScreenshotAttachmentCard(attachment: image)
-                    }
                     ForEach(pdfs) { pdf in
                         VyronPDFAttachmentCard(attachment: pdf)
                     }
@@ -89,8 +91,19 @@ struct VyronConversationMessageView: View {
                     }
                 }
             }
-        } else if let images = message.images, !images.isEmpty {
-            VyronScreenshotAttachmentsView(images: images)
+        }
+    }
+
+    private func userImageAttachments(_ images: [VyronImageAttachment]) -> some View {
+        let thumbnails = HStack(spacing: VyronConversationStyle.sentImageSpacing) {
+            ForEach(images) { image in
+                VyronSentImageThumbnail(attachment: image)
+            }
+        }
+        return ViewThatFits(in: .horizontal) {
+            thumbnails.fixedSize(horizontal: true, vertical: false)
+            ScrollView(.horizontal) { thumbnails }
+                .frame(height: VyronConversationStyle.sentImageSize)
         }
     }
 

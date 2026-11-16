@@ -3,6 +3,17 @@ import VyronLocalization
 import VyronModelDomain
 
 extension ModelConnectionProfile {
+    public var publishedOutputTokenLimit: Int? {
+        let model = selectedModel.trimmingCharacters(in: .whitespacesAndNewlines)
+        if kind == .anthropic, VyronClaudeModelBudget.hasPublishedLimits(for: model) {
+            return VyronClaudeModelBudget.maximumOutputTokens(for: model)
+        }
+        if let budget = VyronDeepSeekModelBudget.published(for: self, model: model) {
+            return budget.maximumOutputTokens
+        }
+        return VyronHostedCompatibleOutputLimit.published(for: self, model: model)
+    }
+
     public func validated() throws -> ModelConnectionProfile {
         var result = self
         result.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -22,7 +33,7 @@ extension ModelConnectionProfile {
                 maximumOutput: limits.maximumOutputTokens
             )
         } else {
-            result.settings = try settings.validated()
+            result.settings = try result.validatedCompatibleSettings(for: result.selectedModel)
         }
         if kind == .openAICompatible, settings.thinking != nil || settings.thinkingLevel != nil {
             let supportsDeepSeekToggle =
@@ -36,6 +47,23 @@ extension ModelConnectionProfile {
             }
         }
         return result
+    }
+
+    func validatedCompatibleSettings(for model: String) throws -> ModelSettings {
+        if let maximum = VyronHostedCompatibleOutputLimit.published(for: self, model: model) {
+            // A formerly accepted override can stay in a saved profile. Inference still respects the model cap.
+            return try settings.validated(maximumOutput: maximum, preservesLegacyOutputRange: true)
+        }
+        return try settings.validated()
+    }
+
+    public func validatedForEditing() throws -> ModelConnectionProfile {
+        let profile = try validated()
+        if let limit = profile.publishedOutputTokenLimit, let output = profile.settings.maxOutputTokens,
+            output > limit {
+            _ = try profile.settings.validated(maximumOutput: limit)
+        }
+        return profile
     }
 
     public func makeProvider(

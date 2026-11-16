@@ -62,6 +62,11 @@ public enum AutomationPolicy {
         "com.apple.calculator", "com.apple.TextEdit", "com.apple.Notes", "com.apple.dt.Xcode",
         "com.figma.Desktop", "com.microsoft.Outlook", "com.apple.mail", "com.apple.systempreferences"
     ]).union(VyronXcodeApplicationCatalog.applicationIDs)
+    private static let automaticSystemApplicationPaths = [
+        "com.apple.Photos": "/System/Applications/Photos.app",
+        "com.apple.Preview": "/System/Applications/Preview.app",
+        "com.apple.QuickTimePlayerX": "/System/Applications/QuickTime Player.app"
+    ]
     private static let benignNavigation: Set<String> = [
         "back", "forward", "go back", "go forward", "previous", "home",
         "search", "find", "find next", "find previous", "refresh", "reload",
@@ -76,6 +81,26 @@ public enum AutomationPolicy {
     ]
     private static let sensitivePattern =
         #"\b(send|post|publish|submit|pay|payment|buy|purchase|checkout|delete|erase|trash|remove|reset|install|uninstall|permission|permissions|allow|approve|accept|agree|terms|login|logout|sign\s*in|sign\s*out|log\s*in|log\s*out|security|password|passkey|credential|credentials|authorize|authenticate|authentication|transfer|download|upload|save|share|unsubscribe)\b"#
+
+    public static func evaluateLaunch(of application: DesktopApplication) -> AutomationDecision {
+        launchDecision(
+            applicationID: application.bundleIdentifier ?? application.id,
+            installationURL: application.installationURL
+        )
+    }
+
+    private static func launchDecision(applicationID: String, installationURL: URL? = nil) -> AutomationDecision {
+        guard !applicationID.isEmpty else { return .refused("A specific installed application is required.") }
+        let isKnownSystemBundle = if let installationURL, installationURL.isFileURL,
+            let expectedPath = automaticSystemApplicationPaths[applicationID] {
+            installationURL.standardizedFileURL.path == expectedPath
+        } else {
+            false
+        }
+        return automaticLaunchApplicationIDs.contains(applicationID) || isKnownSystemBundle
+            ? .automatic("Open a known installed application.")
+            : .review("Review opening this application before the agent continues.")
+    }
 
     public static func evaluate(
         kind: String,
@@ -104,9 +129,7 @@ public enum AutomationPolicy {
         case "inspect", "focus", "activate", "wait", "complete":
             return .automatic("Read-only inspection or routine application focus.")
         case "launch":
-            return automaticLaunchApplicationIDs.contains(applicationID)
-                ? .automatic("Open a known installed application.")
-                : .review("Review opening this application before the agent continues.")
+            return launchDecision(applicationID: applicationID)
         case "openurl":
             guard browserIDs.contains(applicationID) else {
                 return .refused("Web addresses require a supported browser.")
