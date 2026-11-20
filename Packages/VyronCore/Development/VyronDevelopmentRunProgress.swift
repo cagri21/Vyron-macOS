@@ -12,7 +12,7 @@ struct VyronDevelopmentRunProgress {
         return previousTask.map {
             "Earlier unfinished task (reference only; use resume_task if the current request continues it):\n"
                 + boundedAgentPrefix($0.identity.originalGoal, bytes: 2_000)
-                + "\n" + $0.compactSummary(maximumBytes: 2_000)
+                + "\n" + $0.compactSummary(maximumBytes: 2_000, includeAssistantNarrative: false)
         } ?? ""
     }
 
@@ -126,7 +126,9 @@ struct VyronDevelopmentRunProgress {
             || !state.progress.context.decisions.isEmpty
             || !state.progress.context.summary.isEmpty
         guard hasProgress || !previousTaskReference.isEmpty else { return base }
-        let reference = state.compactSummary(maximumBytes: VyronDevelopmentRunLimits.checkpointBytes)
+        let reference = state.compactSummary(
+            maximumBytes: VyronDevelopmentRunLimits.checkpointBytes, includeAssistantNarrative: false
+        )
             + "\n" + previousTaskReference
         return base + [DevelopmentMessage(
             role: "system",

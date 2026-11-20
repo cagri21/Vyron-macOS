@@ -24,6 +24,7 @@ final class VyronComposerModel: ObservableObject {
     var isModeCompatible: (ComposerMode) -> Bool = { _ in true }
     var didChangeMode: () -> Void = {}
     var queuedMessageDrainTask: Task<Void, Never>?
+    var queuedMessageDrainConversationID: UUID?
 
     private let defaults: UserDefaults
     private var draftBeforeQueueEdit = ""

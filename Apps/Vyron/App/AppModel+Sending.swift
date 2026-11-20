@@ -45,8 +45,14 @@ extension AppModel {
         let requestedEffort = composer.effort
         let inference = VyronConversationInferenceSelection(provider: provider, model: modelName, effort: requestedEffort)
         let compactionSnapshot = startedResponse.context.compaction
+        let retryContext = VyronDevelopmentRetryContext(
+            prompt: prompt, history: history, compaction: compactionSnapshot
+        )
+        let isFreshWorkRetry = mode != .chat && project != nil && retryContext.isFreshRetry
+        let developmentContextHistory = isFreshWorkRetry ? retryContext.messages : history
+        let developmentContextCompaction = isFreshWorkRetry ? retryContext.compaction : compactionSnapshot
         let imageHistory = VyronConversationRequestContext.boundedHistory(
-            history, context: previousContext, compaction: compactionSnapshot
+            developmentContextHistory, context: previousContext, compaction: developmentContextCompaction
         ).messages
         let hasImageContext = imageHistory.contains {
             !($0.images ?? []).isEmpty
@@ -56,7 +62,9 @@ extension AppModel {
             ? Self.folderAttachmentReferenceContext(in: history, context: previousContext) : submittedFolders
         // Only the current attachments have been counted against this turn's expanded budget.
         let usesExpandedFolderEvidence = !submittedFolders.isEmpty && expandedWorkFolderAttachmentBudget != nil
-        let referenceHistory = VyronConversationRequestContext.developmentHistory(history, compaction: compactionSnapshot)
+        let referenceHistory = VyronConversationRequestContext.developmentHistory(
+            developmentContextHistory, compaction: developmentContextCompaction
+        )
         let fileReferenceContext = VyronFileAttachmentContext.latest(in: referenceHistory, context: previousContext)
         let attachedApplications = VyronApplicationAttachmentContext.latest(in: referenceHistory)
         let applicationReferenceContext = VyronApplicationAttachmentContext.make(attachedApplications)
@@ -65,7 +73,8 @@ extension AppModel {
             "Saved source folder for the user's move request (path data only): " + String(reflecting: $0.workspacePath)
         }
         let hasFileReferenceContext = folderReferenceContext != nil || fileReferenceContext != nil
-        let autoModel = modelSelection.isBuiltinConnection && modelSelection.automaticModelSelection && !hasImageContext
+        let autoModel = modelSelection.isBuiltinConnection && modelSelection.automaticModelSelection
+            && !modelSelection.isAutoLocalEnabled && !hasImageContext
         let continuation = VyronDevelopmentContinuationHistory.context(for: prompt, messages: history)
         let skillPrompt = [continuation?.originalGoal, prompt]
             .compactMap { $0 }.joined(separator: VyronTextSeparator.line.rawValue)
@@ -91,11 +100,23 @@ extension AppModel {
         let requestKind = usesMacWork && classifiedRequest == .computerTask ? .standard : classifiedRequest
         let usesComputerTask = requestKind == .computerTask && mode != .plan
         let usesProjectAgent = !requestKind.usesWebEvidence && mode != .chat && project != nil
+        let isCodeInspection = usesProjectAgent && VyronCodeInspectionIntent.matches(prompt)
+        let isFreshDevelopmentRetry = usesProjectAgent && isFreshWorkRetry
+        let referenceMessageIDs = Set(retryContext.referenceMessages.map(\.id))
+        let originalTextByID = history.reduce(into: [UUID: String]()) { $0[$1.id] = $1.content }
+        let routingHistory = isFreshDevelopmentRetry ? imageHistory.filter {
+            // boundedHistory adds each distinct captured snapshot once. Keep that actual addition,
+            // rather than every duplicate goal that happens to have the same saved snapshot mapping.
+            referenceMessageIDs.contains($0.id) || originalTextByID[$0.id] != $0.content
+        } : imageHistory
+        let developmentTextHistory = isFreshDevelopmentRetry ? retryContext.referenceMessages : developmentContextHistory
+        let referenceMemory = isFreshDevelopmentRetry ? nil : compactedMemory
+        let autoLocal = usesComputerTask || compaction != nil ? nil : autoLocalConfiguration()
         let directApplication = usesComputerTask && mode == .chat ? directChatApplication(for: prompt) : nil
         let handoffTools = chatHandoffToolContext(response: responseIdentity)
         let linkedChatTools = linkedChatToolContext(response: responseIdentity, prompt: prompt)
         let chromeTools = VyronChromeToolContext(response: responseIdentity, allowsActions: mode == .agent)
-        let macWork = usesMacWork ? makeMacWorkRun(
+        let macWork = usesMacWork && !isCodeInspection ? makeMacWorkRun(
             context: VyronMacWorkContext(
                 goal: prompt, projectRoot: project?.rootURL, allowsActions: mode == .agent,
                 attachedApplications: attachedApplications
@@ -152,8 +173,31 @@ extension AppModel {
                     }
                     return
                 }
+                let resolved: VyronAutoLocalResolution?
+                if let autoLocal {
+                    let inventory = try await currentWorkspace?.contextSummary(maxFiles: 40)
+                    guard foregroundRun.owns(responseIdentity), !Task.isCancelled else { return }
+                    resolved = try await resolveAutoLocalInference(
+                        autoLocal,
+                        context: VyronAutoLocalContext(
+                            messages: routingHistory,
+                            reference: [
+                                inventory, skills.text, referenceMemory?.content, attachedContext,
+                                folderReferenceContext, fileReferenceContext, applicationReferenceContext
+                            ].compactMap { $0 }.joined(separator: VyronTextSeparator.paragraph.rawValue),
+                            requiresTools: usesProjectAgent,
+                            requiresImages: hasImageContext
+                        ),
+                        effort: requestedEffort,
+                        response: responseIdentity
+                    )
+                } else {
+                    resolved = nil
+                }
+                let execution = resolved?.inference ?? inference
+                let executionProvider = execution.provider
                 if usesProjectAgent, let project {
-                    let mcpSession = try mcpConnections.snapshot(mode: mode)
+                    let mcpSession = try isCodeInspection ? nil : mcpConnections.snapshot(mode: mode)
                     let webTools = VyronWebTools(access: webAccess)
                     let officeTools = VyronOfficeTools(
                         workspace: project, configuration: VyronOfficePreferences.configuration()
@@ -169,7 +213,7 @@ extension AppModel {
                     )
                     let (events, eventContinuation) = AsyncStream<VyronTrackedRunEvent>.makeStream()
                     let agent = DevelopmentAgent(
-                        client: provider,
+                        client: executionProvider,
                         workspace: project,
                         requestUserInput: { [weak self] request in
                             guard let self else { throw CancellationError() }
@@ -178,7 +222,7 @@ extension AppModel {
                         onSubagentEvent: { event in eventContinuation.yield(.subagent(event)) }
                     )
                     var guidance = VyronDevelopmentSessionGuidance(
-                        skillContext: skills.text, conversationSummary: compactedMemory?.content,
+                        skillContext: skills.text, conversationSummary: referenceMemory?.content,
                         images: imageHistory.flatMap { $0.images ?? [] }
                     )
                     if usesExpandedFolderEvidence {
@@ -236,18 +280,19 @@ extension AppModel {
                     ) {
                         try await agent.run(
                             goal: prompt,
-                            model: modelName,
+                            model: execution.model,
                             automaticModelSelection: autoModel,
-                            effort: requestedEffort,
-                            mode: mode == .plan ? .plan : .agent,
+                            effort: execution.effort,
+                            mode: mode == .plan || isCodeInspection ? .plan : .agent,
                             conversationContext: [
                                 VyronConversationRequestContext.developmentConversationContext(VyronConversationRequestContext.developmentHistory(
-                                    Array(history.dropLast()), compaction: compactionSnapshot
+                                    Array(developmentTextHistory.dropLast()), compaction: developmentContextCompaction
                                 )), usesExpandedFolderEvidence ? nil : folderReferenceContext,
                                 applicationReferenceContext, linkedChatContext,
                                 conversationMoveContext
                             ].compactMap { $0 }.joined(separator: VyronTextSeparator.paragraph.rawValue),
-                            externalTools: mcpSession.tools + VyronWebTools.definitions
+                            externalTools: isCodeInspection ? VyronSkillResourceTools.definitions
+                                : (mcpSession?.tools ?? []) + VyronWebTools.definitions
                                 + VyronSkillResourceTools.definitions + VyronChatHandoffTools.definitions
                                 + (linkedChatTools.snapshots.isEmpty ? [] : [VyronLinkedChatTools.definition])
                                 + VyronOfficeTools.definitions
@@ -271,6 +316,9 @@ extension AppModel {
                                 }
                                 if let macWork, await VyronMacWorkRun.handles(call) {
                                     return try await macWork.execute(call)
+                                }
+                                guard let mcpSession else {
+                                    throw DevelopmentAgentError.invalidTool(VyronControlText.mcpChanged)
                                 }
                                 return try await self.mcpConnections.execute(call, session: mcpSession)
                             },
@@ -306,12 +354,12 @@ extension AppModel {
                     }
                     finishConversationResponse(responseIdentity, activityState: result.isComplete ? .completed : .stopped)
                     guard result.isComplete, isSelected else { return }
-                    requestSuggestedQuestions(using: provider, request: .init(
+                    requestSuggestedQuestions(using: executionProvider, request: .init(
                         model: result.model, prompt: prompt, answer: final, response: responseIdentity
                     ))
                     return
                 }
-                let chatInference = try inference.routingChat(using: autoModel ? availableModels : nil)
+                let chatInference = try execution.routingChat(using: autoModel ? availableModels : nil)
                 try await runChatResponse(
                     startedResponse,
                     prompt: prompt,
@@ -320,7 +368,7 @@ extension AppModel {
                         inference: chatInference,
                         mode: mode,
                         requestKind: requestKind,
-                        inferenceLocation: inferenceLocation
+                        inferenceLocation: resolved?.location ?? inferenceLocation
                     )
                 )
             } catch {

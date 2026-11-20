@@ -6,6 +6,7 @@ import VyronModelDomain
 public actor VyronOpenAIResponsesClient: ModelProvider, VyronEffortChatProviding, VyronDevelopmentMessageBudgetProviding {
     private let endpoint: URL
     private let settings: ModelSettings
+    private let automaticReasoning: Bool
     private let apiKey: String?
     private let session: URLSession
     private let discovery: OpenAICompatibleClient
@@ -16,15 +17,21 @@ public actor VyronOpenAIResponsesClient: ModelProvider, VyronEffortChatProviding
     public init(
         connection: ModelConnectionProfile,
         apiKey: String? = nil,
-        usageHandler: (@Sendable (VyronOpenAIUsageEvent) async -> Void)? = nil
+        usageHandler: (@Sendable (VyronOpenAIUsageEvent) async -> Void)? = nil,
+        automaticReasoning: Bool = false
     ) throws {
-        try self.init(connection: connection, apiKey: apiKey, configuration: .ephemeral, usageHandler: usageHandler)
+        try self.init(
+            connection: connection,
+            apiKey: apiKey,
+            transport: .init(configuration: .ephemeral, automaticReasoning: automaticReasoning),
+            usageHandler: usageHandler
+        )
     }
 
     init(
         connection: ModelConnectionProfile,
         apiKey: String? = nil,
-        configuration: URLSessionConfiguration,
+        transport: VyronOpenAIResponsesTransport,
         usageHandler: (@Sendable (VyronOpenAIUsageEvent) async -> Void)? = nil
     ) throws {
         let profile = try connection.validated()
@@ -39,11 +46,14 @@ public actor VyronOpenAIResponsesClient: ModelProvider, VyronEffortChatProviding
         }
         endpoint = url
         settings = profile.settings
+        automaticReasoning = transport.automaticReasoning
         connectionID = profile.id
         self.usageHandler = usageHandler
         self.apiKey = try validatedModelAPIKey(apiKey)
-        session = modelProviderSession(configuration: configuration)
-        discovery = try OpenAICompatibleClient(connection: profile, apiKey: apiKey, configuration: configuration)
+        session = modelProviderSession(configuration: transport.configuration)
+        discovery = try OpenAICompatibleClient(
+            connection: profile, apiKey: apiKey, configuration: transport.configuration
+        )
     }
 
     deinit { session.invalidateAndCancel() }
@@ -91,7 +101,10 @@ public actor VyronOpenAIResponsesClient: ModelProvider, VyronEffortChatProviding
                         for: model,
                         requested: settings.maxOutputTokens ?? inference.configuration.effort.developmentBudget.outputTokens
                     ),
-                    stream: true
+                    stream: true,
+                    reasoningEffort: VyronOpenAIAutomaticReasoning.effort(
+                        for: model, effort: inference.configuration.effort, enabled: automaticReasoning
+                    )
                 )
             )
             let body = try VyronOpenAIResponsesWire.request(
@@ -207,7 +220,13 @@ public actor VyronOpenAIResponsesClient: ModelProvider, VyronEffortChatProviding
         )
         let maximumMessageBytes = developmentMessageBudget(for: model).maximumBytes
         let options = VyronOpenAIResponsesOptions(
-            generation: .init(maximumOutputTokens: desired, stream: false),
+            generation: .init(
+                maximumOutputTokens: desired,
+                stream: false,
+                reasoningEffort: VyronOpenAIAutomaticReasoning.effort(
+                    for: model, effort: effort, enabled: automaticReasoning
+                )
+            ),
             tools: tools
         )
         let toolBytes = try JSONEncoder().encode(tools.map(VyronOpenAIResponsesWire.tool)).count

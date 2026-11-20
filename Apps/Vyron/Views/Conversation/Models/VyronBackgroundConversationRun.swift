@@ -2,7 +2,7 @@ import Foundation
 
 struct VyronBackgroundConversationRun {
     let response: VyronResponseIdentity
-    let balanceConnectionID: UUID?
+    var balanceConnectionID: UUID?
     let route: VyronForegroundRunRoute
     var isDeveloping: Bool
 }

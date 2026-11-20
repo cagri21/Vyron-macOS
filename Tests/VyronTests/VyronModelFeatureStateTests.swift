@@ -5,10 +5,10 @@ import XCTest
 
 @MainActor
 final class VyronModelFeatureStateTests: XCTestCase {
-    func testKnownIncompatibleAgentAndProjectPlanBlockBeforeAnyDevelopmentRequest() async throws {
+    func testChatOnlyModelBlocksAgentAndProjectPlanBeforeAnyDevelopmentRequest() async throws {
         let test = try VyronFeatureTestHarness()
         defer { test.cleanUp() }
-        let profile = test.profile(modelName: "deepseek-flash", endpoint: "https://api.deepseek.com/v1")
+        let profile = chatOnlyProfile()
         test.select(profile, provider: test.provider, capabilities: ["tools"])
         await test.model.loadWorkspace(test.project)
         test.model.composer.draft = "Inspect this project"
@@ -30,11 +30,11 @@ final class VyronModelFeatureStateTests: XCTestCase {
         XCTAssertEqual(development, 0)
     }
 
-    func testKnownIncompatibleModelStillCompletesChat() async throws {
+    func testChatOnlyModelStillCompletesChat() async throws {
         let test = try VyronFeatureTestHarness()
         defer { test.cleanUp() }
         test.select(
-            test.profile(modelName: "deepseek-flash", endpoint: "https://api.deepseek.com/v1"),
+            chatOnlyProfile(),
             provider: test.provider
         )
         test.model.composer.mode = .chat
@@ -54,7 +54,7 @@ final class VyronModelFeatureStateTests: XCTestCase {
         let test = try VyronFeatureTestHarness()
         defer { test.cleanUp() }
         test.select(
-            test.profile(modelName: "deepseek-flash", endpoint: "https://api.deepseek.com/v1"),
+            chatOnlyProfile(),
             provider: test.provider
         )
         test.model.composer.mode = .plan
@@ -172,11 +172,11 @@ final class VyronModelFeatureStateTests: XCTestCase {
         XCTAssertNil(test.model.modelFeatures.verificationTask)
     }
 
-    func testRestoringUnsupportedAgentConversationPreservesHistoryAndQueuedMessages() async throws {
+    func testRestoringChatOnlyAgentConversationPreservesHistoryAndQueuedMessages() async throws {
         let test = try VyronFeatureTestHarness()
         defer { test.cleanUp() }
         test.select(
-            test.profile(modelName: "deepseek-flash", endpoint: "https://api.deepseek.com/v1"),
+            chatOnlyProfile(),
             provider: test.provider
         )
         await test.model.loadWorkspace(test.project)
@@ -219,5 +219,14 @@ final class VyronModelFeatureStateTests: XCTestCase {
         XCTAssertEqual(manualReport[.agent].status, .unavailable)
         XCTAssertEqual(manualReport[.agent].reason, .helperModelReservedForChat)
         XCTAssertFalse(manualReport[.plan].isEnabled)
+    }
+
+    private func chatOnlyProfile() -> ModelConnectionProfile {
+        ModelConnectionProfile(
+            name: "Chat-only local helper",
+            kind: .ollama,
+            endpoint: "http://localhost:11434",
+            selectedModel: "qwen3:4b"
+        )
     }
 }

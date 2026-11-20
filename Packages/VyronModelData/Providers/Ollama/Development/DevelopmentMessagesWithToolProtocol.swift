@@ -1,6 +1,7 @@
 import Foundation
 import VyronModelDomain
 
+// Coalesce Qwen3 Coder system guidance with VyronOllamaDevelopmentSystemMessages before applying this reminder.
 func developmentMessagesWithToolProtocol(_ messages: [DevelopmentMessage], model: String) -> [DevelopmentMessage] {
     guard developmentUsesFunctionXMLGrammar(model) else { return messages }
     let reminder =

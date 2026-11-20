@@ -374,6 +374,29 @@ before starting new work. Folder changes wait for active project work to finish.
   stronger compatible coding model. Choosing a model manually uses that exact
   model or reports why it cannot run the task. Low through Ultra effort profiles
   remain available.
+- **Auto Local** first uses an installed local chat model to assess the prompt
+  and recent context. It then chooses an eligible local model or a saved
+  connected model according to the task's complexity and required capabilities,
+  and selects effort and supported reasoning controls before continuing.
+  Enabling this option allows the task and its context to be sent to a saved
+  connected model when needed. Regular **Auto** remains local.
+
+To enable Auto Local, choose **On this Mac** and then **Auto Local** in the model
+menu. A local chat model must already be installed for the assessment; a small
+helper can assess a task without becoming its coding agent. Connected candidates
+are the exact selected models in saved connections, so save the models you want
+available in **Manage Models…**. Auto Local does not download models or discover
+additional hosted models. Its per-turn choice appears in **Activity** and does
+not change your saved connection or model settings. An explicit effort choice
+takes precedence over automatic effort. Unknown reasoning controls retain the
+provider default. If assessment fails or no suitable model is available, the turn
+reports an error so you can retry or select a model manually.
+Image turns currently require an installed local model with advertised vision
+support; saved connected profiles do not retain per-model vision evidence.
+
+Auto Local applies to main Chat, Work, and Plan turns. Side chats and scheduled
+tasks retain their existing captured model selection. Native computer-control
+tasks retain the built-in local control flow.
 
 ### Changes and terminal output
 
@@ -532,8 +555,9 @@ You can keep typing while a response runs. **Return** queues a follow-up
 above the composer; queued messages run in order after a successful response.
 Use **Steer** to apply a queued update to the current task, or use its menu to
 edit it, delete it, or turn off queuing for subsequent messages. Editing restores
-your existing draft when saved or canceled. Queued messages stay with their chat
-and survive reopening; Stop or an error keeps them pending for **Send now**.
+your existing draft when saved or canceled. If the response finishes during an
+edit, saving or canceling the edit resumes queued delivery. Queued messages stay
+with their chat and survive reopening; Stop or an error keeps them pending for **Send now**.
 Drag a message by its text or queue icon onto another row to move it up or down.
 The row highlights as a drop target; its menu also offers **Move up** and
 **Move down**. Reordering saves the new execution order without sending a message.
@@ -905,7 +929,9 @@ Text-only Ollama models can use text extracted locally with Apple Vision.
 
 The built-in Ollama engine loads one model at a time. Model weights remain fixed; effort changes
 context, output, and step budgets. Tasks choose only among installed local
-models and never download another model automatically. Custom connections use the exact selected model. The smaller helper model
+models and never download another model automatically. Custom connections use the exact selected model.
+With **Auto Local**, a local assessment may choose one of those saved selected
+models for the current main conversation turn. The smaller helper model
 is not used as the coding agent. Other local Ollama tags can be added from the
 model manager; unsupported agent models produce a clear error.
 

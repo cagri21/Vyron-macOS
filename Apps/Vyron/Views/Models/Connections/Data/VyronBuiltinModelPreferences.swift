@@ -16,4 +16,9 @@ struct VyronBuiltinModelPreferences {
         get { defaults.object(forKey: VyronUserDefaultsKey.automaticModelSelection.rawValue) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: VyronUserDefaultsKey.automaticModelSelection.rawValue) }
     }
+
+    var localFirstRouting: Bool {
+        get { defaults.bool(forKey: VyronUserDefaultsKey.localFirstModelRouting.rawValue) }
+        nonmutating set { defaults.set(newValue, forKey: VyronUserDefaultsKey.localFirstModelRouting.rawValue) }
+    }
 }

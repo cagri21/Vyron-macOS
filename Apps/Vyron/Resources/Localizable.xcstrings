@@ -25856,16 +25856,46 @@
     },
     "folderAttachmentFileAudioUnreadable": {
       "localizations": {
-        "en": {"stringUnit": {"state": "translated", "value": "This audio file could not be read. Choose a playable MP3, WAV, or M4A file."}},
-        "tr": {"stringUnit": {"state": "translated", "value": "Bu ses dosyası okunamadı. Oynatılabilir bir MP3, WAV veya M4A dosyası seçin."}},
-        "uk": {"stringUnit": {"state": "translated", "value": "Не вдалося прочитати аудіофайл. Виберіть файл MP3, WAV або M4A, який можна відтворити."}}
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This audio file could not be read. Choose a playable MP3, WAV, or M4A file."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu ses dosyası okunamadı. Oynatılabilir bir MP3, WAV veya M4A dosyası seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося прочитати аудіофайл. Виберіть файл MP3, WAV або M4A, який можна відтворити."
+          }
+        }
       }
     },
     "folderAttachmentFileAudioTooLarge": {
       "localizations": {
-        "en": {"stringUnit": {"state": "translated", "value": "This audio file exceeds the %d MiB limit."}},
-        "tr": {"stringUnit": {"state": "translated", "value": "Bu ses dosyası %d MiB sınırını aşıyor."}},
-        "uk": {"stringUnit": {"state": "translated", "value": "Розмір аудіофайлу перевищує ліміт у %d МіБ."}}
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This audio file exceeds the %d MiB limit."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu ses dosyası %d MiB sınırını aşıyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розмір аудіофайлу перевищує ліміт у %d МіБ."
+          }
+        }
       }
     },
     "pluginsCodexName": {
@@ -37769,6 +37799,138 @@
         }
       }
     },
+    "modelDomainReadingTask": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading the task"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Görev okunuyor"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Читання завдання"
+          }
+        }
+      }
+    },
+    "modelDomainTaskTextRead": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task text read"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Görev metni okundu"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст завдання прочитано"
+          }
+        }
+      }
+    },
+    "modelDomainPartialReadScope": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read source excerpts (partial list; review incomplete):"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okunan kaynak alıntıları (kısmi liste; inceleme tamamlanmadı):"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прочитані уривки джерел (частковий список; огляд не завершено):"
+          }
+        }
+      }
+    },
+    "modelDomainTaskPagesUnread": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work stopped because the original task text was not fully read. No project actions were permitted."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özgün görev metninin tamamı okunmadığı için çalışma durduruldu. Projede işlem yapılmasına izin verilmedi."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роботу зупинено, оскільки початковий текст завдання прочитано не повністю. Дії з проєктом не дозволялися."
+          }
+        }
+      }
+    },
+    "modelDomainFileListingRequest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a file-list limit from 1 to 300, an offset from 0 to 2000, and a nonempty path filter up to 500 UTF-8 bytes."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya listesi sınırı için 1–300, konum için 0–2000 arasında bir değer ve en fazla 500 UTF-8 baytlık boş olmayan bir yol filtresi kullanın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Використовуйте ліміт списку від 1 до 300, зміщення від 0 до 2000 та непорожній фільтр шляху до 500 байтів UTF-8."
+          }
+        }
+      }
+    },
+    "modelDomainFileReadOffset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a valid UTF-8 file offset and the next offset returned by the previous read."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geçerli bir UTF-8 dosya konumu ve önceki okumanın döndürdüğü sonraki konumu kullanın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Використовуйте коректне зміщення UTF-8 та наступне зміщення, повернуте попереднім читанням."
+          }
+        }
+      }
+    },
     "modelDomainRoutingClarification": {
       "extractionState": "manual",
       "localizations": {
@@ -42270,6 +42432,182 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@, %@"
+          }
+        }
+      }
+    },
+    "workspaceAutoLocal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto Local"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik Yerel"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локальний авто"
+          }
+        }
+      }
+    },
+    "workspaceAutoLocalDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assesses your prompt and recent context on this Mac. May send the task and its context to a saved connected model when needed."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İsteğinizi ve son bağlamı bu Mac’te değerlendirir. Gerektiğinde görevi ve bağlamını kayıtlı bağlı bir modele gönderebilir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оцінює запит і нещодавній контекст на цьому Mac. За потреби може надіслати завдання та його контекст збереженій підключеній моделі."
+          }
+        }
+      }
+    },
+    "workspaceAutoLocalAssessing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assessing task locally"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Görev yerel olarak değerlendiriliyor"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локальне оцінювання завдання"
+          }
+        }
+      }
+    },
+    "workspaceAutoLocalSelected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected %@ · %@ · %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçildi: %@ · %@ · %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрано %@ · %@ · %@"
+          }
+        }
+      }
+    },
+    "workspaceAutoLocalUnavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto Local needs an installed local chat model. Choose or download one in Manage Models."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik Yerel için yüklü bir yerel sohbet modeli gerekir. Modelleri Yönet bölümünden bir model seçin veya indirin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для локального автоматичного режиму потрібна встановлена локальна модель чату. Виберіть або завантажте її в розділі керування моделями."
+          }
+        }
+      }
+    },
+    "workspaceAutoLocalInvalidAssessment": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The local model could not select a suitable model for this task. Try again or choose a model manually."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel model bu görev için uygun bir model seçemedi. Yeniden deneyin veya elle bir model seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локальна модель не змогла вибрати відповідну модель для цього завдання. Повторіть спробу або виберіть модель вручну."
+          }
+        }
+      }
+    },
+    "workspaceAutoLocalEnabled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto Local will assess each task on this Mac and use a saved connected model when needed."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik Yerel, her görevi bu Mac’te değerlendirir ve gerektiğinde kayıtlı bağlı bir modeli kullanır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локальний автоматичний режим оцінюватиме кожне завдання на цьому Mac і за потреби використовуватиме збережену підключену модель."
+          }
+        }
+      }
+    },
+    "workspaceAutoLocalNoSuitableModel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No suitable model is available for this task. Select a compatible local model or save a connected model in Manage Models."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu görev için uygun bir model yok. Uyumlu bir yerel model seçin veya Modelleri Yönet bölümünden bağlı bir model kaydedin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для цього завдання немає відповідної моделі. Виберіть сумісну локальну модель або збережіть підключену модель у розділі керування моделями."
           }
         }
       }

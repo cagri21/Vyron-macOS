@@ -92,7 +92,7 @@ public enum ModelCatalog {
         return nil
     }
 
-    static func isAutomaticCandidate(_ model: LocalModel) -> Bool {
+    package static func isAutomaticCandidate(_ model: LocalModel) -> Bool {
         if model.size >= 40_000_000_000 { return false }
         if let descriptor = descriptor(for: model.name), descriptor.role == .coding {
             return descriptor.isAutomaticCodingCandidate

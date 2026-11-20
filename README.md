@@ -94,6 +94,12 @@ Use **Test response** or **Check model features** to check a connection. Work
 requires a model with native tool support. Available context, thinking, tool,
 and image capabilities depend on the selected provider and model.
 
+Choose **Auto Local** in the model menu under **On this Mac** to assess each
+main Chat, Work, or Plan request locally before choosing its model and effort.
+This option can send the task and its context to a saved connected model when
+needed. It requires an installed local chat model and uses only installed local
+models or the selected model in each saved connection.
+
 See the [model connection guide](docs/user-guide.md#models-connections-and-storage)
 for discovery, downloads, model parameters, and provider-specific behavior.
 

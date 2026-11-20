@@ -17,6 +17,9 @@ final class VyronModelSelectionModel: ObservableObject {
             if isBuiltinConnection { preferences.automaticallySelect = automaticModelSelection }
         }
     }
+    @Published var localFirstRouting: Bool {
+        didSet { preferences.localFirstRouting = localFirstRouting }
+    }
     @Published var connectionProfiles: [ModelConnectionProfile] = []
     @Published var activeConnectionID: UUID?
     @Published var builtinModelSettings = ModelSettings()
@@ -35,7 +38,7 @@ final class VyronModelSelectionModel: ObservableObject {
 
     let store: ModelConnectionStore
     let preferences: VyronBuiltinModelPreferences
-    private let providers: VyronModelProviderBuilders
+    let providers: VyronModelProviderBuilders
     private var refreshTask: Task<Void, Never>?
     private var stopped = false
 
@@ -51,6 +54,7 @@ final class VyronModelSelectionModel: ObservableObject {
         self.providers = providers
         selectedModel = preferences.model
         automaticModelSelection = preferences.automaticallySelect
+        localFirstRouting = preferences.localFirstRouting
     }
 
     var inferenceProvider: (any ModelProvider)? {
@@ -58,6 +62,8 @@ final class VyronModelSelectionModel: ObservableObject {
     }
 
     var isBuiltinConnection: Bool { activeConnectionID == nil }
+
+    var isAutoLocalEnabled: Bool { isBuiltinConnection && automaticModelSelection && localFirstRouting }
 
     var activeConnectionProfile: ModelConnectionProfile? {
         connectionProfiles.first { $0.id == activeConnectionID }
@@ -147,10 +153,12 @@ final class VyronModelSelectionModel: ObservableObject {
         }
         selectedModel = installed.name
         automaticModelSelection = false
+        localFirstRouting = false
         return installed
     }
 
     func useAutomaticSelection(forChat: Bool) throws {
+        localFirstRouting = false
         automaticModelSelection = true
         let candidate =
             if forChat {
@@ -165,6 +173,17 @@ final class VyronModelSelectionModel: ObservableObject {
             }
         guard let candidate else { throw VyronAutomaticModelSelectionError() }
         selectedModel = candidate.name
+    }
+
+    func useAutoLocalSelection() throws {
+        guard isBuiltinConnection,
+            let assessor = AgentModelRouter.selectModel(from: models, effort: .quick)
+        else {
+            throw ModelProviderError.invalidSettings(VyronWorkspaceText.autoLocalUnavailable)
+        }
+        selectedModel = assessor.name
+        automaticModelSelection = true
+        localFirstRouting = true
     }
 
     func load() {

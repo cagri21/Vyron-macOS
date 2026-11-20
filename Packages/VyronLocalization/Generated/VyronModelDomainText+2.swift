@@ -60,6 +60,20 @@ package extension VyronModelDomainText {
             language: language
         )
     }
+    static var fileListingRequest: String {
+        VyronSharedResources.current.string("modelDomainFileListingRequest", fallback: "Use a file-list limit from 1 to 300, an offset from 0 to 2000, and a nonempty path filter up to 500 UTF-8 bytes.")
+    }
+
+    static func fileListingRequest(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainFileListingRequest", fallback: "Use a file-list limit from 1 to 300, an offset from 0 to 2000, and a nonempty path filter up to 500 UTF-8 bytes.", language: language)
+    }
+    static var fileReadOffset: String {
+        VyronSharedResources.current.string("modelDomainFileReadOffset", fallback: "Use a valid UTF-8 file offset and the next offset returned by the previous read.")
+    }
+
+    static func fileReadOffset(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainFileReadOffset", fallback: "Use a valid UTF-8 file offset and the next offset returned by the previous read.", language: language)
+    }
     static var imageInvalidRole: String {
         VyronSharedResources.current.string("modelDomainImageInvalidRole", fallback: "Images can only be attached to user messages.")
     }
@@ -199,6 +213,13 @@ package extension VyronModelDomainText {
     static func ollamaRequestTimedOut(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("modelDomainOllamaRequestTimedOut", fallback: "Ollama request timed out.", language: language)
     }
+    static var partialReadScope: String {
+        VyronSharedResources.current.string("modelDomainPartialReadScope", fallback: "Read source excerpts (partial list; review incomplete):")
+    }
+
+    static func partialReadScope(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainPartialReadScope", fallback: "Read source excerpts (partial list; review incomplete):", language: language)
+    }
     static var providerAccessRejected: String {
         VyronSharedResources.current.string("modelDomainProviderAccessRejected", fallback: "The model server rejected access. Check the API key and permissions.")
     }
@@ -234,27 +255,5 @@ package extension VyronModelDomainText {
 
     static func providerInvalidModel(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("modelDomainProviderInvalidModel", fallback: "Enter a model ID without spaces or control characters.", language: language)
-    }
-    static func providerInvalidResponse(_ p1: String, language: VyronResourceLanguage? = nil) -> String {
-        VyronSharedResources.current.format(
-            "modelDomainProviderInvalidResponse",
-            fallback: "Could not read the model server response. %@",
-            arguments: [p1],
-            language: language
-        )
-    }
-    static var providerModelListUnavailable: String {
-        VyronSharedResources.current.string("modelDomainProviderModelListUnavailable", fallback: "This server does not provide model discovery. Enter its exact model ID manually.")
-    }
-
-    static func providerModelListUnavailable(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDomainProviderModelListUnavailable", fallback: "This server does not provide model discovery. Enter its exact model ID manually.", language: language)
-    }
-    static var providerOutputLimitReached: String {
-        VyronSharedResources.current.string("modelDomainProviderOutputLimitReached", fallback: "The model reached its output limit before completing the response. Try smaller file edits or increase the connection's output limit.")
-    }
-
-    static func providerOutputLimitReached(language: VyronResourceLanguage) -> String {
-        VyronSharedResources.current.string("modelDomainProviderOutputLimitReached", fallback: "The model reached its output limit before completing the response. Try smaller file edits or increase the connection's output limit.", language: language)
     }
 }

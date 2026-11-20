@@ -154,6 +154,8 @@
 "modelDomainDevelopmentInvalidTool" = "The development tool request could not be used. %@";
 "modelDomainDevelopmentNoCodingModel" = "No compatible local coding model is available. Download a coding model from Local AI Setup.";
 "modelDomainDevelopmentUnsupportedModel" = "The selected model cannot run this development task. %@";
+"modelDomainFileListingRequest" = "Use a file-list limit from 1 to 300, an offset from 0 to 2000, and a nonempty path filter up to 500 UTF-8 bytes.";
+"modelDomainFileReadOffset" = "Use a valid UTF-8 file offset and the next offset returned by the previous read.";
 "modelDomainImageInvalidRole" = "Images can only be attached to user messages.";
 "modelDomainImageInvalidSize" = "Each image must contain data and be no larger than %@ MB.";
 "modelDomainImageRequestTooLarge" = "The attached images exceed %@ MB. Use smaller images or start a new chat.";
@@ -173,6 +175,7 @@
 "modelDomainOllamaInvalidResponse" = "Could not read the local Ollama response. %@";
 "modelDomainOllamaModelNotInstalled" = "The model %@ is not downloaded to this Mac.";
 "modelDomainOllamaRequestTimedOut" = "Ollama request timed out.";
+"modelDomainPartialReadScope" = "Read source excerpts (partial list; review incomplete):";
 "modelDomainProviderAccessRejected" = "The model server rejected access. Check the API key and permissions.";
 "modelDomainProviderConnectionFailed" = "Could not connect to the model server. Check its address and whether it is running.";
 "modelDomainProviderHTTPError" = "The model server returned HTTP %@. Check the connection and supported API.";
@@ -182,6 +185,7 @@
 "modelDomainProviderModelListUnavailable" = "This server does not provide model discovery. Enter its exact model ID manually.";
 "modelDomainProviderOutputLimitReached" = "The model reached its output limit before completing the response. Try smaller file edits or increase the connection's output limit.";
 "modelDomainProviderUnsupportedTools" = "Native tool calling could not be verified for this model. Use Chat, or choose a model that supports tools.";
+"modelDomainReadingTask" = "Reading the task";
 "modelDomainRoutingClarification" = "What would you like me to do on your Mac?";
 "modelDomainRoutingInvalidRoute" = "The local model could not clearly distinguish a conversation from a computer task. Please rephrase your request.";
 "modelDomainRoutingInvalidText" = "Enter a message under %@ KB.";
@@ -192,6 +196,8 @@
 "modelDomainSettingsTemperatureRange" = "Temperature must be between %@ and %@.";
 "modelDomainSettingsThinkingConflict" = "Choose either a thinking toggle or a thinking level.";
 "modelDomainSettingsTopPRange" = "Top P must be between %@ and %@.";
+"modelDomainTaskPagesUnread" = "Work stopped because the original task text was not fully read. No project actions were permitted.";
+"modelDomainTaskTextRead" = "Task text read";
 "projectApprovalCommandMayChangeProjectFiles" = "Review this local command before running it. Its project code may change files inside the selected project.";
 "projectApprovalCommandNeedsReview" = "Command needs your review";
 "projectApprovalCommandNotPermitted" = "This command is not permitted in project mode.";

@@ -176,22 +176,36 @@ extension AppModel {
 
     func stopQueuedMessageDelivery() {
         composer.cancelQueuedMessageDrain()
+        composer.queuedMessageDrainConversationID = nil
         composer.pendingSteeringIDs = []
     }
 
     func finishQueuedMessageRun(automaticallyContinue: Bool) {
         stopQueuedMessageDelivery()
         guard automaticallyContinue, let conversationID = selectedConversationID,
-            !queuedMessages.isEmpty, !composer.isEditingQueuedMessage
+            !queuedMessages.isEmpty
+        else { return }
+        composer.queuedMessageDrainConversationID = conversationID
+        resumeQueuedMessageDelivery()
+    }
+
+    func resumeQueuedMessageDelivery() {
+        guard let conversationID = composer.queuedMessageDrainConversationID,
+            composer.queuedMessageDrainTask == nil, !isShuttingDown
         else { return }
         composer.queuedMessageDrainTask = Task { @MainActor [weak self] in
-            // Let the completed response settle before starting the next queued turn.
+            // Feature notifications precede their mutations. Coalesce them and read the settled state.
             await Task.yield()
             guard let self, !Task.isCancelled else { return }
             self.composer.queuedMessageDrainTask = nil
+            guard self.composer.queuedMessageDrainConversationID == conversationID else { return }
+            guard self.selectedConversationID == conversationID, let message = self.queuedMessages.first else {
+                self.composer.queuedMessageDrainConversationID = nil
+                return
+            }
             guard !self.foregroundRun.isGenerating,
-                self.selectedConversationID == conversationID, !self.composer.isEditingQueuedMessage,
-                let message = self.queuedMessages.first, self.canSteerQueuedMessage(message)
+                !self.composer.isEditingQueuedMessage, self.canSteerQueuedMessage(message),
+                !self.composerAttachments.hasDrafts, !self.composerAttachments.isImporting
             else { return }
             self.sendQueuedMessage(message, conversationID: conversationID)
         }
@@ -201,6 +215,8 @@ extension AppModel {
         guard !foregroundRun.isGenerating, canSteerQueuedMessage(message), selectedConversationID == conversationID,
             !composerAttachments.hasDrafts, !composerAttachments.isImporting
         else { return }
+        // A failed handoff needs an explicit retry, including one started with Send now.
+        stopQueuedMessageDelivery()
         if isRedundantCompaction(message.content) {
             guard let ci = conversations.firstIndex(where: { $0.id == conversationID }),
                 let position = conversations[ci].queuedMessages?.firstIndex(where: { $0.id == message.id })

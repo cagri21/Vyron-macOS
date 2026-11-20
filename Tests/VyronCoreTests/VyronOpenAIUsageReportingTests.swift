@@ -161,7 +161,7 @@ final class VyronOpenAIUsageReportingTests: XCTestCase {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [VyronResponsesTestURLProtocol.self]
         return try VyronOpenAIResponsesClient(
-            connection: profile, configuration: configuration,
+            connection: profile, transport: .init(configuration: configuration),
             usageHandler: { await recorder.append($0) }
         )
     }

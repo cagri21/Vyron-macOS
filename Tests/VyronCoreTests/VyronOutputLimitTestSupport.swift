@@ -28,7 +28,7 @@ enum VyronOutputLimitTestSupport {
             connection: VyronResponsesTestSupport.profile(settings: ModelSettings(
                 contextTokens: 32_768, maxOutputTokens: 4_096
             )),
-            configuration: configuration, usageHandler: { await recorder.append($0) }
+            transport: .init(configuration: configuration), usageHandler: { await recorder.append($0) }
         )
     }
 }

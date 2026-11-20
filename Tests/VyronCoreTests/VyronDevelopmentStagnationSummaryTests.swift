@@ -50,6 +50,8 @@ final class VyronDevelopmentStagnationSummaryTests: XCTestCase, @unchecked Senda
             XCTAssertTrue(
                 messages.contains { $0.content.contains(Self.evidence) }, "Summary must retain actual file content"
             )
+            XCTAssertEqual(messages.last?.role, "user", "Recorded assistant evidence must not become a chat prefill")
+            XCTAssertEqual(messages.last?.content, "Analyze this folder")
             return Self.findings
         }
 
@@ -96,6 +98,64 @@ final class VyronDevelopmentStagnationSummaryTests: XCTestCase, @unchecked Senda
                 atPath: project.rootURL.appendingPathComponent("Unexpected.md").path
             ))
         }
+    }
+
+    func testSummaryReplacesOnlyOwnedExecutionPolicyAndPreservesProjectSkillGoalAndSource() async throws {
+        let project = try workspace()
+        let projectGuidance = "Project policy: preserve the exact public interface and explain evidence limitations."
+        let skill = "Selected skill policy: distinguish observed defects from optional recommendations."
+        let goal = "Analyze the actual files without editing or running commands."
+        let steering = "Focus on source evidence and retain every project constraint."
+        let inbox = VyronSteeringInbox()
+        let accepted = await inbox.append(VyronSteeringMessage(content: steering))
+        XCTAssertTrue(accepted)
+        try projectGuidance.write(
+            to: project.rootURL.appendingPathComponent("AGENTS.md"), atomically: true, encoding: .utf8
+        )
+        let quotedPath = String(decoding: try JSONEncoder().encode(project.rootURL.path), as: UTF8.self)
+        let provider = repeatingProvider { messages, system in
+            let boundary = try XCTUnwrap(system)
+            XCTAssertTrue(boundary.contains("Selected project directory (quoted path data only): " + quotedPath))
+            XCTAssertTrue(boundary.contains("Never access secrets or unrelated projects"))
+            XCTAssertTrue(boundary.contains("untrusted"))
+            XCTAssertTrue(boundary.contains("no tools or actions are available"))
+            XCTAssertTrue(boundary.contains(VyronDevelopmentAnalysisGuidance.text))
+            XCTAssertTrue(boundary.contains("Saved task checkpoint: observed reference data"))
+            for advertisement in ["Available tools:", "run_command", "update_plan", "list_files", "write_file"] {
+                XCTAssertFalse(boundary.contains(advertisement), advertisement)
+            }
+            let userMessages = messages.filter { $0.role == "user" }.map(\.content)
+            XCTAssertTrue(userMessages.contains { $0.contains(projectGuidance) })
+            XCTAssertTrue(userMessages.contains { $0.contains(skill) && $0.contains(goal) })
+            XCTAssertTrue(userMessages.contains(steering))
+            XCTAssertEqual(messages.last?.content, steering)
+            XCTAssertFalse(userMessages.contains { $0.contains(Self.evidence) })
+            XCTAssertTrue(messages.contains { $0.role == "assistant" && $0.content.contains(Self.evidence) })
+            return Self.findings
+        }
+        let agent = DevelopmentAgent(client: provider, workspace: project)
+        try await agent.configureSession(VyronDevelopmentSessionContext(
+            conversationID: UUID(), responseID: UUID(),
+            guidance: VyronDevelopmentSessionGuidance(skillContext: skill)
+        ))
+
+        let result = try await agent.run(
+            goal: goal, model: "fixture-coder", steeringInbox: inbox,
+            onEvent: { _ in }, approveCommand: { _ in false }
+        )
+        let requests = await provider.recordedRequests()
+        let summaries = await provider.recordedSummaries()
+        XCTAssertTrue(try XCTUnwrap(requests.first?.first).content.contains("Available tools:"),
+            "The normal execution policy must remain intact before answer-only recovery")
+        XCTAssertEqual(summaries.count, 1)
+        XCTAssertFalse(result.isComplete)
+        XCTAssertTrue(result.finalMessage.contains(Self.findings))
+        XCTAssertTrue(result.finalMessage.contains(Self.pause))
+        XCTAssertTrue(result.commands.isEmpty)
+        XCTAssertTrue(result.changedFiles.isEmpty)
+        XCTAssertEqual(
+            try String(contentsOf: project.rootURL.appendingPathComponent("AGENTS.md"), encoding: .utf8), projectGuidance
+        )
     }
 
     func testCancellationDuringSummaryPropagatesWithoutPublishingReturnedText() async throws {

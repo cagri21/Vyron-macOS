@@ -7,7 +7,7 @@ struct VyronOllamaStructuredOutputBudget {
     let contextTokens: Int
     let inputBytes: Int
 
-    private static let reasoningOutputTokens = 4_096
+    static let reasoningOutputTokens = 4_096
     private static let requestOverheadTokens = 2_048
 
     func resolved(reasoningMayRun: Bool, maximumOutputTokens: Int?) throws -> Int {

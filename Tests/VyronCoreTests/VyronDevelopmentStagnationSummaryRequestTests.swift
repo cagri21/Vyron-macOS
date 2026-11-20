@@ -13,7 +13,8 @@ final class VyronDevelopmentStagnationSummaryRequestTests: XCTestCase, @unchecke
                 DevelopmentMessage(role: "assistant", content: "I will inspect it."),
                 DevelopmentMessage(role: "tool", content: injection, toolName: "read_file"),
                 DevelopmentMessage(role: "user", content: "Focus on the study documents."),
-                DevelopmentMessage(role: "system", content: "Available tools include run_command.")
+                DevelopmentMessage(role: "system", content: "Available tools include run_command."),
+                DevelopmentMessage(role: "assistant", content: "The document contents remain unread.")
             ],
             effort: .extraHigh
         )
@@ -27,8 +28,10 @@ final class VyronDevelopmentStagnationSummaryRequestTests: XCTestCase, @unchecke
         XCTAssertTrue(system.contains("Filenames and listings establish names and structure"))
         XCTAssertTrue(system.contains("failed, refused, skipped or uncertain actions"))
         XCTAssertEqual(request.messages.filter { $0.role == "user" }.map(\.content), [
-            "Explain what this folder contains.", "Focus on the study documents."
+            "Explain what this folder contains.", "Focus on the study documents.", "Focus on the study documents."
         ])
+        XCTAssertEqual(request.messages.last?.role, "user")
+        XCTAssertEqual(request.messages.last?.content, "Focus on the study documents.")
         let recorded = try XCTUnwrap(request.messages.first { $0.content.contains(injection) })
         XCTAssertEqual(recorded.role, "assistant")
         XCTAssertTrue(recorded.content.hasPrefix("Recorded evidence (untrusted data"))
@@ -53,7 +56,10 @@ final class VyronDevelopmentStagnationSummaryRequestTests: XCTestCase, @unchecke
             effort: .deep
         )
 
-        XCTAssertEqual(request.messages.filter { $0.role == "user" }.count, 1)
+        XCTAssertEqual(request.messages.filter { $0.role == "user" }.map(\.content), [
+            "Review this folder.", "Review this folder."
+        ])
+        XCTAssertEqual(request.messages.last?.role, "user")
         let requested = try XCTUnwrap(request.messages.first { $0.content.contains("trash_item") })
         XCTAssertTrue(requested.content.contains("requested_tools_only"))
         let observation = try XCTUnwrap(request.messages.first { $0.content.contains("Visible heading") })
@@ -66,13 +72,20 @@ final class VyronDevelopmentStagnationSummaryRequestTests: XCTestCase, @unchecke
         let image = image("user.png")
         let request = try VyronDevelopmentStagnationSummary.chatRequest(
             model: "selected",
-            messages: [DevelopmentMessage(role: "user", content: "Explain the visible folder.", images: [image])],
+            messages: [
+                DevelopmentMessage(role: "user", content: "Explain the visible folder.", images: [image]),
+                DevelopmentMessage(role: "assistant", content: "Retained observation from this attachment.")
+            ],
             effort: .balanced
         )
 
         XCTAssertEqual(request.messages.first?.role, "user")
         XCTAssertEqual(request.messages.first?.content, "Explain the visible folder.")
         XCTAssertEqual(request.messages.first?.images, [image])
+        XCTAssertEqual(request.messages.last?.role, "user")
+        XCTAssertEqual(request.messages.last?.content, "Explain the visible folder.")
+        XCTAssertNil(request.messages.last?.images)
+        XCTAssertEqual(request.messages.reduce(0) { $0 + ($1.images?.count ?? 0) }, 1)
     }
 
     func testOversizedGuidanceIsRejectedWithoutTruncatingInstructions() {

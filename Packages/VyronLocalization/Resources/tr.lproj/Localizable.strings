@@ -154,6 +154,8 @@
 "modelDomainDevelopmentInvalidTool" = "Geliştirme aracı isteği kullanılamadı. %@";
 "modelDomainDevelopmentNoCodingModel" = "Uyumlu bir yerel kodlama modeli yok. Yerel Yapay Zekâ Kurulumu'ndan bir kodlama modeli indirin.";
 "modelDomainDevelopmentUnsupportedModel" = "Seçilen model bu geliştirme görevini çalıştıramıyor. %@";
+"modelDomainFileListingRequest" = "Dosya listesi sınırı için 1–300, konum için 0–2000 arasında bir değer ve en fazla 500 UTF-8 baytlık boş olmayan bir yol filtresi kullanın.";
+"modelDomainFileReadOffset" = "Geçerli bir UTF-8 dosya konumu ve önceki okumanın döndürdüğü sonraki konumu kullanın.";
 "modelDomainImageInvalidRole" = "Görseller yalnızca kullanıcı mesajlarına eklenebilir.";
 "modelDomainImageInvalidSize" = "Her görsel veri içermeli ve %@ MB'ı aşmamalıdır.";
 "modelDomainImageRequestTooLarge" = "Ekli görseller %@ MB'ı aşıyor. Daha küçük görseller kullanın veya yeni bir sohbet başlatın.";
@@ -173,6 +175,7 @@
 "modelDomainOllamaInvalidResponse" = "Yerel Ollama yanıtı okunamadı. %@";
 "modelDomainOllamaModelNotInstalled" = "%@ modeli bu Mac'e indirilmemiş.";
 "modelDomainOllamaRequestTimedOut" = "Ollama isteği zaman aşımına uğradı.";
+"modelDomainPartialReadScope" = "Okunan kaynak alıntıları (kısmi liste; inceleme tamamlanmadı):";
 "modelDomainProviderAccessRejected" = "Model sunucusu erişimi reddetti. API anahtarını ve izinleri kontrol edin.";
 "modelDomainProviderConnectionFailed" = "Model sunucusuna bağlanılamadı. Sunucunun adresini ve çalışıp çalışmadığını kontrol edin.";
 "modelDomainProviderHTTPError" = "Model sunucusu HTTP %@ döndürdü. Bağlantıyı ve desteklenen API'yi kontrol edin.";
@@ -182,6 +185,7 @@
 "modelDomainProviderModelListUnavailable" = "Bu sunucu model keşfi sunmuyor. Modelin tam kimliğini elle girin.";
 "modelDomainProviderOutputLimitReached" = "Model, yanıtı tamamlamadan çıktı sınırına ulaştı. Daha küçük dosya değişiklikleri deneyin veya bağlantının çıktı sınırını artırın.";
 "modelDomainProviderUnsupportedTools" = "Bu modelin yerleşik araç çağırma desteği doğrulanamadı. Sohbet'i kullanın veya araçları destekleyen bir model seçin.";
+"modelDomainReadingTask" = "Görev okunuyor";
 "modelDomainRoutingClarification" = "Mac'inizde ne yapmamı istersiniz?";
 "modelDomainRoutingInvalidRoute" = "Yerel model, sohbeti bilgisayar görevinden ayıramadı. İsteğinizi farklı bir şekilde ifade edin.";
 "modelDomainRoutingInvalidText" = "%@ KB'den kısa bir mesaj girin.";
@@ -192,6 +196,8 @@
 "modelDomainSettingsTemperatureRange" = "Sıcaklık %@ ile %@ arasında olmalıdır.";
 "modelDomainSettingsThinkingConflict" = "Düşünme anahtarı ile düşünme düzeyinden birini seçin.";
 "modelDomainSettingsTopPRange" = "Top P, %@ ile %@ arasında olmalıdır.";
+"modelDomainTaskPagesUnread" = "Özgün görev metninin tamamı okunmadığı için çalışma durduruldu. Projede işlem yapılmasına izin verilmedi.";
+"modelDomainTaskTextRead" = "Görev metni okundu";
 "projectApprovalCommandMayChangeProjectFiles" = "Bu yerel komutu çalıştırmadan önce inceleyin. Komutun proje kodu, seçili projedeki dosyaları değiştirebilir.";
 "projectApprovalCommandNeedsReview" = "Komut incelemenizi bekliyor";
 "projectApprovalCommandNotPermitted" = "Proje modunda bu komuta izin verilmez.";

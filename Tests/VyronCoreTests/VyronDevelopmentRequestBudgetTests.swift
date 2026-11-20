@@ -139,7 +139,15 @@ final class VyronDevelopmentRequestBudgetTests: XCTestCase, @unchecked Sendable 
     func testOllamaRepairReminderIsBudgetedWithoutDroppingUserGuidanceOrLatestPair() async throws {
         let tools = try DevelopmentToolDefinition.available(mode: .agent, externalTools: [])
         let toolBytes = try JSONEncoder().encode(tools).count
-        let cap = min(24_000, 32_768 - toolBytes - 2_048 - 512)
+        let allocation = try VyronOllamaDevelopmentBudget.allocation(
+            for: VyronDevelopmentBudgetRequest(
+                model: LocalModel(name: "qwen3-coder:30b", size: 19_000_000_000),
+                configuration: VyronDevelopmentInferenceConfiguration(effort: .balanced, mode: .agent, externalTools: []),
+                minimumMessageBytes: 100
+            ),
+            settings: ModelSettings(), maximumContext: 32_768, toolBytes: toolBytes
+        )
+        let cap = allocation.messageBudget.maximumBytes
         let sample = try sizedMessages(byteCount: 2_000)
         let overhead = try JSONEncoder().encode(
             developmentMessagesWithToolProtocol(sample, model: "qwen3-coder:30b")

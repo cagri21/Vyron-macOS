@@ -62,6 +62,14 @@ final class VyronForegroundRun: ObservableObject {
         }
     }
 
+    func setBalanceConnection(_ id: UUID?, for response: VyronResponseIdentity) {
+        if activeResponse == response {
+            activeBalanceConnectionID = id
+        } else if backgroundResponses[response.conversationID]?.response == response {
+            backgroundResponses[response.conversationID]?.balanceConnectionID = id
+        }
+    }
+
     func complete(_ generationID: UUID) {
         guard activeGeneration == generationID else { return }
         releaseResponse()

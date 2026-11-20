@@ -154,6 +154,8 @@
 "modelDomainDevelopmentInvalidTool" = "Не вдалося використати запит до інструмента розробки. %@";
 "modelDomainDevelopmentNoCodingModel" = "Немає сумісної локальної моделі для програмування. Завантажте таку модель у налаштуваннях локального ШІ.";
 "modelDomainDevelopmentUnsupportedModel" = "Вибрана модель не може виконати це завдання розробки. %@";
+"modelDomainFileListingRequest" = "Використовуйте ліміт списку від 1 до 300, зміщення від 0 до 2000 та непорожній фільтр шляху до 500 байтів UTF-8.";
+"modelDomainFileReadOffset" = "Використовуйте коректне зміщення UTF-8 та наступне зміщення, повернуте попереднім читанням.";
 "modelDomainImageInvalidRole" = "Зображення можна додавати лише до повідомлень користувача.";
 "modelDomainImageInvalidSize" = "Кожне зображення має містити дані й бути не більше %@ МБ.";
 "modelDomainImageRequestTooLarge" = "Розмір прикріплених зображень перевищує %@ МБ. Використайте менші зображення або почніть новий чат.";
@@ -173,6 +175,7 @@
 "modelDomainOllamaInvalidResponse" = "Не вдалося прочитати відповідь локальної Ollama. %@";
 "modelDomainOllamaModelNotInstalled" = "Модель %@ не завантажено на цей Mac.";
 "modelDomainOllamaRequestTimedOut" = "Час очікування запиту Ollama вичерпано.";
+"modelDomainPartialReadScope" = "Прочитані уривки джерел (частковий список; огляд не завершено):";
 "modelDomainProviderAccessRejected" = "Сервер моделей відхилив доступ. Перевірте ключ API та дозволи.";
 "modelDomainProviderConnectionFailed" = "Не вдалося підключитися до сервера моделей. Перевірте його адресу та переконайтеся, що він працює.";
 "modelDomainProviderHTTPError" = "Сервер моделей повернув HTTP %@. Перевірте з’єднання та підтримуваний API.";
@@ -182,6 +185,7 @@
 "modelDomainProviderModelListUnavailable" = "Цей сервер не підтримує пошук моделей. Введіть точний ідентифікатор моделі вручну.";
 "modelDomainProviderOutputLimitReached" = "Модель досягла ліміту виведення до завершення відповіді. Спробуйте вносити менші зміни до файлів або збільште ліміт виведення для підключення.";
 "modelDomainProviderUnsupportedTools" = "Не вдалося підтвердити, що ця модель підтримує вбудований виклик інструментів. Скористайтеся чатом або виберіть модель із підтримкою інструментів.";
+"modelDomainReadingTask" = "Читання завдання";
 "modelDomainRoutingClarification" = "Що мені зробити на вашому Mac?";
 "modelDomainRoutingInvalidRoute" = "Локальна модель не змогла визначити, чи це розмова, чи завдання для комп’ютера. Перефразуйте запит.";
 "modelDomainRoutingInvalidText" = "Введіть повідомлення розміром до %@ КБ.";
@@ -192,6 +196,8 @@
 "modelDomainSettingsTemperatureRange" = "Температура має бути в діапазоні від %@ до %@.";
 "modelDomainSettingsThinkingConflict" = "Виберіть перемикач мислення або його рівень.";
 "modelDomainSettingsTopPRange" = "Top P має бути в діапазоні від %@ до %@.";
+"modelDomainTaskPagesUnread" = "Роботу зупинено, оскільки початковий текст завдання прочитано не повністю. Дії з проєктом не дозволялися.";
+"modelDomainTaskTextRead" = "Текст завдання прочитано";
 "projectApprovalCommandMayChangeProjectFiles" = "Перевірте цю локальну команду перед запуском. Її код може змінити файли у вибраному проєкті.";
 "projectApprovalCommandNeedsReview" = "Команда потребує вашої перевірки";
 "projectApprovalCommandNotPermitted" = "Ця команда заборонена в режимі проєкту.";

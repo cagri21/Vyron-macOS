@@ -20,7 +20,8 @@ enum VyronResponsesTestSupport {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [VyronResponsesTestURLProtocol.self]
         return try VyronOpenAIResponsesClient(
-            connection: profile(settings: settings), apiKey: "offline-test-key", configuration: configuration
+            connection: profile(settings: settings), apiKey: "offline-test-key",
+            transport: .init(configuration: configuration)
         )
     }
 

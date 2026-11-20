@@ -7,6 +7,7 @@ actor VyronQueueTestProvider: ModelProvider {
     private(set) var cancellations = 0
     private var pending: [Int: VyronQueueTestRequest] = [:]
     private(set) var developmentRequests: [[DevelopmentMessage]] = []
+    private(set) var developmentModes: [DevelopmentMode] = []
     private(set) var developmentToolCatalogs: [[DevelopmentExternalTool]] = []
     private(set) var developmentCancellations = 0
     private var pendingDevelopment: [Int: CheckedContinuation<DevelopmentStep, any Error>] = [:]
@@ -65,6 +66,7 @@ actor VyronQueueTestProvider: ModelProvider {
     ) async throws -> DevelopmentStep {
         let index = developmentRequests.count
         developmentRequests.append(messages)
+        developmentModes.append(mode)
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 pendingDevelopment[index] = continuation

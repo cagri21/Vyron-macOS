@@ -6,6 +6,7 @@ enum VyronOllamaEffortThinking {
         support: VyronModelThinkingSupport
     ) -> VyronModelThinkingLevel? {
         guard case .levels(let advertised) = support else { return nil }
+        if effort == .ultra { return advertised.levels.last }
         let requested: VyronModelThinkingLevel
         switch effort {
         case .automatic: return nil

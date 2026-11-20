@@ -115,7 +115,8 @@ final class VyronResponseSpeedWireTests: XCTestCase {
             configuration.protocolClasses = [VyronResponsesTestURLProtocol.self]
             let recorder = VyronOpenAIUsageTestRecorder()
             let client = try VyronOpenAIResponsesClient(
-                connection: profile, configuration: configuration, usageHandler: { await recorder.append($0) }
+                connection: profile, transport: .init(configuration: configuration),
+                usageHandler: { await recorder.append($0) }
             )
             _ = try await client.chat(model: profile.selectedModel, messages: [ChatMessage(role: "user", content: "Hi")]) {
                 _ in

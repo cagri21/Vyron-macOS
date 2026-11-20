@@ -21,7 +21,10 @@ private final class DevelopmentURLProtocol: URLProtocol, @unchecked Sendable {
     override func startLoading() {
         do {
             let data = try Self.state.response(request)
-            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"])!
+            let url = try XCTUnwrap(request.url)
+            let response = try XCTUnwrap(HTTPURLResponse(
+                url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": "application/json"]
+            ))
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             client?.urlProtocol(self, didLoad: data)
             client?.urlProtocolDidFinishLoading(self)
@@ -35,21 +38,6 @@ private final class DevelopmentEventLog: @unchecked Sendable {
     private var events: [DevelopmentEvent] = []
     func append(_ event: DevelopmentEvent) { lock.withLock { events.append(event) } }
     var values: [DevelopmentEvent] { lock.withLock { events } }
-}
-
-private func developmentRequestBody(_ request: URLRequest) -> Data {
-    if let body = request.httpBody { return body }
-    guard let stream = request.httpBodyStream else { return Data() }
-    stream.open()
-    defer { stream.close() }
-    var output = Data()
-    var bytes = [UInt8](repeating: 0, count: 4_096)
-    while stream.hasBytesAvailable {
-        let count = stream.read(&bytes, maxLength: bytes.count)
-        if count <= 0 { break }
-        output.append(contentsOf: bytes.prefix(count))
-    }
-    return output
 }
 
 private struct DevelopmentWireReply: Encodable { let message: DevelopmentMessage; let done = true }
@@ -77,7 +65,8 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
     func testNativeToolArgumentsDecodeAndRejectUnsupportedOrOutsideProjectCalls() throws {
         let data = Data(#"{"role":"assistant","content":"","tool_calls":[{"function":{"name":"edit_file","arguments":{"path":"Sources/Math.swift","old_text":"a - b","new_text":"a + b"}}}]}"#.utf8)
         let message = try JSONDecoder().decode(DevelopmentMessage.self, from: data)
-        guard case .edit(let path, let old, let new) = try DevelopmentInvocation.decode(message.toolCalls![0]) else { return XCTFail("Expected exact edit") }
+        let call = try XCTUnwrap(message.toolCalls?.first)
+        guard case .edit(let path, let old, let new) = try DevelopmentInvocation.decode(call) else { return XCTFail("Expected exact edit") }
         XCTAssertEqual(path, "Sources/Math.swift")
         XCTAssertEqual(old, "a - b")
         XCTAssertEqual(new, "a + b")
@@ -115,14 +104,16 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         let commandReplies = VyronSteeringTestLog<String>()
         DevelopmentURLProtocol.state.set { request in
             if request.url?.path == "/api/tags" { return catalog }
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
             let message: DevelopmentMessage
             if messages.last?.toolName == "run_command" {
                 if let content = messages.last?.content { commandReplies.append(content) }
                 message = DevelopmentMessage(role: "assistant", content: "Read the installed Swift version.")
             } else if messages.last?.content.contains("No actual tool call was executed") == true {
-                XCTAssertEqual(messages[1].content, "Run swift --version exactly once without editing.")
+                XCTAssertEqual(try XCTUnwrap(messages.dropFirst().first).content,
+                    "Run swift --version exactly once without editing.")
                 message = DevelopmentMessage(role: "assistant", toolCalls: [DevelopmentToolCall(name: "run_command", arguments: ["command": .string("swift --version")])])
             } else {
                 message = DevelopmentMessage(role: "assistant", content: "<function=run_command>\n<parameter=command>\nswift --version\n</parameter>\n</function>")
@@ -151,8 +142,9 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         let catalog = catalog
         DevelopmentURLProtocol.state.set { request in
             if request.url?.path == "/api/tags" { return catalog }
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
             XCTAssertLessThanOrEqual(messages.count, 3, "Repair is bounded to one retry")
             return try JSONEncoder().encode(DevelopmentWireReply(message: DevelopmentMessage(role: "assistant", content: "<function=run_command>\n<parameter=command>swift test</parameter>\n</function>")))
         }
@@ -208,20 +200,48 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(quick.num_predict, 2_048)
         XCTAssertEqual(balanced.num_predict, 4_096)
         XCTAssertEqual(deep.num_predict, 6_144)
-        let large = [DevelopmentMessage(role: "system", content: "System rules"), DevelopmentMessage(role: "user", content: String(repeating: "x", count: 23_000))]
+        let schemaBytes = try JSONEncoder().encode(DevelopmentToolDefinition.all).count
+        let smallInput = try JSONEncoder().encode(small).count + schemaBytes + 2_048
+        // Fill the remaining context after the current complete tool schema, leaving a known output allowance.
+        let largeCount = 32_768 - smallInput + "Fix addition".utf8.count - 1_024
+        XCTAssertGreaterThan(largeCount, 0)
+        let large = [
+            DevelopmentMessage(role: "system", content: "System rules"),
+            DevelopmentMessage(role: "user", content: String(repeating: "x", count: largeCount))
+        ]
         let expandedQuick = try developmentRequestOptions(messages: large, tools: DevelopmentToolDefinition.all, effort: .quick)
         XCTAssertEqual(expandedQuick.num_ctx, 32_768)
         let clampedDeep = try developmentRequestOptions(messages: large, tools: DevelopmentToolDefinition.all, effort: .deep)
-        let input = try JSONEncoder().encode(large).count + JSONEncoder().encode(DevelopmentToolDefinition.all).count + 2_048
+        let input = try JSONEncoder().encode(large).count + schemaBytes + 2_048
+        XCTAssertEqual(clampedDeep.num_predict, 1_024)
         XCTAssertLessThan(clampedDeep.num_predict, 6_144)
         XCTAssertLessThanOrEqual(input + clampedDeep.num_predict, 32_768)
-        XCTAssertEqual(large.last?.content.count, 23_000)
+        XCTAssertEqual(large.last?.content.count, largeCount)
+        let heavyContext = smallInput + 1_024
         let heavy = try developmentRequestOptions(
-            messages: small, tools: DevelopmentToolDefinition.all, effort: .deep, limits: .init(maximumContext: 8_192)
+            messages: small, tools: DevelopmentToolDefinition.all, effort: .deep,
+            limits: .init(maximumContext: heavyContext)
         )
-        XCTAssertEqual(heavy.num_ctx, 8_192)
-        let heavyInput = try JSONEncoder().encode(small).count + JSONEncoder().encode(DevelopmentToolDefinition.all).count + 2_048
-        XCTAssertLessThanOrEqual(heavyInput + heavy.num_predict, 8_192)
+        XCTAssertEqual(heavy.num_ctx, heavyContext)
+        XCTAssertEqual(heavy.num_predict, 1_024)
+        XCTAssertLessThanOrEqual(smallInput + heavy.num_predict, heavyContext)
+        XCTAssertThrowsError(try developmentRequestOptions(
+            messages: small, tools: DevelopmentToolDefinition.all, effort: .deep,
+            limits: .init(maximumContext: smallInput + 511)
+        ))
+        if smallInput + 512 > 8_192 {
+            XCTAssertThrowsError(try developmentRequestOptions(
+                messages: small, tools: DevelopmentToolDefinition.all, effort: .deep,
+                limits: .init(maximumContext: 8_192)
+            ))
+        } else {
+            let eightK = try developmentRequestOptions(
+                messages: small, tools: DevelopmentToolDefinition.all, effort: .deep,
+                limits: .init(maximumContext: 8_192)
+            )
+            XCTAssertEqual(eightK.num_ctx, 8_192)
+            XCTAssertLessThanOrEqual(smallInput + eightK.num_predict, 8_192)
+        }
         XCTAssertThrowsError(try developmentRequestOptions(
             messages: large, tools: DevelopmentToolDefinition.all, effort: .deep, limits: .init(maximumContext: 8_192)
         ))
@@ -258,8 +278,9 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         let code = "let marker = \"<tool_call>\"\n"
         DevelopmentURLProtocol.state.set { request in
             if request.url?.path == "/api/tags" { return catalog }
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
             let message = messages.last?.toolName == "write_file"
                 ? DevelopmentMessage(role: "assistant", content: "Created the marker fixture.\n<tool_call>")
                 : DevelopmentMessage(role: "assistant", toolCalls: [DevelopmentToolCall(name: "write_file", arguments: ["path": .string("Sources/Marker.swift"), "content": .string(code)])])
@@ -282,13 +303,14 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         DevelopmentURLProtocol.state.set { request in
             XCTAssertEqual(request.url?.host, "127.0.0.1")
             if request.url?.path == "/api/tags" { return catalog }
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
             XCTAssertEqual(body["model"] as? String, "qwen3-coder:30b", "The 4B intent model must not perform development")
             XCTAssertEqual((body["options"] as? [String: Any])?["num_predict"] as? Int, 2_048)
             XCTAssertNil(body["format"], "Development uses actual native tools rather than a simulated JSON action")
             let tools = try XCTUnwrap(body["tools"] as? [[String: Any]])
             XCTAssertTrue(tools.contains { ($0["function"] as? [String: Any])?["name"] as? String == "edit_file" })
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
             let expectedStep = events.values.filter { $0.message == "Considering the next step" }.count
             XCTAssertEqual(events.values.last?.kind, .status, "The next-step status must be available before inference begins")
             XCTAssertEqual(events.values.last?.message, "Considering the next step")
@@ -296,7 +318,7 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
             let message: DevelopmentMessage
             switch messages.last?.toolName {
             case "read_file":
-                XCTAssertTrue(messages.last!.content.contains("a - b"))
+                XCTAssertTrue(try XCTUnwrap(messages.last).content.contains("a - b"))
                 message = DevelopmentMessage(role: "assistant", toolCalls: [DevelopmentToolCall(name: "edit_file", arguments: ["path": .string("Sources/Math.swift"), "old_text": .string("a - b"), "new_text": .string("a + b")])])
             case "edit_file":
                 message = DevelopmentMessage(role: "assistant", content: "All tests passed.")
@@ -329,8 +351,9 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         let fileContent = "// Activity fixture contents\n"
         DevelopmentURLProtocol.state.set { request in
             if request.url?.path == "/api/tags" { return catalog }
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
             let reply = messages.last?.role == "tool"
                 ? DevelopmentMessage(role: "assistant", content: "Created an activity fixture.")
                 : DevelopmentMessage(role: "assistant", toolCalls: [
@@ -345,9 +368,11 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         _ = try await DevelopmentAgent(client: client(), workspace: workspace).run(goal: "Create an activity fixture", model: "qwen3-coder:30b", onEvent: { events.append($0) }, approveCommand: { _ in false })
         let started = events.values.filter { $0.kind == .toolStarted }
         XCTAssertEqual(started.map(\.message), ["Listing project files", "Searching the project", "Writing Sources/Activity.swift"])
-        XCTAssertEqual(started[1].content, "Activity fixture")
-        XCTAssertEqual(started[2].path, "Sources/Activity.swift")
-        XCTAssertNil(started[2].content, "File content belongs in the change review rather than the tool-start summary")
+        let search = try XCTUnwrap(started.first { $0.tool == "search" })
+        let write = try XCTUnwrap(started.first { $0.tool == "write_file" })
+        XCTAssertEqual(search.content, "Activity fixture")
+        XCTAssertEqual(write.path, "Sources/Activity.swift")
+        XCTAssertNil(write.content, "File content belongs in the change review rather than the tool-start summary")
         XCTAssertFalse(started.contains { $0.path == "../Outside.swift" }, "Invalid tool arguments must not become activity metadata")
         let failures = events.values.filter { $0.kind == .toolFinished && $0.failure != nil }
         XCTAssertEqual(failures.count, 1)
@@ -365,14 +390,15 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         let events = DevelopmentEventLog()
         DevelopmentURLProtocol.state.set { request in
             if request.url?.path == "/api/tags" { return catalog }
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
             XCTAssertEqual(events.values.last?.message, "Considering the next planning step")
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
             let tools = try XCTUnwrap(body["tools"] as? [[String: Any]])
             let names = Set(tools.compactMap { ($0["function"] as? [String: Any])?["name"] as? String })
             XCTAssertEqual(names, [
                 "list_files", "read_file", "search", "request_user_input", "update_plan", "resume_task"
             ])
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
             let reply = messages.last?.role == "tool"
                 ? DevelopmentMessage(role: "assistant", content: "Plan: inspect the implementation, then add a focused fix.")
                 : DevelopmentMessage(role: "assistant", toolCalls: [DevelopmentToolCall(name: "write_file", arguments: ["path": .string("Sources/Forbidden.swift"), "content": .string("written")]), DevelopmentToolCall(name: "run_command", arguments: ["command": .string("swift test")])])
@@ -395,8 +421,9 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
         let catalog = catalog
         DevelopmentURLProtocol.state.set { request in
             if request.url?.path == "/api/tags" { return catalog }
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
             let reply = messages.last?.role == "tool"
                 ? DevelopmentMessage(role: "assistant", content: "The first command was declined and the second failed.")
                 : DevelopmentMessage(role: "assistant", toolCalls: [
@@ -427,12 +454,12 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
             if request.url?.path == "/api/tags" {
                 return Data(#"{"models":[{"name":"qwen3.8:27b","size":18000000000,"capabilities":["completion","tools","thinking"]},{"name":"devstral-small-2:24b","size":15000000000,"capabilities":["completion","tools"]}]}"#.utf8)
             }
-            XCTAssertEqual(request.url?.path, "/api/chat")
-            let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
+            if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
+            let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
             XCTAssertEqual(body["model"] as? String, "devstral-small-2:24b")
             XCTAssertNil(body["think"])
-            let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
-            XCTAssertFalse(messages[0].content.contains("Native tool formatting:"), "Devstral must not inherit Qwen's native XML grammar")
+            let messages = try VyronDevelopmentAgentWireFixture.messages(body)
+            XCTAssertFalse(try XCTUnwrap(messages.first).content.contains("Native tool formatting:"), "Devstral must not inherit Qwen's native XML grammar")
             return try JSONEncoder().encode(DevelopmentWireReply(message: DevelopmentMessage(role: "assistant", content: "Plan: inspect the project conventions before editing.")))
         }
         let result = try await DevelopmentAgent(client: client(), workspace: workspace).run(goal: "Plan the next change", model: "devstral-small-2:24b", automaticModelSelection: false, mode: .plan, onEvent: { _ in }, approveCommand: { _ in false })
@@ -447,13 +474,12 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
                 case "/api/tags": return try JSONSerialization.data(withJSONObject: ["models": [["name": tag, "size": 18_000_000_000]]])
                 case "/api/show": return Data(#"{"capabilities":["completion","tools","thinking"],"thinking":{"values":[false,true],"default":true}}"#.utf8)
                 default:
-                    XCTAssertEqual(request.url?.path, "/api/chat")
-                    let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
+                    let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
                     XCTAssertEqual(body["model"] as? String, tag)
                     XCTAssertNil(body["think"])
                     XCTAssertLessThanOrEqual((body["options"] as? [String: Any])?["num_ctx"] as? Int ?? 0, 32_768)
-                    let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
-                    XCTAssertFalse(messages[0].content.contains("Native tool formatting:"))
+                    let messages = try VyronDevelopmentAgentWireFixture.messages(body)
+                    XCTAssertFalse(try XCTUnwrap(messages.first).content.contains("Native tool formatting:"))
                     return try JSONEncoder().encode(DevelopmentWireReply(message: DevelopmentMessage(role: "assistant", content: "Ready to inspect.")))
                 }
             }
@@ -470,14 +496,13 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
             switch request.url?.path {
             case "/api/tags": return Data(#"{"models":[{"name":"my-local-coder:latest","size":7000000000}]}"#.utf8)
             case "/api/show":
-                let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
+                let body = try VyronDevelopmentAgentWireFixture.fields(request)
                 XCTAssertEqual(body["model"] as? String, "my-local-coder:latest")
                 return Data(#"{"capabilities":["completion","tools"]}"#.utf8)
             default:
-                XCTAssertEqual(request.url?.path, "/api/chat")
-                let body = try XCTUnwrap(try JSONSerialization.jsonObject(with: developmentRequestBody(request)) as? [String: Any])
+                let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
                 XCTAssertEqual(body["model"] as? String, "my-local-coder:latest")
-                let messages = try JSONDecoder().decode([DevelopmentMessage].self, from: JSONSerialization.data(withJSONObject: body["messages"]!))
+                let messages = try VyronDevelopmentAgentWireFixture.messages(body)
                 let reply = messages.last?.role == "tool"
                     ? DevelopmentMessage(role: "assistant", content: "Plan: preserve the existing number declaration.")
                     : DevelopmentMessage(role: "assistant", toolCalls: [DevelopmentToolCall(name: "read_file", arguments: ["path": .string("Sources/Number.swift")])])

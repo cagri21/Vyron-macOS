@@ -70,6 +70,19 @@ final class VyronDevelopmentSummaryTests: XCTestCase {
         XCTAssertEqual(developmentVerifiedSummary("\n<tool_call>\n<|im_end|>\n", checks: []), "Task finished.")
     }
 
+    func testCorrectingAnUnsupportedClaimPreservesFindingsAndReviewedScope() {
+        let finding = "Sources/Retry.swift:8 catches cancellation and retries forever."
+        let scope = "Reviewed Sources/Retry.swift and Sources/History.swift; other files remain unread."
+        let answer = finding + "\n\nAll tests passed.\n\n" + scope
+
+        let summary = developmentVerifiedSummary(answer, checks: [])
+
+        XCTAssertTrue(summary.contains(finding))
+        XCTAssertTrue(summary.contains(scope))
+        XCTAssertTrue(summary.contains("has not been verified"))
+        XCTAssertFalse(summary.contains("All tests passed"))
+    }
+
     func testReadOnlyAgentAnswerHasNoRoutineFooterOrChangeMetadata() async throws {
         let answer = "This setting shares API traffic with OpenAI."
         let provider = VyronSteeringTestProvider { _, _ in

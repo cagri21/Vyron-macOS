@@ -1552,6 +1552,14 @@
 "workspaceApproveForMeDescription" = "Güvenilir komutları otomatik çalıştır; izin verilen diğer komutlar için sor.";
 "workspaceAskForApproval" = "Onay iste";
 "workspaceAskForApprovalDescription" = "Her proje komutunu çalıştırmadan önce sor.";
+"workspaceAutoLocal" = "Otomatik Yerel";
+"workspaceAutoLocalAssessing" = "Görev yerel olarak değerlendiriliyor";
+"workspaceAutoLocalDescription" = "İsteğinizi ve son bağlamı bu Mac’te değerlendirir. Gerektiğinde görevi ve bağlamını kayıtlı bağlı bir modele gönderebilir.";
+"workspaceAutoLocalEnabled" = "Otomatik Yerel, her görevi bu Mac’te değerlendirir ve gerektiğinde kayıtlı bağlı bir modeli kullanır.";
+"workspaceAutoLocalInvalidAssessment" = "Yerel model bu görev için uygun bir model seçemedi. Yeniden deneyin veya elle bir model seçin.";
+"workspaceAutoLocalNoSuitableModel" = "Bu görev için uygun bir model yok. Uyumlu bir yerel model seçin veya Modelleri Yönet bölümünden bağlı bir model kaydedin.";
+"workspaceAutoLocalSelected" = "Seçildi: %@ · %@ · %@";
+"workspaceAutoLocalUnavailable" = "Otomatik Yerel için yüklü bir yerel sohbet modeli gerekir. Modelleri Yönet bölümünden bir model seçin veya indirin.";
 "workspaceAutomaticEffort" = "Otomatik";
 "workspaceAutomaticEffortDescription" = "Her görev için çalışma düzeyini otomatik seç.";
 "workspaceAutomaticModel" = "Otomatik model";

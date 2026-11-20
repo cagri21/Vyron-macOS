@@ -133,7 +133,11 @@ final class AppModel: ObservableObject {
             computerWork.objectWillChange.eraseToAnyPublisher(),
             modelSelection.objectWillChange.eraseToAnyPublisher(),
             modelFeatures.objectWillChange.eraseToAnyPublisher(),
+            scheduledTasks.objectWillChange.eraseToAnyPublisher(),
             transferActivity.eraseToAnyPublisher()
-        ]).sink { [weak self] in self?.objectWillChange.send() }
+        ]).sink { [weak self] in
+            self?.objectWillChange.send()
+            self?.resumeQueuedMessageDelivery()
+        }
     }
 }

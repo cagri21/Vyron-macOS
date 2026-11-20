@@ -48,19 +48,26 @@ struct DevelopmentToolDefinition: Encodable {
     static let all: [DevelopmentToolDefinition] = [
         make(
             "list_files",
-            "List source files inside the selected project.",
-            ["limit": ("integer", "Maximum files, 1 to 300.")],
+            "List project paths, with implementation files first. Filter filenames/paths with query; continue using next_offset. Contents are not searched.",
+            [
+                "limit": ("integer", "Maximum files per page, 1 to 300, default 100."),
+                "offset": ("integer", "Inventory offset, default 0. Use next_offset from the previous result."),
+                "query": ("string", "Optional literal filename/path substring, for example .py or examples/.")
+            ],
             []
         ),
         make(
             "read_file",
-            "Read a bounded excerpt of a project file before editing. Truncation is explicit.",
-            ["path": ("string", "Project-relative file path.")],
+            "Read a bounded UTF-8 file page. Use next_offset to read later ranges. Partial reads never authorize whole-file replacement.",
+            [
+                "path": ("string", "Project-relative file path."),
+                "offset": ("integer", "UTF-8 byte offset, default 0. Use next_offset from the previous result.")
+            ],
             ["path"]
         ),
         make(
             "search",
-            "Search source text inside the project.",
+            "Search literal file contents inside the project. For filenames or paths, use list_files with query instead.",
             ["query": ("string", "Literal text to find."), "limit": ("integer", "Maximum matches, 1 to 60.")],
             ["query"]
         ),

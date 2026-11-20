@@ -2,12 +2,41 @@
 import Foundation
 
 package extension VyronModelDomainText {
+    static func providerInvalidResponse(_ p1: String, language: VyronResourceLanguage? = nil) -> String {
+        VyronSharedResources.current.format(
+            "modelDomainProviderInvalidResponse",
+            fallback: "Could not read the model server response. %@",
+            arguments: [p1],
+            language: language
+        )
+    }
+    static var providerModelListUnavailable: String {
+        VyronSharedResources.current.string("modelDomainProviderModelListUnavailable", fallback: "This server does not provide model discovery. Enter its exact model ID manually.")
+    }
+
+    static func providerModelListUnavailable(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainProviderModelListUnavailable", fallback: "This server does not provide model discovery. Enter its exact model ID manually.", language: language)
+    }
+    static var providerOutputLimitReached: String {
+        VyronSharedResources.current.string("modelDomainProviderOutputLimitReached", fallback: "The model reached its output limit before completing the response. Try smaller file edits or increase the connection's output limit.")
+    }
+
+    static func providerOutputLimitReached(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainProviderOutputLimitReached", fallback: "The model reached its output limit before completing the response. Try smaller file edits or increase the connection's output limit.", language: language)
+    }
     static var providerUnsupportedTools: String {
         VyronSharedResources.current.string("modelDomainProviderUnsupportedTools", fallback: "Native tool calling could not be verified for this model. Use Chat, or choose a model that supports tools.")
     }
 
     static func providerUnsupportedTools(language: VyronResourceLanguage) -> String {
         VyronSharedResources.current.string("modelDomainProviderUnsupportedTools", fallback: "Native tool calling could not be verified for this model. Use Chat, or choose a model that supports tools.", language: language)
+    }
+    static var readingTask: String {
+        VyronSharedResources.current.string("modelDomainReadingTask", fallback: "Reading the task")
+    }
+
+    static func readingTask(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainReadingTask", fallback: "Reading the task", language: language)
     }
     static var routingClarification: String {
         VyronSharedResources.current.string("modelDomainRoutingClarification", fallback: "What would you like me to do on your Mac?")
@@ -84,5 +113,19 @@ package extension VyronModelDomainText {
             arguments: [p1, p2],
             language: language
         )
+    }
+    static var taskPagesUnread: String {
+        VyronSharedResources.current.string("modelDomainTaskPagesUnread", fallback: "Work stopped because the original task text was not fully read. No project actions were permitted.")
+    }
+
+    static func taskPagesUnread(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainTaskPagesUnread", fallback: "Work stopped because the original task text was not fully read. No project actions were permitted.", language: language)
+    }
+    static var taskTextRead: String {
+        VyronSharedResources.current.string("modelDomainTaskTextRead", fallback: "Task text read")
+    }
+
+    static func taskTextRead(language: VyronResourceLanguage) -> String {
+        VyronSharedResources.current.string("modelDomainTaskTextRead", fallback: "Task text read", language: language)
     }
 }

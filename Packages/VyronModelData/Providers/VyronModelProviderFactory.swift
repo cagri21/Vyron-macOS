@@ -10,7 +10,8 @@ public enum VyronModelProviderFactory {
     public static func makeProvider(
         for profile: ModelConnectionProfile,
         apiKey: String? = nil,
-        usageHandler: (@Sendable (VyronOpenAIUsageEvent) async -> Void)? = nil
+        usageHandler: (@Sendable (VyronOpenAIUsageEvent) async -> Void)? = nil,
+        automaticReasoning: Bool = false
     ) throws -> any ModelProvider {
         switch profile.kind {
         case .ollama:
@@ -23,7 +24,8 @@ public enum VyronModelProviderFactory {
                 return try VyronOpenAIResponsesClient(
                     connection: validated,
                     apiKey: apiKey,
-                    usageHandler: usageHandler
+                    usageHandler: usageHandler,
+                    automaticReasoning: automaticReasoning
                 )
             }
             return try OpenAICompatibleClient(connection: validated, apiKey: apiKey, usageHandler: usageHandler)

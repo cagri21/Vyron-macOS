@@ -2,6 +2,30 @@
 import Foundation
 
 extension VyronWorkspaceText {
+    static var fastSpeedDescription: String {
+        VyronResourceBundle.string("workspaceFastSpeedDescription", fallback: "Faster OpenAI responses at higher API rates. Effort stays the same.")
+    }
+    static var fastSpeedUnavailable: String {
+        VyronResourceBundle.string("workspaceFastSpeedUnavailable", fallback: "Fast is available with supported OpenAI models.")
+    }
+    static var files: String {
+        VyronResourceBundle.string("workspaceFiles", fallback: "Files")
+    }
+    static var fullAccess: String {
+        VyronResourceBundle.string("workspaceFullAccess", fallback: "Full access")
+    }
+    static var fullAccessDescription: String {
+        VyronResourceBundle.string("workspaceFullAccessDescription", fallback: "Run all permitted project commands without asking.")
+    }
+    static var hideSidebar: String {
+        VyronResourceBundle.string("workspaceHideSidebar", fallback: "Hide sidebar")
+    }
+    static var highEffort: String {
+        VyronResourceBundle.string("workspaceHighEffort", fallback: "High")
+    }
+    static var highEffortDescription: String {
+        VyronResourceBundle.string("workspaceHighEffortDescription", fallback: "Complex debugging, multi-file changes, and production risks.")
+    }
     static func inferenceSelection(_ p1: String, _ p2: String, _ p3: String) -> String {
         VyronResourceBundle.format(
             "workspaceInferenceSelection",
@@ -94,29 +118,5 @@ extension VyronWorkspaceText {
             fallback: "Project added, but some setup files could not be created: %@",
             arguments: [p1]
         )
-    }
-    static var quickEffort: String {
-        VyronResourceBundle.string("workspaceQuickEffort", fallback: "Quick")
-    }
-    static var readOnly: String {
-        VyronResourceBundle.string("workspaceReadOnly", fallback: "Read-only")
-    }
-    static var resetEffort: String {
-        VyronResourceBundle.string("workspaceResetEffort", fallback: "Reset to Auto")
-    }
-    static var responseSpeed: String {
-        VyronResourceBundle.string("workspaceResponseSpeed", fallback: "Speed")
-    }
-    static var runTask: String {
-        VyronResourceBundle.string("workspaceRunTask", fallback: "Run task (⌘ Return)")
-    }
-    static var searchPrompt: String {
-        VyronResourceBundle.string("workspaceSearchPrompt", fallback: "Search the web for ")
-    }
-    static var searchWeb: String {
-        VyronResourceBundle.string("workspaceSearchWeb", fallback: "Search the web")
-    }
-    static var selectEffort: String {
-        VyronResourceBundle.string("workspaceSelectEffort", fallback: "Select effort")
     }
 }

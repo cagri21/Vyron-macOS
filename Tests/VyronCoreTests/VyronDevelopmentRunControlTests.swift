@@ -1,3 +1,4 @@
+import Foundation
 import XCTest
 import VyronDevelopment
 @testable import VyronCore
@@ -87,6 +88,78 @@ final class VyronDevelopmentRunControlTests: XCTestCase {
         XCTAssertEqual(control.stalledTools, ["list_files"])
     }
 
+    func testEmptyListingCursorMetadataCannotRenewProgress() throws {
+        var control = VyronDevelopmentRunControl()
+
+        for offset in 0...3 {
+            try control.observe(
+                DevelopmentToolCall(name: "list_files", arguments: ["offset": .number(Double(offset))]),
+                response: try listingResponse(
+                    offset: offset, paths: [], summary: "No matching paths at offset \(offset)."
+                )
+            )
+            control.finishRound()
+        }
+
+        XCTAssertEqual(control.progressVersion, 1, "Cursor metadata is not new file evidence")
+        XCTAssertEqual(control.stagnantRounds, 3)
+        XCTAssertTrue(control.shouldStop)
+        XCTAssertEqual(control.stalledTools, ["list_files"])
+    }
+
+    func testOnlyNewListingFilesResetStagnationAcrossCursorAndQueryChanges() throws {
+        var control = VyronDevelopmentRunControl()
+        let paths = ["examples/demo.py", "examples/demo.py", "eval/score.py", "eval/score.py"]
+
+        for (offset, path) in paths.enumerated() {
+            try control.observe(
+                DevelopmentToolCall(name: "list_files", arguments: [
+                    "offset": .number(Double(offset)), "query": .string("query-\(offset)")
+                ]),
+                response: try listingResponse(
+                    offset: offset, paths: [path], summary: "Discovery page \(offset)."
+                )
+            )
+            control.finishRound()
+            if offset == 1 {
+                XCTAssertEqual(control.progressVersion, 1)
+                XCTAssertEqual(control.stagnantRounds, 1)
+                XCTAssertTrue(control.shouldReplan)
+            }
+            if offset == 2 {
+                XCTAssertEqual(control.progressVersion, 2)
+                XCTAssertEqual(control.stagnantRounds, 0, "A newly discovered file is real progress")
+                XCTAssertTrue(control.stalledTools.isEmpty)
+            }
+        }
+
+        XCTAssertEqual(control.progressVersion, 2)
+        XCTAssertEqual(control.stagnantRounds, 1, "The repeated file must not become progress at another cursor")
+        XCTAssertTrue(control.shouldReplan)
+        XCTAssertFalse(control.shouldStop)
+    }
+
+    func testLegacyOutputOnlyListingsStillRecognizeNewFileEvidence() throws {
+        var control = VyronDevelopmentRunControl()
+        let responses = [
+            #"{"ok":true,"output":"README.md (32 bytes)"}"#,
+            #"{"ok":true,"output":"README.md (32 bytes)"}"#,
+            #"{"ok":true,"output":"README.md (32 bytes)\nFeature.swift (64 bytes)"}"#
+        ]
+        for (index, response) in responses.enumerated() {
+            try control.observe(
+                DevelopmentToolCall(name: "list_files", arguments: ["limit": .number(Double(index + 1))]),
+                response: response
+            )
+            control.finishRound()
+        }
+
+        XCTAssertEqual(control.progressVersion, 2)
+        XCTAssertEqual(control.stagnantRounds, 0)
+        XCTAssertFalse(control.shouldReplan)
+        XCTAssertTrue(control.stalledTools.isEmpty)
+    }
+
     func testVaryingSearchQueriesWithoutNewResultsDoesNotAdvanceProgress() throws {
         var control = VyronDevelopmentRunControl()
         let response = #"{"ok":true,"output":"README.md:1: Project guidance"}"#
@@ -149,5 +222,18 @@ final class VyronDevelopmentRunControlTests: XCTestCase {
         try control.observe(call, response: response)
         control.finishRound()
         XCTAssertEqual(control.stagnantRounds, 0, "New user guidance permits reconsidering a previous result")
+    }
+
+    private func listingResponse(offset: Int, paths: [String], summary: String) throws -> String {
+        let files = paths.map { path in
+            DevelopmentJSONValue.object(["path": .string(path), "size": .number(64)])
+        }
+        let value = DevelopmentJSONValue.object([
+            "ok": .bool(true), "files": .array(files), "output": .string(summary),
+            "offset": .number(Double(offset)), "next_offset": .null,
+            "total_matches": .number(Double(paths.count)), "scan_limited": .bool(false),
+            "truncated": .bool(false)
+        ])
+        return String(decoding: try JSONEncoder().encode(value), as: UTF8.self)
     }
 }

@@ -5,4 +5,5 @@ package enum VyronDevelopmentToolName {
     package static let parallelTasks = "parallel_tasks"
     package static let updatePlan = "update_plan"
     package static let resumeTask = "resume_task"
+    package static let readTask = "read_task"
 }

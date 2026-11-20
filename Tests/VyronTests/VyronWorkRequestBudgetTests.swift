@@ -30,7 +30,8 @@ final class VyronWorkRequestBudgetTests: XCTestCase {
             await VyronWorkBudgetURLProtocol.state.reset()
             let messages = try await capturedMessages(effort: effort, externalTools: externalTools)
             let client = try VyronOpenAIResponsesClient(
-                connection: profile, apiKey: "offline-work-budget-key", configuration: configuration
+                connection: profile, apiKey: "offline-work-budget-key",
+                transport: .init(configuration: configuration)
             )
             let step = try await client.developmentStep(
                 model: "gpt-6.1-sol", messages: messages, effort: effort,

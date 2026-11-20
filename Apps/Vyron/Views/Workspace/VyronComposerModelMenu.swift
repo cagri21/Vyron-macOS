@@ -50,7 +50,8 @@ struct VyronComposerModelMenu: View {
     }
 
     private var selectionLabel: String {
-        VyronInferenceSelectionPresentation.modelName(
+        if model.modelSelection.isAutoLocalEnabled { return VyronWorkspaceText.autoLocal }
+        return VyronInferenceSelectionPresentation.modelName(
             model.modelSelection.selectedModel, automatic: model.modelSelection.automaticModelSelection
         )
     }
@@ -82,11 +83,24 @@ struct VyronComposerModelMenu: View {
             Button {
                 model.useAutomaticModels()
             } label: {
-                if model.modelSelection.automaticModelSelection {
+                if model.modelSelection.automaticModelSelection && !model.modelSelection.isAutoLocalEnabled {
                     Label(VyronWorkspaceText.chooseAutomaticModel, systemImage: VyronSymbols.checkmark)
                 } else {
                     Text(VyronWorkspaceText.chooseAutomaticModel)
                 }
+            }
+            Button {
+                model.useAutoLocalModels()
+            } label: {
+                if model.modelSelection.isAutoLocalEnabled {
+                    Label(VyronWorkspaceText.autoLocal, systemImage: VyronSymbols.checkmark)
+                } else {
+                    Text(VyronWorkspaceText.autoLocal)
+                }
+            }
+            .help(VyronWorkspaceText.autoLocalDescription)
+            if model.modelSelection.isAutoLocalEnabled {
+                Text(VyronWorkspaceText.autoLocalDescription)
             }
             Divider()
         }

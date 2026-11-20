@@ -74,20 +74,17 @@ extension OllamaClient {
                 VyronModelDataText.ollamaChatContextExceeded
             )
         }
-        let thinking = try await structuredThinkingOption(
+        let generation = try await chatGeneration(
             for: selected.localModel,
-            effort: input.configuration.effort
+            configuration: input.configuration,
+            budget: VyronOllamaStructuredOutputBudget(
+                outputTokens: desiredOutput, contextTokens: context, inputBytes: inputBudget - 2_048
+            )
         )
         let body = VyronOllamaChatRequest(
             model: model,
             messages: wireMessages,
-            think: thinking,
-            options: VyronOllamaChatOptions(
-                num_ctx: context,
-                num_predict: outputBudget,
-                temperature: settings.temperature ?? 0.3,
-                top_p: settings.topP
-            )
+            generation: generation
         )
         let request = try makeRequest(path: "chat", body: body)
         let (bytes, response) = try await stream(request)

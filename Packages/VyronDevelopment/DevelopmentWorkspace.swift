@@ -63,7 +63,7 @@ public actor DevelopmentWorkspace {
     private var writtenHashes: [String: String] = [:]
     private var commandRunning = false
     private var fileOperations: VyronProjectFileOperations?
-    private static let maximumFileBytes = 512_000
+    private static let maximumFileBytes = VyronDevelopmentFileReadBudget.maximumFileBytes
     private static let excluded: Set<String> = [
         ".git", ".build", ".swiftpm", "node_modules", "vendor", "pods", "carthage", "build", "dist", "deriveddata",
         "__pycache__", "venv", ".venv", "target", "output", "secrets", "credentials"
@@ -232,15 +232,51 @@ public actor DevelopmentWorkspace {
         return Self.utf8Prefix(data, cap: cap) + "\n[Excerpt truncated. Read the full file before replacing it.]"
     }
 
+    public func readFilePage(
+        _ request: VyronDevelopmentFileReadRequest,
+        budget: VyronDevelopmentFileReadBudget = VyronDevelopmentFileReadBudget()
+    ) throws -> VyronDevelopmentFilePage {
+        try Task.checkCancellation()
+        guard let data = try readData(path: request.path) else {
+            throw DevelopmentError("The file does not exist: \(request.path)")
+        }
+        guard !data.contains(0), String(data: data, encoding: .utf8) != nil else {
+            throw DevelopmentError("This file is not supported UTF-8 source text.")
+        }
+        let offset = request.offset
+        guard offset >= 0, offset <= data.count,
+            offset == data.count || data[offset] & 0xC0 != 0x80,
+            budget.maximumTextBytes > 0, budget.maximumEncodedTextBytes >= 2 else {
+            throw DevelopmentError(VyronModelDomainText.fileReadOffset)
+        }
+        let remaining = Data(data.dropFirst(offset))
+        var cap = min(budget.maximumTextBytes, Self.maximumFileBytes)
+        var text = Self.utf8Prefix(remaining, cap: cap)
+        while try JSONEncoder().encode(text).count > budget.maximumEncodedTextBytes {
+            cap = cap * 3 / 4
+            text = Self.utf8Prefix(remaining, cap: cap)
+        }
+        guard !text.isEmpty || offset == data.count else {
+            throw DevelopmentError(VyronModelDomainText.fileReadOffset)
+        }
+        try Task.checkCancellation()
+        let hash = Self.hash(data)
+        if observedHashes[request.path] != hash { readHashes.removeValue(forKey: request.path) }
+        observedHashes[request.path] = hash
+        observedText[request.path] = text
+        let coverage = VyronDevelopmentFileReadCoverage(offset: offset, bytes: text.utf8.count, totalBytes: data.count)
+        if coverage.isWholeFile { readHashes[request.path] = hash }
+        return VyronDevelopmentFilePage(text: text, coverage: coverage)
+    }
+
     public func search(query: String, limit: Int = 40) throws -> String {
         guard !query.isEmpty, query.count <= 500 else {
             throw DevelopmentError("Use a nonempty search query under 500 characters.")
         }
         var lines: [String] = []
         for file in try listFiles(limit: 150) {
-            guard let data = try? readData(path: file.path), !data.contains(0),
-                let text = String(data: data.prefix(40_000), encoding: .utf8)
-            else { continue }
+            guard let data = try? readData(path: file.path), !data.contains(0) else { continue }
+            let text = Self.utf8Prefix(data, cap: 40_000)
             for (index, line) in text.components(separatedBy: .newlines).enumerated()
             where line.localizedCaseInsensitiveContains(query) {
                 lines.append("\(file.path):\(index + 1): \(String(line.prefix(400)))")
@@ -647,7 +683,7 @@ public actor DevelopmentWorkspace {
         }
     }
 
-    private static func allowedComponent(_ component: String) -> Bool {
+    static func allowedComponent(_ component: String) -> Bool {
         let lower = component.lowercased()
         return !component.isEmpty && component != "." && component != ".." && !component.contains("\0")
             && !excluded.contains(lower) && (!component.hasPrefix(".") || hiddenAllowed.contains(lower))

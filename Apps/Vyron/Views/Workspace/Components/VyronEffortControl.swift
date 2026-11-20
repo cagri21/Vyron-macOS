@@ -26,7 +26,8 @@ struct VyronEffortControl: View {
     }
 
     private var selectedModelLabel: String {
-        VyronInferenceSelectionPresentation.modelName(
+        if model.modelSelection.isAutoLocalEnabled { return VyronWorkspaceText.autoLocal }
+        return VyronInferenceSelectionPresentation.modelName(
             model.modelSelection.selectedModel, automatic: model.modelSelection.automaticModelSelection
         )
     }

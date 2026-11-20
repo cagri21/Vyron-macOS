@@ -157,7 +157,7 @@ final class VyronOpenAIResponsesTokenCountTests: XCTestCase {
             connection: VyronResponsesTestSupport.profile(settings: ModelSettings(
                 contextTokens: 32_768, maxOutputTokens: 4_096
             )),
-            configuration: configuration,
+            transport: .init(configuration: configuration),
             usageHandler: { event in await recorder?.append(event) }
         )
     }

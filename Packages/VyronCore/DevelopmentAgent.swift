@@ -15,7 +15,8 @@ public struct DevelopmentResult: Sendable {
 }
 
 enum DevelopmentInvocation {
-    case list(Int), read(String), search(String, Int), write(String, String), edit(String, String, String), command(
+    case list(VyronDevelopmentFileListingRequest), read(VyronDevelopmentFileReadRequest), search(String, Int)
+    case write(String, String), edit(String, String, String), command(
         String,
         TimeInterval
     )
@@ -55,8 +56,19 @@ enum DevelopmentInvocation {
             return value
         }
         switch call.function.name {
-        case "list_files": try keys(["limit"]); return .list(try integer("limit", fallback: 200, range: 1...300))
-        case "read_file": try keys(["path"]); return .read(try path())
+        case "list_files":
+            try keys(["limit", "offset", "query"])
+            return .list(VyronDevelopmentFileListingRequest(
+                limit: try integer("limit", fallback: 100, range: 1...300),
+                offset: try integer("offset", fallback: 0, range: 0...2_000),
+                query: arguments["query"] == nil ? nil : try string("query", maximum: 500)
+            ))
+        case "read_file":
+            try keys(["path", "offset"])
+            return .read(VyronDevelopmentFileReadRequest(
+                path: try path(),
+                offset: try integer("offset", fallback: 0, range: 0...VyronDevelopmentFileReadBudget.maximumFileBytes)
+            ))
         case "search":
             try keys(["query", "limit"]);
             return .search(try string("query", maximum: 500), try integer("limit", fallback: 30, range: 1...60))
@@ -175,18 +187,18 @@ public actor DevelopmentAgent {
         await workspace.beginTaskReadScope()
         let modePrompt =
             mode == .plan
-            ? "\nPLAN MODE: Only list_files, read_file, search, update_plan and request_user_input are available. Read the relevant project files and produce a concrete implementation plan. Do not edit, write or run commands."
+            ? "\nPLAN MODE: Inspect relevant evidence and produce an answer or implementation plan. Do not edit, write or run commands."
             : ""
         guard !externalTools.contains(where: {
             $0.name == VyronParallelTaskTool.name || VyronDevelopmentFileOperationTools.names.contains($0.name)
-                || VyronDevelopmentFolderTool.names.contains($0.name)
+                || VyronDevelopmentFolderTool.names.contains($0.name) || $0.name == VyronDevelopmentTaskTool.name
         }) else {
             throw DevelopmentAgentError.invalidTool("A connected tool uses a reserved native tool name.")
         }
         let connectedTools = externalTools.filter { mode != .plan || $0.isReadOnly }
         let fileTools = mode == .agent && fileOperationAccess != nil
             ? VyronDevelopmentFileOperationTools.definitions : []
-        let availableExternalTools = connectedTools + fileTools
+        var availableExternalTools = connectedTools + fileTools
             + (onSubagentEvent == nil ? [] : [VyronParallelTaskTool.definition])
         let externalPrompt =
             connectedTools.isEmpty
@@ -200,6 +212,8 @@ public actor DevelopmentAgent {
         let inferenceGoal = progress.state.identity.originalGoal == goal ? goalText
             : "Resume this original user task:\n\(progress.state.identity.originalGoal)"
                 + "\n\nCurrent user request:\n\(goalText)"
+        var taskDocument = try VyronDevelopmentTaskDocument(inferenceGoal)
+        if taskDocument.isPaged { availableExternalTools.append(VyronDevelopmentTaskTool.definition) }
         let substantiveGuidance = progress.state.guidance.filter {
             !VyronDevelopmentContinuationContext.isContinuationRequest($0)
         }
@@ -221,8 +235,6 @@ public actor DevelopmentAgent {
             Self.recordTaskFailure(error, progress: &progress, onEvent: onEvent)
             throw error
         }
-        let budgetProvider = client as? any VyronDevelopmentMessageBudgetProviding
-        let messageBudget = budgetProvider?.developmentMessageBudget(for: selected.name) ?? .standard
         let maximumSteps = requestedEffort.developmentBudget.maximumToolRounds
         let initialChanges = await workspace.changes()
         var initialContent = Dictionary(uniqueKeysWithValues: initialChanges.map { ($0.path, $0.after) })
@@ -232,19 +244,39 @@ public actor DevelopmentAgent {
             content: "Up to \(maximumSteps) tool rounds per work cycle; up to 3 build or test attempts per stage."
         ))
         var base = developmentBaseMessages(
-            system: Self.systemPrompt + modePrompt + externalPrompt + subagentPrompt
+            system: (mode == .plan ? VyronDevelopmentPlanInstructions.text : Self.systemPrompt)
+                + VyronDevelopmentDiscoveryGuidance.text
+                + modePrompt + externalPrompt + subagentPrompt
                 + VyronDevelopmentWorkspaceGuidance.prompt(for: workspace.rootURL)
                 + (images.isEmpty ? "" : "\n" + VyronDevelopmentImageContext.evidencePrompt)
                 + VyronDevelopmentEffortGuidance.prompt(
                     for: requestedEffort, delegationAvailable: onSubagentEvent != nil
                 ),
-            goal: inferenceGoal,
+            goal: taskDocument.reference,
             conversationContext: conversationContext,
             guidance: (sessionContext?.guidance ?? VyronDevelopmentSessionGuidance())
                 .withProjectInstructions(projectInstructions)
         )
         var exchanges = progress.state.guidance.map {
             DevelopmentExchange(messages: [DevelopmentMessage(role: "user", content: $0)])
+        }
+        var messageBudget: VyronDevelopmentMessageBudget
+        do {
+            messageBudget = try await VyronDevelopmentBudgetResolver.resolve(
+                using: client,
+                request: VyronDevelopmentBudgetRequest(
+                    model: selected,
+                    configuration: VyronDevelopmentInferenceConfiguration(
+                        effort: requestedEffort, mode: mode, externalTools: availableExternalTools
+                    ),
+                    minimumMessageBytes: VyronDevelopmentImageContext.estimatedMessageBytes(
+                        progress.baseMessages(base) + exchanges.flatMap(\.messages)
+                    )
+                )
+            )
+        } catch {
+            Self.recordTaskFailure(error, progress: &progress, onEvent: onEvent)
+            throw error
         }
         var control = VyronDevelopmentRunControl()
         var gitContext = VyronDevelopmentGitContext()
@@ -269,6 +301,7 @@ public actor DevelopmentAgent {
         var stageNeedsVerification = latestSavedEdit != nil
         var verificationRecovery = false
         var finalDeferrals = 0
+        var taskReadDeferrals = 0
         var stopReason: String?
         var shouldSummarizeStagnation = false
         do {
@@ -298,6 +331,12 @@ public actor DevelopmentAgent {
                     pendingAcknowledgments.append(contentsOf: incoming)
                 }
                 var roundBase = progress.baseMessages(base)
+                if let guidance = taskDocument.readGuidance {
+                    roundBase.append(DevelopmentMessage(role: "system", content: guidance))
+                }
+                if let guidance = try control.readEvidenceGuidance() {
+                    roundBase.append(DevelopmentMessage(role: "system", content: guidance))
+                }
                 if continuingAutomatically {
                     roundBase.append(DevelopmentMessage(
                         role: "system", content: VyronDevelopmentRecoveryGuidance.continuation
@@ -435,6 +474,16 @@ public actor DevelopmentAgent {
                         pendingAcknowledgments.append(contentsOf: incoming)
                         continue
                     }
+                    if taskDocument.hasUnreadPages {
+                        guard taskReadDeferrals < 2 else {
+                            stopReason = VyronModelDomainText.taskPagesUnread
+                            shouldSummarizeStagnation = true
+                            break
+                        }
+                        taskReadDeferrals += 1
+                        exchanges.append(DevelopmentExchange(messages: [result.message]))
+                        continue
+                    }
                     if progress.state.plan.contains(where: { $0.status != .completed }) {
                         guard finalDeferrals < 2 else {
                             stopReason = "Work paused with unfinished plan stages after recovery. Completed actions are saved."
@@ -520,6 +569,8 @@ public actor DevelopmentAgent {
                 let requestsPlan = calls.contains {
                     [VyronDevelopmentPlanTool.name, VyronDevelopmentResumeTool.name].contains($0.function.name)
                 }
+                // Even the batch containing the last page cannot act before inference has seen that page.
+                let readingOriginalTask = taskDocument.hasUnreadPages
                 for call in calls {
                     try Task.checkCancellation()
                     if roundSteering.isEmpty {
@@ -596,6 +647,27 @@ public actor DevelopmentAgent {
                     var response: String
                     var failure: String?
                     do {
+                        if tool == VyronDevelopmentTaskTool.name {
+                            onEvent(DevelopmentEvent(
+                                kind: .toolStarted, message: VyronModelDomainText.readingTask, tool: tool
+                            ))
+                            let output = try taskDocument.response(to: call)
+                            cycle.append(DevelopmentMessage(
+                                role: "tool", content: output, toolName: tool, toolCallID: call.id
+                            ))
+                            try control.observe(call, response: output)
+                            onEvent(DevelopmentEvent(
+                                kind: .toolFinished, message: VyronModelDomainText.taskTextRead,
+                                tool: tool, content: output
+                            ))
+                            continue
+                        }
+                        guard !readingOriginalTask else {
+                            throw DevelopmentAgentError.invalidTool(
+                                "Read every original task page with read_task before using other tools. "
+                                    + (taskDocument.readGuidance ?? "")
+                            )
+                        }
                         if VyronDevelopmentFileOperationTools.handles(call) {
                             guard mode != .plan, let fileOperationAccess else {
                                 throw DevelopmentAgentError.invalidTool(
@@ -801,20 +873,41 @@ public actor DevelopmentAgent {
                                 }
                                 let nextInstructions = try VyronProjectGuidance.read(at: nextWorkspace.rootURL)
                                 let nextBase = developmentBaseMessages(
-                                    system: Self.systemPrompt + modePrompt + externalPrompt + subagentPrompt
+                                    system: (mode == .plan ? VyronDevelopmentPlanInstructions.text : Self.systemPrompt)
+                                        + VyronDevelopmentDiscoveryGuidance.text
+                                        + modePrompt + externalPrompt + subagentPrompt
                                         + VyronDevelopmentWorkspaceGuidance.prompt(for: nextWorkspace.rootURL)
                                         + (images.isEmpty ? "" : "\n" + VyronDevelopmentImageContext.evidencePrompt)
                                         + VyronDevelopmentEffortGuidance.prompt(
                                             for: requestedEffort, delegationAvailable: onSubagentEvent != nil
                                         ),
-                                    goal: inferenceGoal,
+                                    goal: taskDocument.reference,
                                     conversationContext: conversationContext,
                                     guidance: (sessionContext?.guidance ?? VyronDevelopmentSessionGuidance())
                                         .withProjectInstructions(nextInstructions)
                                 )
                                 // Validate new guidance before changing the live conversation or its checkpoint owner.
+                                let nextBudget = try await VyronDevelopmentBudgetResolver.resolve(
+                                    using: client,
+                                    request: VyronDevelopmentBudgetRequest(
+                                        model: selected,
+                                        configuration: VyronDevelopmentInferenceConfiguration(
+                                            effort: requestedEffort, mode: mode, externalTools: availableExternalTools
+                                        ),
+                                        minimumMessageBytes: VyronDevelopmentImageContext.estimatedMessageBytes(nextBase)
+                                    )
+                                )
+                                roundSteering = await steeringInbox?.drain() ?? []
+                                try Task.checkCancellation()
+                                if !roundSteering.isEmpty {
+                                    cycle.append(Self.skippedToolMessage(call, maximumBytes: responseBudget))
+                                    continue
+                                }
+                                guard try VyronFolderCreation.existingDestination(for: creation) == destination else {
+                                    throw DevelopmentAgentError.invalidTool("The reviewed project path changed.")
+                                }
                                 _ = try boundedDevelopmentMessages(
-                                    base: nextBase, exchanges: [], maximumBytes: messageBudget.maximumBytes
+                                    base: nextBase, exchanges: [], maximumBytes: nextBudget.maximumBytes
                                 )
                                 let nextProgress = try progress.moved(to: nextWorkspace, session: sessionContext)
                                 try Task.checkCancellation()
@@ -824,12 +917,14 @@ public actor DevelopmentAgent {
                                 self.workspace = nextWorkspace
                                 progress = nextProgress
                                 base = nextBase
+                                messageBudget = nextBudget
                                 try progress.save()
                                 previousProgress.state.finish(.completed, detail: "Task continued in " + destination.path)
                                 try previousProgress.save()
                                 initialContent = Dictionary(uniqueKeysWithValues: await workspace.changes().map { ($0.path, $0.after) })
                                 await workspace.beginTaskReadScope()
                                 gitContext = VyronDevelopmentGitContext()
+                                control.beginReadScope()
                                 movedConversation = true
                                 created = false
                             } else {
@@ -872,6 +967,35 @@ public actor DevelopmentAgent {
                                 exchanges.append(DevelopmentExchange(messages: restoredGuidance))
                             }
                             if previousID != progress.state.identity.id {
+                                taskDocument = try VyronDevelopmentTaskDocument(
+                                    "Resume this original user task:\n\(progress.state.identity.originalGoal)"
+                                        + "\n\nCurrent user request:\n\(goalText)"
+                                )
+                                if taskDocument.isPaged,
+                                    !availableExternalTools.contains(where: { $0.name == VyronDevelopmentTaskTool.name }) {
+                                    availableExternalTools.append(VyronDevelopmentTaskTool.definition)
+                                }
+                                base = developmentBaseMessages(
+                                    system: base.first?.content ?? Self.systemPrompt,
+                                    goal: taskDocument.reference,
+                                    conversationContext: conversationContext,
+                                    guidance: (sessionContext?.guidance ?? VyronDevelopmentSessionGuidance())
+                                        .withProjectInstructions(try VyronProjectGuidance.read(at: workspace.rootURL))
+                                )
+                                await workspace.beginTaskReadScope()
+                                control.beginReadScope()
+                                messageBudget = try await VyronDevelopmentBudgetResolver.resolve(
+                                    using: client,
+                                    request: VyronDevelopmentBudgetRequest(
+                                        model: selected,
+                                        configuration: VyronDevelopmentInferenceConfiguration(
+                                            effort: requestedEffort, mode: mode, externalTools: availableExternalTools
+                                        ),
+                                        minimumMessageBytes: VyronDevelopmentImageContext.estimatedMessageBytes(
+                                            progress.baseMessages(base) + restoredGuidance
+                                        )
+                                    )
+                                )
                                 stageNeedsVerification = progress.state.progress.files.contains {
                                     $0.status == .saved && Self.requiresVerification($0.path)
                                 }
@@ -1075,13 +1199,19 @@ public actor DevelopmentAgent {
                         }
                         onEvent(Self.toolStartedEvent(for: invocation, tool: tool))
                         switch invocation {
-                        case .list(let limit):
-                            let files = try await workspace.listFiles(limit: limit)
-                            let text = files.map { "\($0.path) (\($0.size) bytes)" }.joined(separator: "\n")
-                            response = Self.toolResponse(ok: true, output: text, maximumBytes: responseBudget)
-                        case .read(let path):
-                            let text = try await workspace.readFile(path: path, maxBytes: max(256, responseBudget / 2))
-                            response = Self.toolResponse(ok: true, output: text, maximumBytes: responseBudget)
+                        case .list(let request):
+                            let page = try await workspace.fileListing(request)
+                            response = try VyronDevelopmentFileListingToolResponse.encode(
+                                page: page, maximumBytes: responseBudget
+                            )
+                        case .read(let request):
+                            let page = try await workspace.readFilePage(request, budget: VyronDevelopmentFileReadBudget(
+                                maximumTextBytes: max(256, responseBudget / 2),
+                                maximumEncodedTextBytes: responseBudget
+                                    - VyronDevelopmentRunControl.readFeedbackReserveBytes
+                                    - VyronDevelopmentFileToolResponse.metadataReserveBytes
+                            ))
+                            response = try VyronDevelopmentFileToolResponse.encode(page)
                         case .search(let query, let limit):
                             response = Self.toolResponse(
                                 ok: true,
@@ -1311,12 +1441,15 @@ public actor DevelopmentAgent {
                         try progress.save()
                         response = Self.toolResponse(
                             ok: false,
-                            output: error.localizedDescription + " Do not bypass a refused tool or project boundary.",
+                            output: error.localizedDescription
+                                + (VyronDevelopmentToolRepairGuidance.suffix(for: error, call: call) ?? "")
+                                + " Do not bypass a refused tool or project boundary.",
                             maximumBytes: responseBudget
                         )
                     }
-                    cycle.append(DevelopmentMessage(role: "tool", content: response, toolName: tool, toolCallID: call.id))
                     try control.observe(call, response: response)
+                    response = try control.readFeedback(response)
+                    cycle.append(DevelopmentMessage(role: "tool", content: response, toolName: tool, toolCallID: call.id))
                     onEvent(
                         DevelopmentEvent(
                             kind: .toolFinished,
@@ -1369,10 +1502,17 @@ public actor DevelopmentAgent {
                         exchanges.append(Self.steeringExchange(finalUpdates))
                         pendingAcknowledgments.append(contentsOf: finalUpdates)
                     }
-                    let summaryMessages = try VyronDevelopmentExchangeCompactor.messages(
-                        base: progress.baseMessages(base), exchanges: exchanges, forceCompact: false,
-                        budget: messageBudget
+                    // The answer-only fitter selects whole source records before optional discovery.
+                    // Trimming the native transcript first could evict the only successful source read.
+                    var summaryBase = base
+                    guard summaryBase.first?.role == "system" else { throw DevelopmentAgentError.contextBudget }
+                    // Only this first message is the app-owned execution policy. User, project and skill
+                    // instructions remain in their original messages; summary mode cannot execute actions.
+                    summaryBase[0] = DevelopmentMessage(
+                        role: "system",
+                        content: try VyronDevelopmentStagnationSummary.answerBoundary(for: workspace.rootURL)
                     )
+                    let summaryMessages = progress.baseMessages(summaryBase) + exchanges.flatMap(\.messages)
                     let request = try VyronDevelopmentStagnationSummary.chatRequest(
                         model: selected.name, messages: summaryMessages, effort: requestedEffort,
                         messageBudget: messageBudget
@@ -1390,7 +1530,10 @@ public actor DevelopmentAgent {
                 } catch {
                     if error is CancellationError || Task.isCancelled { throw CancellationError() }
                     if error is VyronDevelopmentCheckpointFailure { throw error }
-                    progress.state.recordDecision("The final findings summary was unavailable. Tool execution stayed paused.")
+                    let diagnostic = VyronDevelopmentInferenceDiagnostic.code(for: error)
+                    progress.state.recordDecision(
+                        "The final findings summary was unavailable (\(diagnostic)). Tool execution stayed paused."
+                    )
                     try progress.save()
                 }
             }
@@ -1399,8 +1542,9 @@ public actor DevelopmentAgent {
             let evidenceMatches = try await progress.fileEvidenceMatches(workspace)
             let pauseMessage = stopReason
                 ?? "Work paused at the overall task safety limit. Completed actions and remaining work are saved."
+            let partial = stagnantFindings ?? control.partialReadScope
             let finalMessage = Self.verifiedSummary(
-                stagnantFindings.map { $0 + "\n\n" + pauseMessage } ?? pauseMessage,
+                partial.map { $0 + "\n\n" + pauseMessage } ?? pauseMessage,
                 checks: progress.verificationChecks,
                 verificationIsCurrent: verifiedMutationVersion == mutationVersion && evidenceMatches
             )
@@ -1425,8 +1569,8 @@ public actor DevelopmentAgent {
         switch invocation {
         case .list:
             return DevelopmentEvent(kind: .toolStarted, message: "Listing project files", tool: tool)
-        case .read(let path):
-            return DevelopmentEvent(kind: .toolStarted, message: "Reading \(path)", tool: tool, path: path)
+        case .read(let request):
+            return DevelopmentEvent(kind: .toolStarted, message: "Reading \(request.path)", tool: tool, path: request.path)
         case .search(let query, _):
             return DevelopmentEvent(kind: .toolStarted, message: "Searching the project", tool: tool, content: query)
         case .write(let path, _):
@@ -1550,17 +1694,17 @@ func developmentVerifiedSummary(
     }
     let latest = checks.last
     let verified = latest.map { $0.exitCode == 0 && !$0.timedOut } ?? false
-    let unsupportedSuccess =
-        text.range(
-            of:
-                #"\b(tests?|build|checks?|compilation)\b.{0,48}\b(pass(?:ed)?|success(?:ful(?:ly)?)?|succeed(?:ed)?)\b"#,
-            options: [.regularExpression, .caseInsensitive]
-        ) != nil && !verified
-    if unsupportedSuccess {
-        text =
-            latest == nil
+    if !verified {
+        let correction = latest == nil
             ? "The changes are ready for review. A successful build or test has not been verified."
             : "The changes need review. The latest build or test did not finish successfully."
+        let successPattern =
+            #"\b(tests?|build|checks?|compilation)\b.{0,48}\b(pass(?:ed)?|success(?:ful(?:ly)?)?|succeed(?:ed)?)\b"#
+        // Correct unsupported claims without discarding unrelated findings or their source evidence.
+        text = text.components(separatedBy: "\n").map { line in
+            line.range(of: successPattern, options: [.regularExpression, .caseInsensitive]) == nil
+                ? line : correction
+        }.joined(separator: "\n")
     }
     let summary = text.isEmpty ? "Task finished." : text
     guard let latest, !verified else { return summary }

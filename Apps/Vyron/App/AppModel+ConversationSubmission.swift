@@ -206,7 +206,7 @@ extension AppModel {
             return nil
         }
 
-        composer.cancelQueuedMessageDrain()
+        stopQueuedMessageDelivery()
         followUpQuestions.cancel()
         let response = VyronResponseIdentity(
             generationID: UUID(), conversationID: conversationID, messageID: assistant.id

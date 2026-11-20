@@ -31,7 +31,14 @@ extension AppModel {
                 preferences: VyronBuiltinModelPreferences(defaults: preferences),
                 providers: VyronModelProviderBuilders(
                     builtin: { try OllamaClient(settings: $0) },
-                    configured: { profile, key in try VyronModelProviderFactory.makeProvider(for: profile, apiKey: key) }
+                    configured: { profile, key in try VyronModelProviderFactory.makeProvider(for: profile, apiKey: key) },
+                    autoLocal: modelOverrides.autoLocal ?? VyronAutoLocalServices(makeProvider: { profile in
+                        let key = try await credentials.reader.key(for: profile.id)
+                        try Task.checkCancellation()
+                        return try VyronModelProviderFactory.makeProvider(
+                            for: profile, apiKey: key, automaticReasoning: true
+                        )
+                    })
                 )
             ),
             downloads: VyronModelDownloads(

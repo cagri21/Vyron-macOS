@@ -41,11 +41,14 @@ extension OllamaClient: VyronDevelopmentInferenceProviding {
 
     package func developmentInference(_ input: VyronDevelopmentInferenceRequest) async throws -> DevelopmentStep {
         let model = input.model
-        var messages = Self.messagesWithoutContinuation(input.messages)
+        try validateName(model)
+        let normalized = try VyronOllamaDevelopmentSystemMessages.coalescing(input.messages, model: model)
+        var messages = Self.messagesWithoutContinuation(
+            VyronOllamaDevelopmentContinuation.appendingIfNeeded(to: normalized)
+        )
         let effort = input.configuration.effort
         let mode = input.configuration.mode
         let externalTools = input.configuration.externalTools
-        try validateName(model)
         try VyronDevelopmentImageContext.validate(messages)
         guard !messages.isEmpty, messages.allSatisfy({ ["system", "user", "assistant", "tool"].contains($0.role) })
         else { throw DevelopmentAgentError.contextBudget }
@@ -80,22 +83,28 @@ extension OllamaClient: VyronDevelopmentInferenceProviding {
         do {
             for attempt in 0..<2 {
                 try Task.checkCancellation()
-                let maximumContext = try await requestedContext(
-                    for: localModel,
-                    fallback: ModelCatalog.descriptor(for: selected.name)?.recommendedContextTokens ?? 32_768
-                )
+                let mandatory = requestMessages.filter { $0.role == "system" || $0.role == "user" }
+                let allocation = try await developmentAllocation(for: VyronDevelopmentBudgetRequest(
+                    model: localModel, configuration: input.configuration,
+                    minimumMessageBytes: VyronDevelopmentImageContext.estimatedMessageBytes(mandatory)
+                ))
+                let context = repairContext ?? allocation.contextTokens
                 requestMessages = try VyronDevelopmentRequestBudget.messages(
                     requestMessages,
                     tools: tools,
-                    budget: .init(contextTokens: repairContext ?? min(maximumContext, settings.contextTokens ?? 32_768))
+                    budget: .init(
+                        contextTokens: context,
+                        outputTokens: max(allocation.outputTokens, VyronOllamaStructuredOutputBudget.reasoningOutputTokens),
+                        maximumMessageBytes: allocation.messageBudget.maximumBytes
+                    )
                 )
                 var options = try developmentRequestOptions(
                     messages: requestMessages,
                     tools: tools,
                     effort: effort,
                     limits: .init(
-                        maximumContext: maximumContext,
-                        contextOverride: repairContext ?? settings.contextTokens,
+                        maximumContext: context,
+                        contextOverride: context,
                         outputOverride: settings.maxOutputTokens
                     )
                 )

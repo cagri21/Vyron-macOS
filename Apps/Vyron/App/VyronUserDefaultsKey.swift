@@ -7,6 +7,7 @@ enum VyronUserDefaultsKey: String {
     case projectCommandApprovalMode = "projectCommandApprovalMode"
     case selectedLocalModel = "selectedLocalModel"
     case automaticModelSelection = "automaticModelSelection"
+    case localFirstModelRouting = "localFirstModelRouting"
     case pausedModelDownloads = "pausedModelDownloads"
     case automaticallySetUpSkills = "automaticallySetUpSkills"
     case selectedSpeechVoiceID = "selectedSpeechVoiceID"

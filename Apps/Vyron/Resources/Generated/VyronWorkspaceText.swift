@@ -35,6 +35,34 @@ enum VyronWorkspaceText {
     static var askForApprovalDescription: String {
         VyronResourceBundle.string("workspaceAskForApprovalDescription", fallback: "Ask before running any project command.")
     }
+    static var autoLocal: String {
+        VyronResourceBundle.string("workspaceAutoLocal", fallback: "Auto Local")
+    }
+    static var autoLocalAssessing: String {
+        VyronResourceBundle.string("workspaceAutoLocalAssessing", fallback: "Assessing task locally")
+    }
+    static var autoLocalDescription: String {
+        VyronResourceBundle.string("workspaceAutoLocalDescription", fallback: "Assesses your prompt and recent context on this Mac. May send the task and its context to a saved connected model when needed.")
+    }
+    static var autoLocalEnabled: String {
+        VyronResourceBundle.string("workspaceAutoLocalEnabled", fallback: "Auto Local will assess each task on this Mac and use a saved connected model when needed.")
+    }
+    static var autoLocalInvalidAssessment: String {
+        VyronResourceBundle.string("workspaceAutoLocalInvalidAssessment", fallback: "The local model could not select a suitable model for this task. Try again or choose a model manually.")
+    }
+    static var autoLocalNoSuitableModel: String {
+        VyronResourceBundle.string("workspaceAutoLocalNoSuitableModel", fallback: "No suitable model is available for this task. Select a compatible local model or save a connected model in Manage Models.")
+    }
+    static func autoLocalSelected(_ p1: String, _ p2: String, _ p3: String) -> String {
+        VyronResourceBundle.format(
+            "workspaceAutoLocalSelected",
+            fallback: "Selected %@ · %@ · %@",
+            arguments: [p1, p2, p3]
+        )
+    }
+    static var autoLocalUnavailable: String {
+        VyronResourceBundle.string("workspaceAutoLocalUnavailable", fallback: "Auto Local needs an installed local chat model. Choose or download one in Manage Models.")
+    }
     static var automaticEffort: String {
         VyronResourceBundle.string("workspaceAutomaticEffort", fallback: "Auto")
     }
@@ -86,29 +114,5 @@ enum VyronWorkspaceText {
     }
     static var fastSpeed: String {
         VyronResourceBundle.string("workspaceFastSpeed", fallback: "Fast")
-    }
-    static var fastSpeedDescription: String {
-        VyronResourceBundle.string("workspaceFastSpeedDescription", fallback: "Faster OpenAI responses at higher API rates. Effort stays the same.")
-    }
-    static var fastSpeedUnavailable: String {
-        VyronResourceBundle.string("workspaceFastSpeedUnavailable", fallback: "Fast is available with supported OpenAI models.")
-    }
-    static var files: String {
-        VyronResourceBundle.string("workspaceFiles", fallback: "Files")
-    }
-    static var fullAccess: String {
-        VyronResourceBundle.string("workspaceFullAccess", fallback: "Full access")
-    }
-    static var fullAccessDescription: String {
-        VyronResourceBundle.string("workspaceFullAccessDescription", fallback: "Run all permitted project commands without asking.")
-    }
-    static var hideSidebar: String {
-        VyronResourceBundle.string("workspaceHideSidebar", fallback: "Hide sidebar")
-    }
-    static var highEffort: String {
-        VyronResourceBundle.string("workspaceHighEffort", fallback: "High")
-    }
-    static var highEffortDescription: String {
-        VyronResourceBundle.string("workspaceHighEffortDescription", fallback: "Complex debugging, multi-file changes, and production risks.")
     }
 }

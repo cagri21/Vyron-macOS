@@ -1552,6 +1552,14 @@
 "workspaceApproveForMeDescription" = "Run trusted commands automatically; ask for other allowed commands.";
 "workspaceAskForApproval" = "Ask for approval";
 "workspaceAskForApprovalDescription" = "Ask before running any project command.";
+"workspaceAutoLocal" = "Auto Local";
+"workspaceAutoLocalAssessing" = "Assessing task locally";
+"workspaceAutoLocalDescription" = "Assesses your prompt and recent context on this Mac. May send the task and its context to a saved connected model when needed.";
+"workspaceAutoLocalEnabled" = "Auto Local will assess each task on this Mac and use a saved connected model when needed.";
+"workspaceAutoLocalInvalidAssessment" = "The local model could not select a suitable model for this task. Try again or choose a model manually.";
+"workspaceAutoLocalNoSuitableModel" = "No suitable model is available for this task. Select a compatible local model or save a connected model in Manage Models.";
+"workspaceAutoLocalSelected" = "Selected %@ · %@ · %@";
+"workspaceAutoLocalUnavailable" = "Auto Local needs an installed local chat model. Choose or download one in Manage Models.";
 "workspaceAutomaticEffort" = "Auto";
 "workspaceAutomaticEffortDescription" = "Choose the effort for each task automatically.";
 "workspaceAutomaticModel" = "Auto model";

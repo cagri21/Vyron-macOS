@@ -2,6 +2,30 @@
 import Foundation
 
 extension VyronWorkspaceText {
+    static var quickEffort: String {
+        VyronResourceBundle.string("workspaceQuickEffort", fallback: "Quick")
+    }
+    static var readOnly: String {
+        VyronResourceBundle.string("workspaceReadOnly", fallback: "Read-only")
+    }
+    static var resetEffort: String {
+        VyronResourceBundle.string("workspaceResetEffort", fallback: "Reset to Auto")
+    }
+    static var responseSpeed: String {
+        VyronResourceBundle.string("workspaceResponseSpeed", fallback: "Speed")
+    }
+    static var runTask: String {
+        VyronResourceBundle.string("workspaceRunTask", fallback: "Run task (⌘ Return)")
+    }
+    static var searchPrompt: String {
+        VyronResourceBundle.string("workspaceSearchPrompt", fallback: "Search the web for ")
+    }
+    static var searchWeb: String {
+        VyronResourceBundle.string("workspaceSearchWeb", fallback: "Search the web")
+    }
+    static var selectEffort: String {
+        VyronResourceBundle.string("workspaceSelectEffort", fallback: "Select effort")
+    }
     static var showSidebar: String {
         VyronResourceBundle.string("workspaceShowSidebar", fallback: "Show sidebar")
     }

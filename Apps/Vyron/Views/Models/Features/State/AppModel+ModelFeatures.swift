@@ -34,6 +34,10 @@ extension AppModel {
     }
 
     func isComposerModeAvailable(_ mode: ComposerMode) -> Bool {
+        if mode != .chat, let configuration = autoLocalConfiguration() {
+            if mode == .plan, workspaceState.workspaceURL == nil { return true }
+            return !autoLocalCandidates(configuration, requiresTools: true).isEmpty
+        }
         switch mode {
         case .chat: return true
         case .agent: return modelFeatureReport[.agent].isEnabled
