@@ -4,15 +4,18 @@ import VyronDevelopment
 
 extension AppModel {
     func send() {
-        if routeChatHandoffIfRequested() { return }
-        guard canSend else { return }
+        guard !routeChatHandoffIfRequested(), canSend else { return }
         if !voice.isSendingTurn { voice.end() }
         if composer.isEditingQueuedMessage {
             saveQueuedMessageEdit()
             return
         }
+        sendConversation(queuedMessage: nil)
+    }
+
+    func sendConversation(queuedMessage: VyronQueuedMessage?) {
         guard let provider = modelSelection.inferenceProvider,
-            let submission = prepareConversationSubmission(),
+            let submission = prepareConversationSubmission(queuedMessage: queuedMessage),
             let startedResponse = beginConversationResponse(for: submission)
         else { return }
 
@@ -48,7 +51,11 @@ extension AppModel {
         let hasImageContext = imageHistory.contains {
             !($0.images ?? []).isEmpty
         }
-        let folderReferenceContext = Self.folderAttachmentReferenceContext(in: history, context: previousContext)
+        let submittedFolders = submission.draft.references.folders
+        let folderReferenceContext = submittedFolders.isEmpty
+            ? Self.folderAttachmentReferenceContext(in: history, context: previousContext) : submittedFolders
+        // Only the current attachments have been counted against this turn's expanded budget.
+        let usesExpandedFolderEvidence = !submittedFolders.isEmpty && expandedWorkFolderAttachmentBudget != nil
         let referenceHistory = VyronConversationRequestContext.developmentHistory(history, compaction: compactionSnapshot)
         let fileReferenceContext = VyronFileAttachmentContext.latest(in: referenceHistory, context: previousContext)
         let attachedApplications = VyronApplicationAttachmentContext.latest(in: referenceHistory)
@@ -174,7 +181,12 @@ extension AppModel {
                         skillContext: skills.text, conversationSummary: compactedMemory?.content,
                         images: imageHistory.flatMap { $0.images ?? [] }
                     )
-                    guidance.attachmentReference = fileReferenceContext
+                    if usesExpandedFolderEvidence {
+                        guidance.attachmentReference = [submittedFolders, fileReferenceContext]
+                            .compactMap { $0 }.joined(separator: VyronTextSeparator.paragraph.rawValue)
+                    } else {
+                        guidance.attachmentReference = fileReferenceContext
+                    }
                     try await agent.configureSession(VyronDevelopmentSessionContext(
                         conversationID: conversationID,
                         responseID: responseIdentity.messageID,
@@ -231,7 +243,8 @@ extension AppModel {
                             conversationContext: [
                                 VyronConversationRequestContext.developmentConversationContext(VyronConversationRequestContext.developmentHistory(
                                     Array(history.dropLast()), compaction: compactionSnapshot
-                                )), folderReferenceContext, applicationReferenceContext, linkedChatContext,
+                                )), usesExpandedFolderEvidence ? nil : folderReferenceContext,
+                                applicationReferenceContext, linkedChatContext,
                                 conversationMoveContext
                             ].compactMap { $0 }.joined(separator: VyronTextSeparator.paragraph.rawValue),
                             externalTools: mcpSession.tools + VyronWebTools.definitions

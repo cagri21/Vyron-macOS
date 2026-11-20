@@ -1,26 +1,33 @@
 import Foundation
 
 extension DevelopmentWorkspace {
+    public nonisolated static func isGitCommand(_ command: String) -> Bool {
+        gitArguments(command) != nil
+    }
+
+    public nonisolated static func isGitInitializationCommand(_ command: String) -> Bool {
+        gitArguments(command)?.first == "init"
+    }
+
     /// Classification shares execution's parser and policy; it never authorizes or executes a command.
     public nonisolated static func isGitInspectionCommand(_ command: String) -> Bool {
+        guard let arguments = gitArguments(command), VyronGitCommandPolicy.isInspection(arguments),
+            arguments.first != "--version" else { return false }
+        // Comparing two files without an index does not require repository discovery.
+        return arguments.first != "diff" || !arguments.dropFirst().prefix(while: { $0 != "--" }).contains("--no-index")
+    }
+
+    private nonisolated static func gitArguments(_ command: String) -> [String]? {
         do {
             let arguments = try CommandPolicy.arguments(command)
-            try CommandPolicy.validate(arguments)
             guard URL(fileURLWithPath: arguments[0]).lastPathComponent.lowercased() == "git" else {
-                return false
+                return nil
             }
-            // Comparing two files without an index does not require repository discovery.
-            if arguments[1] == "diff", arguments.dropFirst(2).contains("--no-index") { return false }
-            // Git context must refer to the selected folder, rather than another working tree or configuration.
-            let contextOptions = ["-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path"]
-            return !arguments.dropFirst().contains { argument in
-                contextOptions.contains { option in
-                    argument == option || argument.hasPrefix(option + "=")
-                }
-            }
+            try CommandPolicy.validate(arguments)
+            return Array(arguments.dropFirst())
         } catch {
             // Invalid syntax and refused commands remain failures of normal execution, never optional Git skips.
-            return false
+            return nil
         }
     }
 }

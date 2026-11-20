@@ -23,7 +23,7 @@ enum VyronOpenAIResponsesModelBudget {
 
     private static func usesExpandedBudget(for model: String) -> Bool {
         switch VyronOpenAIResponsesRoute.modelFamily(for: model) {
-        case .gpt61Sol, .gpt6Sol, .gpt6Astra: true
+        case .gpt62Astra, .gpt62Sol, .gpt61Sol, .gpt6Sol, .gpt6Astra: true
         case .gpt6Luna, .gpt61Terra, nil: false
         }
     }

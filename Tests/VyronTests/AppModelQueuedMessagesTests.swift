@@ -22,23 +22,67 @@ final class AppModelQueuedMessagesTests: XCTestCase {
         test.send("First follow-up")
         test.send("Second follow-up")
         XCTAssertEqual(test.model.queuedMessages.map(\.content), ["First follow-up", "Second follow-up"])
+        let firstID = try XCTUnwrap(test.model.queuedMessages.first?.id)
+        let secondID = try XCTUnwrap(test.model.queuedMessages.last?.id)
         let beforeCompletion = await test.provider.requests.count
         XCTAssertEqual(beforeCompletion, 1)
         test.model.composer.draft = "Unsent work in progress"
         await test.provider.complete(0, answer: "Original answer")
         try await waitUntil { await test.provider.requests.count == 2 }
         XCTAssertEqual(test.model.composer.draft, "Unsent work in progress")
-        XCTAssertEqual(test.model.queuedMessages.map(\.content), ["Second follow-up"])
+        XCTAssertEqual(test.model.queuedMessages.map(\.id), [secondID])
+        XCTAssertEqual(test.model.messages.filter { $0.id == firstID }.map(\.content), ["First follow-up"])
         let firstMessages = await test.provider.requests[1]
         XCTAssertEqual(firstMessages.filter { $0.role == "user" }.map(\.content), ["Original task", "First follow-up"])
         await test.provider.complete(1, answer: "First answer")
         try await waitUntil { await test.provider.requests.count == 3 }
         let secondMessages = await test.provider.requests[2]
         XCTAssertEqual(secondMessages.last?.content, "Second follow-up")
+        XCTAssertEqual(test.model.messages.filter { $0.id == secondID }.map(\.content), ["Second follow-up"])
         XCTAssertEqual(test.model.composer.draft, "Unsent work in progress")
         await test.provider.complete(2, answer: "Second answer")
         try await waitUntil { !test.model.foregroundRun.isGenerating }
         XCTAssertTrue(test.model.queuedMessages.isEmpty)
+    }
+
+    func testFailedQueueHandoffKeepsMessagePendingAndCanBeRetried() async throws {
+        let test = VyronQueueTestHarness()
+        defer { test.cleanUp() }
+        test.send("Original task")
+        try await waitUntil { await test.provider.requests.count == 1 }
+        test.send("First follow-up")
+        test.send("Second follow-up")
+        let firstID = try XCTUnwrap(test.model.queuedMessages.first?.id)
+        let secondID = try XCTUnwrap(test.model.queuedMessages.last?.id)
+        let conversationID = try XCTUnwrap(test.model.selectedConversationID)
+        test.model.conversations[0].contextByMessageID = [firstID.uuidString: "Unacknowledged steering context"]
+        test.model.composer.draft = "Keep this draft"
+
+        test.model.historyIsWritable = false
+        await test.provider.complete(0, answer: "Original answer")
+        try await waitUntil { test.model.errorMessage == VyronStatusText.historyUnavailable }
+        XCTAssertFalse(test.model.foregroundRun.isGenerating)
+        XCTAssertEqual(test.model.queuedMessages.map(\.id), [firstID, secondID])
+        XCTAssertFalse(test.model.messages.contains { $0.id == firstID })
+        XCTAssertEqual(test.model.composer.draft, "Keep this draft")
+        let requestsAfterBlockedHandoff = await test.provider.requests.count
+        XCTAssertEqual(requestsAfterBlockedHandoff, 1)
+
+        test.model.historyIsWritable = true
+        test.model.steerQueuedMessage(firstID)
+        try await waitUntil { await test.provider.requests.count == 2 }
+        let history = try test.model.historyStore.load()
+        let persistedConversation = try XCTUnwrap(history.first { $0.id == conversationID })
+        XCTAssertEqual(persistedConversation.queuedMessages?.map(\.id), [secondID])
+        XCTAssertEqual(persistedConversation.messages.filter { $0.id == firstID }.map(\.content), ["First follow-up"])
+        XCTAssertNil(persistedConversation.contextByMessageID?[firstID.uuidString])
+        XCTAssertEqual(test.model.composer.draft, "Keep this draft")
+
+        await test.provider.fail(1)
+        try await waitUntil { !test.model.foregroundRun.isGenerating }
+        XCTAssertEqual(test.model.messages.filter { $0.id == firstID }.count, 1)
+        XCTAssertEqual(test.model.messages.last?.activity?.state, .failed)
+        XCTAssertEqual(test.model.queuedMessages.map(\.id), [secondID])
     }
 
     func testEditSaveCancelAndDeletePreserveExistingDraft() async throws {

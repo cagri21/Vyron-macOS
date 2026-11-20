@@ -35,16 +35,18 @@ extension AppModel {
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         if panel.runModal() == .OK, let url = panel.url {
-            if workspaceState.workspaceURL?.standardizedFileURL == url.standardizedFileURL,
-                workspaceState.developmentWorkspace != nil {
-                return
-            }
-            newConversation()
-            let selectionID = prepareWorkspaceSelection(url)
-            Task {
-                await loadAddedWorkspace(url, expectedSelectionID: selectionID)
-            }
+            openAddedProjectFolder(url)
         }
+    }
+
+    func openAddedProjectFolder(_ url: URL) {
+        if workspaceState.workspaceURL?.standardizedFileURL == url.standardizedFileURL,
+            workspaceState.isLoadingWorkspace || workspaceState.developmentWorkspace != nil {
+            return
+        }
+        newConversation()
+        let selectionID = prepareWorkspaceSelection(url)
+        Task { await loadAddedWorkspace(url, expectedSelectionID: selectionID) }
     }
 
     func loadWorkspace(
@@ -190,7 +192,7 @@ extension AppModel {
         let url = URL(fileURLWithPath: path, isDirectory: true)
         if sidebarActiveProjectPath == projectPath,
             workspaceState.workspaceURL?.standardizedFileURL == url.standardizedFileURL,
-            workspaceState.developmentWorkspace != nil {
+            workspaceState.isLoadingWorkspace || workspaceState.developmentWorkspace != nil {
             return
         }
         newConversation()

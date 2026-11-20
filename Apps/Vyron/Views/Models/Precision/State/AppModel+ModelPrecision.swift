@@ -107,7 +107,7 @@ extension AppModel {
 
         // Commit the local selection on the main actor before allowing the delete request.
         try modelDownloads.beginPrecisionRemoval(for: transfer) {
-            _ = try modelSelection.selectInstalledModel(replacement.name)
+            _ = try modelSelection.selectInstalledModel(replacement.name, readKey: savedAPIKey(for:))
         }
         requestModelFeatureVerification()
         do {

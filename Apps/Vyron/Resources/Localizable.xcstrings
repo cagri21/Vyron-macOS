@@ -41032,6 +41032,121 @@
         }
       }
     },
+    "projectApprovalGitCommandRequired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Specify a local Git command in the selected project."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçili projede çalıştırılacak yerel bir Git komutu belirtin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Укажіть локальну команду Git для вибраного проєкту."
+          }
+        }
+      }
+    },
+    "projectApprovalGitCommandUnavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a supported local Git command. Git networking and changes to global Git settings are unavailable in Work."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desteklenen bir yerel Git komutu kullanın. Work modunda Git ağ işlemleri ve genel Git ayarlarını değiştirme kullanılamaz."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скористайтеся підтримуваною локальною командою Git. Режим Work не підтримує мережеві операції Git і зміну глобальних налаштувань Git."
+          }
+        }
+      }
+    },
+    "projectApprovalGitInspectionSideEffects": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Git inspection options that write files or run external helpers."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git inceleme komutundan dosyaya yazan veya harici araç çalıştıran seçenekleri kaldırın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вилучіть із команди перегляду Git параметри, які записують файли або запускають сторонні програми."
+          }
+        }
+      }
+    },
+    "projectApprovalGitHardResetUnavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git hard reset is unavailable in Work. Use a scoped reset or restore."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work modunda git reset --hard kullanılamaz. Kapsamı belirli bir reset veya restore komutu kullanın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Режим Work не підтримує git reset --hard. Скористайтеся командою reset або restore з обмеженою областю дії."
+          }
+        }
+      }
+    },
+    "projectApprovalGitInteractiveCommandUnavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work supports noninteractive Git operations without scripts."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work, etkileşim veya betik gerektirmeyen Git işlemlerini destekler."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Режим Work підтримує неінтерактивні операції Git без скриптів."
+          }
+        }
+      }
+    },
     "projectApprovalCommandMayChangeProjectFiles": {
       "extractionState": "manual",
       "localizations": {

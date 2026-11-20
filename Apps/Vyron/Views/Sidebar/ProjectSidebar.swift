@@ -10,8 +10,15 @@ struct ProjectSidebar: View {
     @State var chatSchedulingTemplate: VyronChatSchedulingTemplate?
     @State private var showsArchivedChats = false
     @State var expandedChatProjects: Set<String> = []
+    @State var draggedRow: VyronSidebarRow?
+    @State var sidebarDropTarget: VyronSidebarDropTarget?
+    @State var sidebarDropFrames: [String: CGRect] = [:]
+    @State var sidebarViewportSize: CGSize = .zero
+    @GestureState var isSidebarDragging = false
+    @State private var sidebarRowsHeight: CGFloat = 0
     @State private var showsSearch = false
     @State private var showsNotifications = false
+    @State private var droppedProjectPath: String?
     @FocusState private var newTaskFocused: Bool
     @FocusState private var searchFocused: Bool
     let presentation: VyronWorkspacePanelPresentation
@@ -45,6 +52,13 @@ struct ProjectSidebar: View {
             engineStatus
         }
         .background(palette.surface)
+        .modifier(VyronSidebarFolderDropTarget(projectPath: $droppedProjectPath))
+        .onChange(of: droppedProjectPath) { _, path in
+            if path != nil { showsNotifications = false }
+        }
+        .onChange(of: model.sidebarActiveProjectPath) { _, path in
+            if droppedProjectPath != path { droppedProjectPath = nil }
+        }
         .onChange(of: showsNotifications) { _, isPresented in
             if isPresented { searchFocused = false }
         }
@@ -131,23 +145,81 @@ struct ProjectSidebar: View {
     }
 
     private var projectList: some View {
+        let displayedEntries = entries
+        let visibleProjectID = droppedProjectPath.map { "project:\($0)" }.flatMap { id in
+            displayedEntries.first { $0.id == id }?.id
+        }
+        return ScrollViewReader { proxy in
+            projectScrollView(displayedEntries)
+                .onChange(of: visibleProjectID, initial: true) { _, id in
+                    guard let id else { return }
+                    proxy.scrollTo(id)
+                    droppedProjectPath = nil
+                }
+        }
+    }
+
+    private func projectScrollView(_ displayedEntries: [VyronSidebarEntry]) -> some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: VyronSidebarStyle.rowSpacing) {
-                ForEach(entries) { entry in
-                    entryView(entry)
-                        .padding(
-                            .leading,
-                            min(
-                                CGFloat(entry.depth) * VyronSidebarStyle.indentation,
-                                VyronSidebarStyle.maximumIndent
+            VStack(alignment: .leading, spacing: 0) {
+                LazyVStack(alignment: .leading, spacing: VyronSidebarStyle.rowSpacing) {
+                    ForEach(displayedEntries) { entry in
+                        sidebarRow(entry)
+                            .padding(
+                                .leading,
+                                min(
+                                    CGFloat(entry.depth) * VyronSidebarStyle.indentation,
+                                    VyronSidebarStyle.maximumIndent
+                                )
                             )
-                        )
+                            .id(entry.id)
+                    }
+                }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sidebarRowsHeight = $0 }
+                if isSearching {
+                    Spacer(minLength: VyronSidebarStyle.sectionSpacing)
+                } else {
+                    sidebarDropSurface(.topLevel) {
+                        Color.clear.containerRelativeFrame(.vertical) { height, _ in
+                            max(VyronSidebarStyle.rowHeight, height - sidebarRowsHeight)
+                        }
+                    }
                 }
             }
             .padding(.horizontal, VyronSidebarStyle.listInset)
-            .padding(.bottom, VyronSidebarStyle.sectionSpacing)
         }
         .scrollIndicators(.hidden)
+        .coordinateSpace(name: VyronSidebarStyle.dragCoordinateSpace)
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { sidebarViewportSize = $0 }
+        .highPriorityGesture(sidebarDragGesture(displayedEntries), including: isSearching ? .subviews : .all)
+        .onChange(of: isSidebarDragging) { _, isDragging in
+            if !isDragging { clearSidebarDrag() }
+        }
+        .onChange(of: isSearching) { _, isSearching in
+            if isSearching { clearSidebarDrag() }
+        }
+    }
+
+    @ViewBuilder
+    private func sidebarRow(_ entry: VyronSidebarEntry) -> some View {
+        if !isSearching, entry.group != nil {
+            sidebarDropSurface(.entry(entry)) { entryView(entry) }
+        } else {
+            entryView(entry)
+        }
+    }
+
+    func showMovedChat(_ row: VyronSidebarRow, in group: VyronSidebarGroup) {
+        guard case .item(.conversation(let id)) = row, case .project(let project) = group,
+            !expandedChatProjects.contains(project.path)
+        else { return }
+
+        let visibleChats = VyronSidebarChatPreview.visibleChats(
+            model.sidebarProjectChats(project.path),
+            selectedID: model.selectedConversationID,
+            showsAll: false
+        )
+        if !visibleChats.contains(where: { $0.id == id }) { expandedChatProjects.insert(project.path) }
     }
 
     private var newTask: some View {

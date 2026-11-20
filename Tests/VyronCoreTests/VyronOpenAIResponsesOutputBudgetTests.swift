@@ -11,15 +11,19 @@ final class VyronOpenAIResponsesOutputBudgetTests: XCTestCase {
     }
 
     func testSelectedOpenAIModelsRetainLargeAgentRequestsAndUltraOutput() async throws {
-        let models = ["gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra", "gpt-6.1-sol-2026-10-07"]
+        let models = [
+            "gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra", "gpt-6.1-sol-2026-10-07",
+            "gpt-6.2-astra", "gpt-6.2-sol", "gpt-6.2-sol-2026-11-18"
+        ]
         let guidance = String(repeating: "Follow the project rules.\n", count: 1_500)
+        let toolOutput = String(repeating: "Source line from README.md.\n", count: 1_200)
         let messages = [
             DevelopmentMessage(role: "system", content: guidance),
             DevelopmentMessage(role: "user", content: "Inspect the project."),
             DevelopmentMessage(role: "assistant", toolCalls: [
-                DevelopmentToolCall(name: "list_files", arguments: [:], id: "list")
+                DevelopmentToolCall(name: "read_file", arguments: ["path": .string("README.md")], id: "read")
             ]),
-            DevelopmentMessage(role: "tool", content: "README.md", toolName: "list_files", toolCallID: "list")
+            DevelopmentMessage(role: "tool", content: toolOutput, toolName: "read_file", toolCallID: "read")
         ]
         await VyronResponsesTestURLProtocol.state.reset { request, _ in
             if request.url?.path == "/v1/models" { return VyronResponsesTestSupport.modelList() }
@@ -28,8 +32,8 @@ final class VyronOpenAIResponsesOutputBudgetTests: XCTestCase {
             XCTAssertEqual(body["max_output_tokens"] as? Int, 12_288)
             let input = try XCTUnwrap(body["input"] as? [[String: Any]])
             XCTAssertEqual(input.first?["content"] as? String, guidance)
-            XCTAssertEqual(input.last?["call_id"] as? String, "list")
-            XCTAssertEqual(input.last?["output"] as? String, "README.md")
+            XCTAssertEqual(input.last?["call_id"] as? String, "read")
+            XCTAssertEqual(input.last?["output"] as? String, toolOutput)
             return VyronResponsesTestResponse(body: try VyronResponsesTestSupport.completion([
                 VyronResponsesTestSupport.textOutput("Project inspected.")
             ]))

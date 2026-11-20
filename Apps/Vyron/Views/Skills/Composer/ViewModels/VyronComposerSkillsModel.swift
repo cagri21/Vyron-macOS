@@ -81,6 +81,22 @@ final class VyronComposerSkillsModel: ObservableObject {
         return String(leadingWhitespace) + command.invocation + " "
     }
 
+    func mention(in draft: String) -> VyronComposerSkillMention? {
+        let content = draft.drop(while: \.isWhitespace)
+        guard let marker = content.first, marker == "/" || marker == "$" else { return nil }
+        let token = content.dropFirst().prefix { !$0.isWhitespace }
+        let tokenEnd = token.endIndex
+        guard tokenEnd < draft.endIndex,
+            let command = commands.entries.first(where: { $0.name == token.lowercased() })
+        else { return nil }
+        let textStart = draft.index(after: tokenEnd)
+        return VyronComposerSkillMention(
+            command: command,
+            prefix: String(draft[..<textStart]),
+            text: String(draft[textStart...])
+        )
+    }
+
     static func query(in draft: String) -> String? {
         let token = draft.drop(while: { $0.isWhitespace })
         guard token.first == "/" else { return nil }

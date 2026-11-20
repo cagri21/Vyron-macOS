@@ -196,5 +196,10 @@
 "projectApprovalCommandNeedsReview" = "Komut incelemenizi bekliyor";
 "projectApprovalCommandNotPermitted" = "Proje modunda bu komuta izin verilmez.";
 "projectApprovalDefaultReviewReason" = "Bu proje komutunu çalıştırılmadan önce inceleyin.";
+"projectApprovalGitCommandRequired" = "Seçili projede çalıştırılacak yerel bir Git komutu belirtin.";
+"projectApprovalGitCommandUnavailable" = "Desteklenen bir yerel Git komutu kullanın. Work modunda Git ağ işlemleri ve genel Git ayarlarını değiştirme kullanılamaz.";
+"projectApprovalGitHardResetUnavailable" = "Work modunda git reset --hard kullanılamaz. Kapsamı belirli bir reset veya restore komutu kullanın.";
+"projectApprovalGitInspectionSideEffects" = "Git inceleme komutundan dosyaya yazan veya harici araç çalıştıran seçenekleri kaldırın.";
+"projectApprovalGitInteractiveCommandUnavailable" = "Work, etkileşim veya betik gerektirmeyen Git işlemlerini destekler.";
 "projectApprovalResponseUndoBusy" = "Bu düzenlemeleri geri almadan önce proje komutunun bitmesini bekleyin.";
 "projectApprovalResponseUndoConflict" = "Bir dosya değiştiği için bu yanıt geri alınamıyor. Düzenlemeleriniz korundu: %@";

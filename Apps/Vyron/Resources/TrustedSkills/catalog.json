@@ -24,6 +24,22 @@
       "aliases": ["presentations", "presentation", "slides", "pptx", "vyron-presentations"],
       "terms": ["presentation", "slide deck", "powerpoint", "pptx", "sunum", "презентація", "презентацію"],
       "actions": ["create", "make", "generate", "build", "read", "review", "edit", "update", "format", "convert", "oluştur", "hazırla", "oku", "incele", "düzenle", "güncelle", "створи", "створити", "прочитай", "читати", "онови", "оновити", "редагуй"]
+    },
+    {
+      "identifier": "vyron-git",
+      "aliases": ["git", "vyron-git", "vyron-commit"],
+      "terms": [
+        "commit", "staged", "unstaged", "stage these changes", "stage the changes", "unstage", "working tree",
+        "worktree", "repository", "stash", "cherry-pick", "rebase", "reflog", "git init", "git status", "git diff",
+        "git log", "git show", "branch", "git switch", "git checkout", "git restore", "git reset", "git add",
+        "git merge", "git tag", "git revert", "git push", "git fetch", "git pull", "git clone", "git history"
+      ],
+      "actions": [
+        "git", "init", "initialize", "inspect", "show", "review", "compare", "stage", "unstage", "commit",
+        "create", "switch", "rename", "delete", "stash", "merge", "rebase", "cherry", "tag", "revert", "restore",
+        "reset", "recover", "apply", "list", "undo", "push", "pull", "fetch", "clone", "karşılaştır", "göster",
+        "incele", "oluştur", "değiştir", "birleştir", "покажи", "перевір", "створи", "збережи"
+      ]
     }
   ]
 }

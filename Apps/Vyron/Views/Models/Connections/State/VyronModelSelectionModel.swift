@@ -123,15 +123,27 @@ final class VyronModelSelectionModel: ObservableObject {
         !automaticModelSelection && modelNamesMatch(selectedModel, name)
     }
 
-    func selectInstalledModel(_ name: String) throws -> LocalModel {
+    func selectInstalledModel(_ name: String, readKey: (UUID) throws -> String) throws -> LocalModel {
         guard let installed = models.first(where: { modelNamesMatch($0.name, name) }) else {
             throw ModelProviderError.invalidSettings(VyronStatusText.downloadBeforeSelecting)
         }
         if let id = activeConnectionID, let index = connectionProfiles.firstIndex(where: { $0.id == id }) {
             var saved = connectionState
+            let needsProvider = VyronModelProviderFactory.changesTransport(
+                for: saved.profiles[index], selecting: installed.name
+            )
             saved.profiles[index].selectedModel = installed.name
+            let provider: (any ModelProvider)? = if needsProvider {
+                try makeProvider(for: saved.profiles[index], apiKey: readKey(id))
+            } else {
+                nil
+            }
             try persist(saved)
-            connectionProfiles = saved.profiles
+            if let provider {
+                replaceConfiguredProvider(provider, profiles: saved.profiles)
+            } else {
+                connectionProfiles = saved.profiles
+            }
         }
         selectedModel = installed.name
         automaticModelSelection = false

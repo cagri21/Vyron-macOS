@@ -196,5 +196,10 @@
 "projectApprovalCommandNeedsReview" = "Command needs your review";
 "projectApprovalCommandNotPermitted" = "This command is not permitted in project mode.";
 "projectApprovalDefaultReviewReason" = "Review this project command before it runs.";
+"projectApprovalGitCommandRequired" = "Specify a local Git command in the selected project.";
+"projectApprovalGitCommandUnavailable" = "Use a supported local Git command. Git networking and changes to global Git settings are unavailable in Work.";
+"projectApprovalGitHardResetUnavailable" = "Git hard reset is unavailable in Work. Use a scoped reset or restore.";
+"projectApprovalGitInspectionSideEffects" = "Remove Git inspection options that write files or run external helpers.";
+"projectApprovalGitInteractiveCommandUnavailable" = "Work supports noninteractive Git operations without scripts.";
 "projectApprovalResponseUndoBusy" = "Wait for the project command to finish before undoing these edits.";
 "projectApprovalResponseUndoConflict" = "This response can’t be undone because a file changed. Your edits were preserved: %@";

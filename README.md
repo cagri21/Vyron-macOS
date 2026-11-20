@@ -107,8 +107,10 @@ for discovery, downloads, model parameters, and provider-specific behavior.
   Public web lookup and configured MCP servers have their own network requests.
 - **Project execution.** Work file tools enforce project boundaries and path
   checks. Guarded development commands run with restricted writes and network
-  access denied. Other actions, including supported file moves and external
-  tool calls, follow their own permission and review rules.
+  access denied. Work can inspect Git history, stage files, and create local
+  commits using the selected command approval mode. Other actions, including
+  supported file moves and external tool calls, follow their own review rules.
+  [Local Git in Work](docs/user-guide.md#local-git)
 - **macOS permissions.** Voice, screenshots, and native app control use the
   applicable system permissions when invoked. Choose which windows or browser
   tabs to make available to the task.

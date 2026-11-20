@@ -6,10 +6,19 @@ struct VyronVoiceComposerInput: View {
     @Environment(\.vyronPalette) private var palette
     @Environment(\.locale) private var localizationLocale
     @ObservedObject var model: AppModel
-    @ObservedObject var voice: VyronVoiceModel
+    @ObservedObject var skills: VyronComposerSkillsModel
+    @ObservedObject private var voice: VyronVoiceModel
     let placeholder: String
     let submit: () -> Void
     @FocusState private var inputFocused: Bool
+
+    init(model: AppModel, skills: VyronComposerSkillsModel, placeholder: String, submit: @escaping () -> Void) {
+        self.model = model
+        self.skills = skills
+        self.voice = model.voice
+        self.placeholder = placeholder
+        self.submit = submit
+    }
 
     private var isInputDisabled: Bool {
         model.computerWork.isComputerWorkActive || model.isRunningScheduledTask || model.isShuttingDown || voice.isActive
@@ -18,15 +27,16 @@ struct VyronVoiceComposerInput: View {
     var body: some View {
         let _ = localizationLocale
         let suggestion = model.composerSuggestion
-        HStack(alignment: .top, spacing: VyronWorkspaceStyle.compactSpacing) {
-            TextField(
-                "",
-                text: Binding(get: { model.composer.draft }, set: { model.composer.draft = $0 }),
-                axis: .vertical
-            )
+        HStack(alignment: .firstTextBaseline, spacing: VyronWorkspaceStyle.compactSpacing) {
+            if let mention = skills.mention(in: model.composer.draft) {
+                VyronComposerSkillChip(mention: mention, remove: removeSkillMention)
+                    .disabled(isInputDisabled)
+            }
+            TextField("", text: editorText, axis: .vertical)
                 .textFieldStyle(.plain)
                 .font(VyronWorkspaceStyle.inputFont)
                 .lineLimit(model.isChatWorkspace ? 1...6 : 2...6)
+                .layoutPriority(1)
                 .disabled(isInputDisabled)
                 .overlay(alignment: .topLeading) {
                     if model.composer.draft.isEmpty {
@@ -82,6 +92,14 @@ struct VyronVoiceComposerInput: View {
                 .onKeyPress(.downArrow, phases: .down) { keyPress in
                     moveSkillSelection(by: 1, keyPress: keyPress)
                 }
+                .onKeyPress(.delete, phases: .down) { keyPress in
+                    guard inputFocused, !isInputDisabled, keyPress.modifiers.subtracting(.capsLock).isEmpty,
+                        (NSApp.keyWindow?.firstResponder as? NSTextInputClient)?.hasMarkedText() != true,
+                        skills.mention(in: model.composer.draft)?.text.isEmpty == true
+                    else { return .ignored }
+                    removeSkillMention()
+                    return .handled
+                }
                 .onKeyPress(.escape, phases: .down) { keyPress in
                     guard inputFocused, !isInputDisabled, keyPress.modifiers.isEmpty,
                         model.composerSkills.isPresented
@@ -119,8 +137,23 @@ struct VyronVoiceComposerInput: View {
         }
     }
 
+    private var editorText: Binding<String> {
+        Binding {
+            let draft = model.composer.draft
+            return skills.mention(in: draft)?.text ?? draft
+        } set: { text in
+            let mention = skills.mention(in: model.composer.draft)
+            model.composer.draft = (mention?.prefix ?? "") + text
+        }
+    }
+
+    private func removeSkillMention() {
+        guard let mention = skills.mention(in: model.composer.draft) else { return }
+        model.composer.draft = mention.text
+        inputFocused = true
+    }
+
     private func acceptSkillSelection(runsSideChat: Bool = false) -> Bool {
-        let skills = model.composerSkills
         skills.updateDraft(model.composer.draft)
         guard skills.isPresented else { return false }
         if let command = skills.selectedCommand,
@@ -136,7 +169,6 @@ struct VyronVoiceComposerInput: View {
         if let editor = NSApp.keyWindow?.firstResponder as? NSTextInputClient, editor.hasMarkedText() {
             return .ignored
         }
-        let skills = model.composerSkills
         skills.updateDraft(model.composer.draft)
         guard skills.isPresented else { return .ignored }
         skills.moveSelection(by: offset)

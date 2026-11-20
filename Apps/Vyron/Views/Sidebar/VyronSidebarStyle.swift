@@ -17,6 +17,10 @@ enum VyronSidebarStyle {
     static let sectionBottomSpacing: CGFloat = 8
     static let indentation: CGFloat = 20
     static let maximumIndent: CGFloat = 120
+    static let dropEdgeFraction: CGFloat = 0.25
+    static let dropIndicatorSize: CGFloat = 2
+    static let dragMinimumDistance: CGFloat = 5
+    static let dragCoordinateSpace = "vyron.sidebar.drag"
     static let disclosureWidth: CGFloat = 28
     static let footerInset: CGFloat = 16
     static let statusSize: CGFloat = 5

@@ -9,10 +9,9 @@ struct VyronDevelopmentGitContext {
         guard isUnavailable else { return nil }
         return """
         The selected project folder is not a Git repository. Git inspection is optional for this task and is \
-        unavailable for this run. Do not repeat Git inspection commands. Continue with project file inspection, \
-        required edits, and appropriate local build or test tools. Do not initialize a repository merely to \
-        unblock this task: that requires explicit user authorization, and the current project command tools \
-        support read-only Git inspection only. Preserve all other task, command, and verification requirements.
+        unavailable until the folder is initialized. Continue with project file inspection, required edits, and \
+        appropriate local build or test tools. Do not initialize a repository unless the user explicitly requests it. \
+        Once initialization succeeds, Git inspection can resume.
         """
     }
 
@@ -27,6 +26,10 @@ struct VyronDevelopmentGitContext {
 
     /// Returns true once, when a real read-only Git result establishes that repository inspection is unavailable.
     mutating func observe(_ result: CommandResult) -> Bool {
+        if isUnavailable, result.succeeded, DevelopmentWorkspace.isGitInitializationCommand(result.command) {
+            isUnavailable = false
+            return false
+        }
         guard !isUnavailable, result.exitCode == 128, !result.timedOut,
             DevelopmentWorkspace.isGitInspectionCommand(result.command),
             result.output.split(whereSeparator: \.isNewline).contains(where: { line in

@@ -90,7 +90,8 @@ the existing file. It does not import browser history or sync cloud Pages.
 
 Type **/** at the start of the composer to open a compact skill picker. Keep
 typing to search every discovered local skill, use **↑ / ↓** to choose, and
-press **Return** or **Tab** to insert its command. **Esc** closes the picker.
+press **Return** or **Tab** to insert the skill as a chip. Type your task beside
+the chip, and click its **×** to remove the skill. **Esc** closes the picker.
 For example, choose `/vyron`, then write `run add a settings screen`. Personal,
 project, system, and cached plugin skills use the same local folders as the
 Skills browser. Plugin commands include their package name; duplicate names
@@ -126,12 +127,12 @@ those capabilities need a compatible connection or workflow in Vyron.
 
 **Settings → Plugins → Automatic skill setup** is on by default. When a Work
 request asks to create, read, or update a PDF, Word document, spreadsheet, or
-presentation, Vyron selects the matching skill from its reviewed built-in
-catalog, installs it if needed, and continues the request with those instructions.
-The catalog ships with the app and works offline; this setting does not download
-arbitrary community skills or activate plugins. Explicit aliases such as `/pdf`
-can select a built-in skill as well. Existing exact local commands retain their
-meaning.
+presentation, or asks for a Git operation, Vyron selects the matching skill
+from its reviewed built-in catalog, installs it if needed, and continues the
+request with those instructions. The catalog ships with the app and works
+offline; this setting does not download arbitrary community skills or activate
+plugins. Explicit aliases such as `/pdf`, `/git`, and `/vyron-commit` can
+select a built-in skill. Existing exact local commands retain their meaning.
 
 Managed skills live in `~/Library/Application Support/VyronAI/Skills`, outside
 the app bundle, and appear in the Skills browser and composer picker. Repeated
@@ -395,20 +396,40 @@ source edits from Work’s file tools.
 The **Terminal** pane shows actual command output and exit status. Drag its top
 divider up or down to expand or shrink the logs while keeping space for the
 conversation. Closing and reopening the pane retains its height for the current
-window. Known local build/test commands run automatically. Other permitted
-commands require review.
-Network, privileged, destructive, remote Git, shell pipelines, and background
-commands are refused. Dependencies must already be available locally.
-
-Git is optional for project work. If a Git inspection reports that the selected
-folder is not a repository, Vyron keeps that result for the current run, skips
-later Git inspections, and tells the model to continue with files and appropriate
-local build or test commands. It does not initialize a repository. Other Git
-errors remain failures, and repeated skipped requests do not renew the work budget.
+window. Project commands run offline with dependencies already available
+locally. The guard blocks privileged commands, shell pipelines, and background
+commands.
 
 Stop cancels the current model request and command process group. Completed
 edits remain available for review; stopping does not roll them back. Recent
 conversation context is bounded and carried into follow-up development requests.
+
+### Local Git
+
+Work can inspect local changes and history, stage selected paths, and create
+commits. It also supports local branches, tags, stashes, merges, rebases,
+cherry-picks, reverts, patch operations, bisect, notes, and worktrees. Use the
+shield menu to choose how commands are reviewed. **Ask for approval** reviews
+each permitted command. **Approve for me** runs recognized inspections such as
+`git status` and `git diff` automatically and reviews Git writes. **Full access**
+runs permitted commands without prompting. The guard blocks Git network
+operations and destructive commands such as `git clean` and `git reset --hard`
+in every mode.
+
+The guard isolates Git from global and system configuration and disables hooks.
+Set the repository's commit identity with `git config --local` and your chosen
+values for `user.name` and `user.email`. Supply commit and annotated tag
+messages with `-m` and use `--no-edit` when an intended merge can use Git's
+generated message. Commands run without an interactive editor. A repository
+that requires a signing service unavailable to the guard can produce a signing
+error. Worktree files and the Git metadata they modify must be writable within
+the selected project folder.
+
+Git is optional for source edits, builds, and tests. If Git reports that the
+selected folder is outside a repository, Vyron skips later inspections during
+that run and continues with project files and local checks. Ask Vyron to
+initialize the folder explicitly when you want a new repository. A successful
+`git init` restores inspection for the current run.
 
 ### Checkpoints and verification
 
@@ -455,10 +476,11 @@ message byte bounds and asks the same connection's `/responses/input_tokens`
 endpoint to count the exact input and all tool schemas. Generation proceeds only
 when the measured input, selected output allowance, and existing overhead fit the
 same context limit. Count failures remain visible and do not generate an answer.
-Official OpenAI Responses connections using GPT-6.1 Sol, GPT-6 Sol, or GPT-6 Astra
-default to a 131,072-token context budget in Vyron. Their Agent message compaction
-target is 96 KiB and the hard message limit is 128 KiB. Saved context and output
-overrides take precedence. Ultra reserves 12,288 output tokens by default.
+Official OpenAI Responses connections using GPT-6.2 Astra, GPT-6.2 Sol, GPT-6.1 Sol,
+GPT-6 Sol, or GPT-6 Astra default to a 131,072-token context budget in Vyron.
+Their Agent message compaction target is 96 KiB and the hard message limit is
+128 KiB. Saved context and output overrides take precedence. Ultra reserves
+12,288 output tokens by default.
 
 Native Claude connections use Anthropic's published limits for known model IDs.
 Current Claude Opus, Sonnet and Haiku 5.5 and Fable 5.2 support a 1,000,000-token
@@ -841,10 +863,19 @@ Vyron to search by project, chat, or folder name. The navigation rail opens the
 workspace, scheduled tasks, and plugins; its **Advanced tools** menu retains Mac
 and browser controls and model management.
 
+Drop a folder from Finder onto the sidebar to open it as a project. If
+the folder already belongs to a project, Vyron selects and reveals that project.
+
+Drag a folder, project, or chat above or below another row to reorder it where
+the insertion line appears. Drop onto the center of a folder to move a row into
+it, or onto the center of a project to place a chat under it. The space below
+the last row accepts drops back at the top level.
+
 Folders are organization inside Vyron; project directories stay in place.
-Moving a chat between sidebar folders keeps its original project association.
-Pins, nested folders, and expanded/collapsed states survive reopening. The
-project registry retains opened projects beyond the eight most recent entries.
+Moving a chat in the sidebar keeps its original project association and source
+folder. Custom order, pins, nested folders, and expanded/collapsed states survive
+reopening. The project registry retains opened projects beyond the eight most
+recent entries.
 Organization is stored separately from messages in
 `~/Library/Application Support/VyronAI/sidebar.json`. Existing history is
 imported without rewriting its messages; an unreadable sidebar file is preserved.
@@ -1004,14 +1035,14 @@ and [OpenAI Costs](https://developers.openai.com/api/reference/resources/admin/s
 OpenAI credit viewing is described in
 [API credit benefits](https://developers.openai.com/api/docs/guides/chatgpt-api-credits).
 
-For the official OpenAI endpoint, `https://api.openai.com/v1`, GPT-6 Astra,
-GPT-6 Sol, GPT-6 Luna, GPT-6.1 Sol, and GPT-6.1 Terra use the Responses API for
-Chat and native project tools. Dated snapshots of those models use the same
-route. Existing saved connections work without a profile migration. The API key
-needs **List models: Read** and **Responses: Write** permissions. Leave
-temperature and top P empty for these reasoning models. Low through Ultra use
-bounded task budgets; the model's default native reasoning effort is retained.
-The data-only tool capability check uses low reasoning effort.
+For the official OpenAI endpoint, `https://api.openai.com/v1`, GPT-6.2 Astra,
+GPT-6.2 Sol, GPT-6.1 Sol, GPT-6.1 Terra, GPT-6 Astra, GPT-6 Sol, and GPT-6 Luna use
+the Responses API for Chat and native project tools. Dated snapshots of those
+models use the same route. Existing saved connections work without a profile
+migration. The API key needs **List models: Read** and **Responses: Write**
+permissions. Leave temperature and top P empty for these reasoning models. Low
+through Ultra use bounded task budgets and retain the model's default native
+reasoning effort. The data-only tool capability check uses low reasoning effort.
 
 Older OpenAI models and other compatible servers keep Chat Completions. Ollama,
 including Qwen models, keeps its existing API, settings, and local execution

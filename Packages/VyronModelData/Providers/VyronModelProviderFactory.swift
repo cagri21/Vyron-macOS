@@ -1,6 +1,12 @@
 import VyronModelDomain
 
 public enum VyronModelProviderFactory {
+    package static func changesTransport(for profile: ModelConnectionProfile, selecting model: String) -> Bool {
+        var updated = profile
+        updated.selectedModel = model
+        return VyronOpenAIResponsesRoute.matches(profile) != VyronOpenAIResponsesRoute.matches(updated)
+    }
+
     public static func makeProvider(
         for profile: ModelConnectionProfile,
         apiKey: String? = nil,

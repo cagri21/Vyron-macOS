@@ -616,7 +616,7 @@ public actor DevelopmentWorkspace {
             throw DevelopmentError("macOS execution protection is unavailable. No command was run.")
         }
         let executable = try CommandPolicy.executable(argv[0], arguments: Array(argv.dropFirst()), root: rootURL)
-        if !approved, !CommandPolicy.isTrustedDevelopmentTool(executable) {
+        if !approved, !CommandPolicy.isTrustedDevelopmentTool(executable, requested: argv[0]) {
             throw DevelopmentError("Review commands that use a custom executable before running them.")
         }
         let root = rootURL

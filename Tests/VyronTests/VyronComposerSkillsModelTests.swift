@@ -46,6 +46,33 @@ final class VyronComposerSkillsModelTests: XCTestCase {
         XCTAssertNil(model.selectedCommand)
     }
 
+    func testSkillSelectionKeepsAnEditableTaskSeparateFromTheInvocation() async throws {
+        let name = "vyron-refactor-indentation-swift"
+        let inventory = inventory([skill("vyron"), skill(name)])
+        let model = VyronComposerSkillsModel(library: VyronSkillsPresentation(loader: { _ in inventory }))
+        await model.load(projectDirectory: nil)
+        model.updateDraft("/vyron-refactor-indent")
+        let command = try XCTUnwrap(model.selectedCommand)
+        let selection = try XCTUnwrap(model.replacement(for: command, in: "/vyron-refactor-indent"))
+        model.updateDraft(selection)
+        XCTAssertFalse(model.isPresented)
+
+        let selected = try XCTUnwrap(model.mention(in: selection))
+        XCTAssertEqual(selected.label, "Vyron Refactor Indentation Swift")
+        XCTAssertEqual(selected.text, "")
+        let message = selected.prefix + "Indent this file\nKeep the comments"
+        let reopened = try XCTUnwrap(model.mention(in: message))
+        XCTAssertEqual(reopened.command, selected.command)
+        XCTAssertEqual(reopened.text, "Indent this file\nKeep the comments")
+        XCTAssertEqual(model.commands.invoked(in: message), [selected.command])
+
+        XCTAssertNil(model.mention(in: "$vyron"))
+        XCTAssertEqual(model.mention(in: "$" + name + " Review")?.command, selected.command)
+        XCTAssertNil(model.mention(in: "/" + name))
+        XCTAssertNil(model.mention(in: "$" + name + "/SKILL.md"))
+        XCTAssertNil(model.mention(in: "/compact "))
+    }
+
     func testBuiltInCommandsProvideInsertionTextWithoutInstalledSkills() throws {
         let model = VyronComposerSkillsModel()
         model.updateDraft("/")

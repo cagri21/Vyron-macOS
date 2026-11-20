@@ -25,6 +25,101 @@ final class VyronProjectSetupIntegrationTests: XCTestCase {
         XCTAssertNil(test.model.errorMessage)
     }
 
+    func testDroppingNewFolderAddsAndOpensSidebarProject() async throws {
+        let test = VyronQueueTestHarness()
+        defer { test.cleanUp() }
+        let project = try folder("DroppedProject", in: test.directory)
+
+        XCTAssertEqual(test.model.openDroppedProjectFolder(at: project), project.path)
+        try await waitForWorkspaceLoad(test.model)
+
+        assertSetupFilesExist(in: project)
+        XCTAssertEqual(test.model.sidebarActiveProjectPath, project.path)
+        XCTAssertEqual(test.model.workspaceState.developmentWorkspace?.rootURL, project)
+        XCTAssertEqual(test.model.sidebarProjectSourceFolders(project.path), [project.path])
+        let saved = try XCTUnwrap(test.model.sidebarState.sidebarStore.load())
+        XCTAssertTrue(saved.contains(.project(project.path)))
+        XCTAssertTrue(saved.isProjectExpanded(project.path))
+    }
+
+    func testDroppingExistingFolderThroughAlternatePathRevealsItsSavedProject() async throws {
+        let test = VyronQueueTestHarness()
+        defer { test.cleanUp() }
+        let project = try folder("Projects/Product", in: test.directory)
+        let alternateParent = test.directory.appendingPathComponent("LinkedProjects")
+        try FileManager.default.createSymbolicLink(
+            at: alternateParent, withDestinationURL: project.deletingLastPathComponent()
+        )
+        let alternate = alternateParent.appendingPathComponent(project.lastPathComponent, isDirectory: true)
+        try register(project, sourceFolders: [project.path], model: test.model)
+        var chat = Conversation(title: "Saved task", workspacePath: project.path)
+        chat.messages = [ChatMessage(role: "user", content: "Keep this task.")]
+        test.model.conversations = [chat]
+        XCTAssertTrue(test.model.saveHistory())
+        test.model.registerSidebarConversation(chat.id)
+        let section = try XCTUnwrap(test.model.createSidebarFolder(name: "Saved projects"))
+        XCTAssertTrue(test.model.moveSidebarItem(.project(project.path), toFolder: section))
+        test.model.setSidebarProjectExpanded(project.path, expanded: false)
+        test.model.setSidebarFolderExpanded(section, expanded: false)
+
+        XCTAssertEqual(test.model.openDroppedProjectFolder(at: alternate), project.path)
+        try await waitForWorkspaceLoad(test.model)
+
+        assertSetupFilesAbsent(in: project)
+        XCTAssertEqual(test.model.sidebarActiveProjectPath, project.path)
+        XCTAssertEqual(test.model.workspaceState.developmentWorkspace?.rootURL, project)
+        XCTAssertEqual(test.model.sidebarProjectChats(project.path).map(\.id), [chat.id])
+        XCTAssertEqual(test.model.conversations.first?.messages, chat.messages)
+        let saved = try XCTUnwrap(test.model.sidebarState.sidebarStore.load())
+        XCTAssertEqual(saved.allProjects, [project.path])
+        XCTAssertEqual(saved.folderID(for: .project(project.path)), section)
+        XCTAssertTrue(saved.isProjectExpanded(project.path))
+        XCTAssertTrue(saved.isFolderExpanded(section))
+    }
+
+    func testDroppingActiveSourceKeepsItsProjectChatAndDraft() async throws {
+        let test = VyronQueueTestHarness()
+        defer { test.cleanUp() }
+        let project = try folder("ProjectOwner", in: test.directory)
+        let source = try folder("AttachedSource", in: test.directory)
+        try register(project, sourceFolders: [project.path, source.path], model: test.model)
+        await test.model.loadWorkspace(source, projectPath: project.path)
+        var chat = Conversation(title: "Active task", workspacePath: source.path)
+        chat.projectPath = project.path
+        test.model.conversations = [chat]
+        test.model.selectedConversationID = chat.id
+        test.model.composer.draft = "Keep this follow-up."
+
+        XCTAssertEqual(test.model.openDroppedProjectFolder(at: source), project.path)
+
+        XCTAssertEqual(test.model.sidebarActiveProjectPath, project.path)
+        XCTAssertEqual(test.model.workspaceState.developmentWorkspace?.rootURL, source)
+        XCTAssertEqual(test.model.selectedConversationID, chat.id)
+        XCTAssertEqual(test.model.composer.draft, "Keep this follow-up.")
+        XCTAssertEqual(test.model.sidebarState.sidebarOrganization.allProjects, [project.path])
+        XCTAssertFalse(test.model.workspaceState.isLoadingWorkspace)
+    }
+
+    func testDroppingRegularFileKeepsCurrentProjectAndDraft() throws {
+        let test = VyronQueueTestHarness()
+        defer { test.cleanUp() }
+        let project = try folder("CurrentProject", in: test.directory)
+        let file = project.appendingPathComponent("Source.swift")
+        try Data("let value = 1\n".utf8).write(to: file)
+        try register(project, sourceFolders: [project.path], model: test.model)
+        test.model.workspaceState.workspaceURL = project
+        test.model.workspaceState.selectedProjectPath = project.path
+        test.model.composer.draft = "Keep this draft."
+        let organization = test.model.sidebarState.sidebarOrganization
+
+        XCTAssertNil(test.model.openDroppedProjectFolder(at: file))
+
+        XCTAssertEqual(test.model.sidebarActiveProjectPath, project.path)
+        XCTAssertEqual(test.model.composer.draft, "Keep this draft.")
+        XCTAssertEqual(test.model.sidebarState.sidebarOrganization, organization)
+        XCTAssertFalse(test.model.workspaceState.isLoadingWorkspace)
+    }
+
     func testRepeatedExplicitAddPreservesExistingGuidanceBytes() async throws {
         let test = VyronQueueTestHarness()
         defer { test.cleanUp() }

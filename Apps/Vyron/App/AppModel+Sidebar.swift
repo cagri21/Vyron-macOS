@@ -55,40 +55,21 @@ extension AppModel {
         return organization
     }
 
-    func sidebarProjects(in folderID: UUID?) -> [String] {
-        let organization = sidebarState.sidebarOrganization
-        return organization.allProjects.filter {
-            let item = SidebarItem.project($0)
-            return !organization.isPinned(item) && organization.folderID(for: item) == folderID
-        }
-    }
-
     func sidebarChats(in folderID: UUID?) -> [Conversation] {
-        let organization = sidebarState.sidebarOrganization
-        let projects = Set(organization.allProjects)
-        return conversations.filter { conversation in
-            let item = SidebarItem.conversation(conversation.id)
-            guard !organization.isConversationArchived(conversation.id),
-                !organization.isPinned(item), organization.folderID(for: item) == folderID
-            else {
-                return false
-            }
-            if folderID != nil { return true }
-            guard let path = conversation.sidebarProjectPath else { return true }
-            return !projects.contains(URL(fileURLWithPath: path).standardizedFileURL.path)
-        }
+        let group: VyronSidebarGroup = folderID.map { .folder(VyronSidebarFolderReference(id: $0)) } ?? .rootChats
+        return sidebarChats(inGroup: group)
     }
 
     func sidebarProjectChats(_ path: String) -> [Conversation] {
         let projectPath = URL(fileURLWithPath: path).standardizedFileURL.path
-        let organization = sidebarState.sidebarOrganization
-        return conversations.filter { conversation in
-            guard !organization.isConversationArchived(conversation.id),
-                let workspacePath = conversation.sidebarProjectPath,
-                URL(fileURLWithPath: workspacePath).standardizedFileURL.path == projectPath
-            else { return false }
-            let item = SidebarItem.conversation(conversation.id)
-            return !organization.isPinned(item) && organization.folderID(for: item) == nil
+        return sidebarChats(inGroup: .project(VyronSidebarProjectReference(path: projectPath)))
+    }
+
+    private func sidebarChats(inGroup group: VyronSidebarGroup) -> [Conversation] {
+        let chatsByID = Dictionary(conversations.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return sidebarRows(in: group).compactMap {
+            guard case .item(.conversation(let id)) = $0 else { return nil }
+            return chatsByID[id]
         }
     }
 
@@ -135,6 +116,7 @@ extension AppModel {
     func moveSidebarItem(_ item: SidebarItem, toFolder folderID: UUID?) -> Bool {
         changeSidebar { organization in
             try organization.move(item, to: folderID)
+            if case .conversation(let id) = item { organization.setChatDisplayGroup(nil, for: id) }
             try Self.expandSidebarAncestors(folderID, in: &organization)
         }
     }
@@ -144,6 +126,10 @@ extension AppModel {
             try organization.togglePin(item)
             if !organization.isPinned(item) {
                 try Self.expandSidebarAncestors(organization.folderID(for: item), in: &organization)
+                if case .conversation(let id) = item,
+                    case .project(let project)? = organization.chatDisplayGroup(id) {
+                    try Self.expandSidebarProject(project.path, in: &organization)
+                }
             }
         }
     }
@@ -224,10 +210,15 @@ extension AppModel {
         }
     }
 
-    private static func expandSidebarAncestors(_ folderID: UUID?, in organization: inout SidebarOrganization) throws {
+    static func expandSidebarAncestors(_ folderID: UUID?, in organization: inout SidebarOrganization) throws {
         for folder in organization.breadcrumb(for: folderID) {
             try organization.setFolderExpanded(folder.id, expanded: true)
         }
+    }
+
+    static func expandSidebarProject(_ path: String, in organization: inout SidebarOrganization) throws {
+        try organization.setProjectExpanded(path, expanded: true)
+        try expandSidebarAncestors(organization.folderID(for: .project(path)), in: &organization)
     }
 
     private func reportSidebarError(_ message: String) {

@@ -97,7 +97,9 @@ struct VyronComposer: View {
     }
 
     private var composerInput: some View {
-        VyronVoiceComposerInput(model: model, voice: model.voice, placeholder: placeholder, submit: submit)
+        VyronVoiceComposerInput(
+            model: model, skills: model.composerSkills, placeholder: placeholder, submit: submit
+        )
     }
 
     private func submit() {

@@ -11,4 +11,8 @@ enum VyronComposerSkillStyle {
     static let maximumListHeight: CGFloat = rowHeight * 5
     static let body = VyronWorkspaceStyle.controlFont
     static let caption = VyronWorkspaceStyle.captionFont
+    static let mentionSpacing: CGFloat = 5
+    static let mentionHorizontalPadding: CGFloat = 7
+    static let mentionVerticalPadding: CGFloat = 3
+    static let mentionLabelMaximumWidth: CGFloat = 230
 }

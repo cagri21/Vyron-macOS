@@ -13,13 +13,16 @@ final class VyronOpenAIResponsesTests: XCTestCase {
     func testOfficialGPT6SelectionsUseResponsesWithoutReroutingOtherConnections() throws {
         for model in [
             "gpt-6-astra", "gpt-6-sol", "gpt-6-luna", "gpt-6.1-sol", "gpt-6.1-terra",
-            "gpt-6.1-sol-2026-10-07"
+            "gpt-6.1-sol-2026-10-07", "gpt-6.2-astra", "gpt-6.2-sol", "gpt-6.2-sol-2026-11-18"
         ] {
             var profile = VyronResponsesTestSupport.profile()
             profile.selectedModel = model
             XCTAssertTrue(try profile.makeProvider() is VyronOpenAIResponsesClient, model)
         }
-        for model in ["gpt-4.1", "gpt-5.5", "gpt-6.1-sol-proxy", "gpt-6.1-sol-2026-10-07-extra"] {
+        for model in [
+            "gpt-4.1", "gpt-5.5", "gpt-6.1-sol-proxy", "gpt-6.1-sol-2026-10-07-extra",
+            "gpt-6.2-astra-proxy", "gpt-6.2-sol-2026-11-18-extra"
+        ] {
             var profile = VyronResponsesTestSupport.profile()
             profile.selectedModel = model
             XCTAssertTrue(try profile.makeProvider() is OpenAICompatibleClient, model)
@@ -30,6 +33,8 @@ final class VyronOpenAIResponsesTests: XCTestCase {
         ] {
             var profile = VyronResponsesTestSupport.profile()
             profile.endpoint = endpoint
+            XCTAssertTrue(try profile.makeProvider() is OpenAICompatibleClient, endpoint)
+            profile.selectedModel = "gpt-6.2-sol"
             XCTAssertTrue(try profile.makeProvider() is OpenAICompatibleClient, endpoint)
         }
         var profile = VyronResponsesTestSupport.profile()

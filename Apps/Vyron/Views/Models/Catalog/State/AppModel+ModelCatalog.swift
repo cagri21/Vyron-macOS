@@ -79,7 +79,7 @@ extension AppModel {
             return
         }
         do {
-            let installed = try modelSelection.selectInstalledModel(name)
+            let installed = try modelSelection.selectInstalledModel(name, readKey: savedAPIKey(for:))
             errorMessage = nil
             if forChat { composer.mode = .chat }
             statusMessage =

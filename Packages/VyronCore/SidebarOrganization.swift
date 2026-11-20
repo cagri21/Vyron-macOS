@@ -18,6 +18,7 @@ public struct SidebarOrganization: Codable, Sendable, Equatable {
     private var placements: [Placement]
     private var expandedFolders: Set<UUID>
     private var expandedProjects: Set<String>
+    var layout: VyronSidebarLayout?
 
     public init() {
         version = 1
@@ -140,6 +141,7 @@ public struct SidebarOrganization: Codable, Sendable, Equatable {
             if let parent = folder.parentID { placements[index].folderID = parent }
         }
         if folder.parentID == nil { placements.removeAll { $0.folderID == id } }
+        updateSidebarLayout { $0.removeFolder(id) }
     }
 
     public mutating func move(_ item: SidebarItem, to folderID: UUID?) throws {
@@ -168,6 +170,7 @@ public struct SidebarOrganization: Codable, Sendable, Equatable {
         }
         placements.removeAll { $0.item == item }
         pinnedItems.removeAll { $0 == item }
+        updateSidebarLayout { $0.removeItem(item) }
     }
 
     public mutating func setFolderExpanded(_ id: UUID, expanded: Bool) throws {
@@ -353,11 +356,12 @@ public struct SidebarOrganization: Codable, Sendable, Equatable {
             expandedFolders.isSubset(of: folderIDs) && expandedProjects.isSubset(of: Set(allProjects)),
             "An expanded item is invalid."
         )
+        try validateSidebarLayout()
     }
 
     private enum CodingKeys: String, CodingKey {
         case version, folders, allProjects, conversationIDs, pinnedItems, placements, expandedFolders, expandedProjects
-        case projectNames, projectSources, archivedConversationIDs
+        case projectNames, projectSources, archivedConversationIDs, layout
     }
 
     public init(from decoder: Decoder) throws {
@@ -373,6 +377,7 @@ public struct SidebarOrganization: Codable, Sendable, Equatable {
         placements = try values.decode([Placement].self, forKey: .placements)
         expandedFolders = try values.decode(Set<UUID>.self, forKey: .expandedFolders)
         expandedProjects = try values.decode(Set<String>.self, forKey: .expandedProjects)
+        layout = try values.decodeIfPresent(VyronSidebarLayout.self, forKey: .layout)
         do { try validate() } catch {
             throw DecodingError.dataCorrupted(
                 .init(codingPath: decoder.codingPath, debugDescription: error.localizedDescription)

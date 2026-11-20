@@ -81,19 +81,17 @@ extension AppModel {
 
     @discardableResult
     func restoreSidebarConversation(_ id: UUID) -> Bool {
-        guard conversations.contains(where: { $0.id == id }) else { return false }
+        guard let conversation = conversations.first(where: { $0.id == id }) else { return false }
         return changeSidebar { organization in
             organization.restoreConversation(id: id)
-            if let path = conversations.first(where: { $0.id == id })?.sidebarProjectPath,
+            let displayGroup = organization.chatDisplayGroup(id)
+            if case .project(let project)? = displayGroup {
+                try Self.expandSidebarProject(project.path, in: &organization)
+            } else if displayGroup == nil, let path = conversation.sidebarProjectPath,
                 organization.contains(.project(path)) {
-                try organization.setProjectExpanded(path, expanded: true)
-                for folder in organization.breadcrumb(for: organization.folderID(for: .project(path))) {
-                    try organization.setFolderExpanded(folder.id, expanded: true)
-                }
+                try Self.expandSidebarProject(path, in: &organization)
             }
-            for folder in organization.breadcrumb(for: organization.folderID(for: .conversation(id))) {
-                try organization.setFolderExpanded(folder.id, expanded: true)
-            }
+            try Self.expandSidebarAncestors(organization.folderID(for: .conversation(id)), in: &organization)
         }
     }
 

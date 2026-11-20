@@ -7,6 +7,48 @@ import VyronCore
 /// Optional visual evidence from the real picker without opening an app, window, or model connection.
 @MainActor
 final class VyronSkillPickerRenderTests: XCTestCase {
+    func testCaptureSelectedSkillInComposer() async throws {
+        guard ProcessInfo.processInfo.environment["VYRON_CAPTURE_SKILL_PICKER"] == "1" else {
+            throw XCTSkip("Set VYRON_CAPTURE_SKILL_PICKER=1 for offscreen composer verification.")
+        }
+        let test = try VyronFeatureTestHarness()
+        defer { test.cleanUp() }
+        let name = "vyron-refactor-indentation-swift"
+        let root = VyronSkillRoot(directoryURL: URL(fileURLWithPath: "/LocalSkills"), source: .codex, scope: .personal)
+        let skill = VyronLocalSkill(
+            metadata: VyronSkillMetadata(name: name, description: "Format Swift using four-space indentation."),
+            root: root,
+            fileURL: root.directoryURL.appendingPathComponent(name + "/SKILL.md"),
+            preview: VyronSkillPreview(content: "Fixture", isTruncated: false)
+        )
+        let library = VyronSkillsPresentation(loader: { _ in
+            VyronSkillInventory(skills: [skill], issues: [], didReachLimit: false)
+        })
+        let skills = VyronComposerSkillsModel(library: library)
+        await skills.load(projectDirectory: nil)
+        test.model.composer.draft = "/\(name) Format this Swift file."
+        let hosting = NSHostingView(rootView: VyronVoiceComposerInput(
+            model: test.model, skills: skills, placeholder: "", submit: {}
+        )
+            .padding(VyronWorkspaceStyle.composerPadding)
+            .frame(width: 580)
+            .background(Palette.raised)
+            .environment(\.colorScheme, .dark))
+        hosting.appearance = NSAppearance(named: .darkAqua)
+        hosting.setFrameSize(hosting.fittingSize)
+        hosting.layoutSubtreeIfNeeded()
+        guard let bitmap = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) else {
+            throw XCTSkip("Native offscreen composer capture is unavailable.")
+        }
+        hosting.cacheDisplay(in: hosting.bounds, to: bitmap)
+        let data = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+        let directory = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent(".build/verification/skills", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try data.write(to: directory.appendingPathComponent("composer-skill-chip.png"), options: .atomic)
+    }
+
     func testCaptureCompactPicker() async throws {
         guard ProcessInfo.processInfo.environment["VYRON_CAPTURE_SKILL_PICKER"] == "1" else {
             throw XCTSkip("Set VYRON_CAPTURE_SKILL_PICKER=1 for offscreen picker verification.")

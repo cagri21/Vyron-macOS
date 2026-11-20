@@ -3,8 +3,12 @@ import VyronCore
 
 extension AppModel {
     var conversationDraftPrompt: String {
-        let trimmed = composer.trimmedDraft
-        return developmentTaskFilename(for: trimmed) == nil ? trimmed : composer.draft
+        conversationPrompt(for: composer.draft)
+    }
+
+    private func conversationPrompt(for draft: String) -> String {
+        let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        return developmentTaskFilename(for: trimmed) == nil ? trimmed : draft
     }
 
     func developmentTaskFilename(for prompt: String) -> String? {
@@ -26,9 +30,15 @@ extension AppModel {
         return VyronStatusText.developmentTaskTooLarge(kilobytes)
     }
 
-    func prepareConversationSubmission() -> VyronConversationSubmission? {
-        let enteredPrompt = conversationDraftPrompt
-        handoff.preparedChatHandoffDraft = nil
+    func prepareConversationSubmission(queuedMessage: VyronQueuedMessage?) -> VyronConversationSubmission? {
+        let enteredPrompt: String
+        if let queuedMessage {
+            enteredPrompt = conversationPrompt(for: queuedMessage.content)
+            guard !enteredPrompt.isEmpty else { return nil }
+        } else {
+            enteredPrompt = conversationDraftPrompt
+            handoff.preparedChatHandoffDraft = nil
+        }
         let images = composerAttachments.screenshotDraft.images
         let folders = composerAttachments.folderAttachmentDraft.folders
         let pdfs = composerAttachments.pdfs
@@ -54,7 +64,7 @@ extension AppModel {
                 + VyronConversationLimits.folderSubmissionOverheadBytes
                 + (compactedMemory?.content.utf8.count ?? 0)
                 + images.count * VyronImageAttachment.estimatedContextTokens
-                > VyronScreenshotLimits.maximumConversationBudget {
+                > attachmentConversationBudget(includesFolders: !folders.isEmpty) {
             if !files.isEmpty {
                 errorMessage = VyronFolderAttachmentText.fileContextTooLarge
             } else {
@@ -98,7 +108,8 @@ extension AppModel {
         return VyronConversationSubmission(
             draft: .init(enteredPrompt: enteredPrompt, prompt: prompt, images: images, references: references),
             compaction: compaction,
-            compactedMemory: compactedMemory
+            compactedMemory: compactedMemory,
+            queuedMessage: queuedMessage
         )
     }
 
@@ -118,13 +129,12 @@ extension AppModel {
     }
 
     func beginConversationResponse(for submission: VyronConversationSubmission) -> VyronStartedConversationResponse? {
-        composer.cancelQueuedMessageDrain()
-        followUpQuestions.cancel()
         let submittedDraft = submission.draft
-        composer.draft = ""
+        let queuedMessage = submission.queuedMessage
+        if queuedMessage == nil { composer.draft = "" }
         errorMessage = nil
         statusMessage = nil
-        if selectedConversationID == nil {
+        if selectedConversationID == nil, queuedMessage == nil {
             let title = initialConversationTitle(for: submittedDraft.prompt)
             var conversation = Conversation(title: title, workspacePath: workspaceState.workspaceURL?.path)
             conversation.projectPath = sidebarActiveProjectPath
@@ -137,7 +147,17 @@ extension AppModel {
             let index = conversations.firstIndex(where: { $0.id == conversationID })
         else { return nil }
         let previousConversation = conversations[index]
-        var userMessage = ChatMessage(role: .user, content: submittedDraft.prompt, images: submittedDraft.images)
+        var conversation = previousConversation
+        var userMessage: ChatMessage
+        if let queuedMessage {
+            guard let queueIndex = conversation.queuedMessages?.firstIndex(where: { $0.id == queuedMessage.id }) else {
+                return nil
+            }
+            conversation.queuedMessages?.remove(at: queueIndex)
+            userMessage = ChatMessage(id: queuedMessage.id, role: .user, content: submittedDraft.prompt)
+        } else {
+            userMessage = ChatMessage(role: .user, content: submittedDraft.prompt, images: submittedDraft.images)
+        }
         userMessage.developmentTaskFilename = developmentTaskFilename(for: submittedDraft.prompt)
         if !submittedDraft.references.pdfs.isEmpty {
             userMessage.pdfPreviews = submittedDraft.references.pdfs.map(\.preview)
@@ -148,16 +168,20 @@ extension AppModel {
         if !submittedDraft.references.applications.isEmpty {
             userMessage.applicationAttachments = submittedDraft.references.applications
         }
-        composerAttachments.resetDrafts()
-        conversations[index].messages.append(userMessage)
-        let history = conversations[index].messages
+        if queuedMessage == nil { composerAttachments.resetDrafts() }
+        conversation.messages.append(userMessage)
+        let history = conversation.messages
         let linkedChatContext = linkedChatReferenceContext(in: submittedDraft.prompt)
-        var previousContext = conversations[index].contextByMessageID ?? [:]
+        var previousContext = conversation.contextByMessageID ?? [:]
         let attachedContext = [submittedDraft.references.context, linkedChatContext]
             .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: VyronTextSeparator.paragraph.rawValue)
+        let contextKey = userMessage.id.uuidString
         if !attachedContext.isEmpty {
-            previousContext[userMessage.id.uuidString] = attachedContext
-            conversations[index].contextByMessageID = previousContext
+            previousContext[contextKey] = attachedContext
+            conversation.contextByMessageID = previousContext
+        } else if queuedMessage != nil, previousContext.removeValue(forKey: contextKey) != nil {
+            // A fresh turn recomputes context from the prompt, including after unacknowledged live steering.
+            conversation.contextByMessageID = previousContext
         }
         var activity = ResponseActivity()
         activity.record(
@@ -170,15 +194,20 @@ extension AppModel {
             )
         )
         let assistant = ChatMessage(role: .assistant, content: "", activity: activity)
-        conversations[index].messages.append(assistant)
-        conversations[index].updatedAt = Date()
-        conversations[index].mode = composer.mode.rawValue
-        if !saveHistory(), submission.compaction != nil {
+        conversation.messages.append(assistant)
+        conversation.updatedAt = Date()
+        conversation.mode = composer.mode.rawValue
+        // Persist the pending entry's removal together with its transcript message before starting inference.
+        conversations[index] = conversation
+        if !saveHistory(), queuedMessage != nil || submission.compaction != nil {
             conversations[index] = previousConversation
-            composer.draft = submittedDraft.enteredPrompt
+            if queuedMessage == nil { composer.draft = submittedDraft.enteredPrompt }
+            if errorMessage == nil { errorMessage = VyronStatusText.historyUnavailable }
             return nil
         }
 
+        composer.cancelQueuedMessageDrain()
+        followUpQuestions.cancel()
         let response = VyronResponseIdentity(
             generationID: UUID(), conversationID: conversationID, messageID: assistant.id
         )

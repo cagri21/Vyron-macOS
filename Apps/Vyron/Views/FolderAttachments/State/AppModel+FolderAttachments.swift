@@ -22,6 +22,19 @@ extension AppModel {
 
     var canAcceptComposerDrop: Bool { canAttachFolders || canAttachFiles }
 
+    var expandedWorkFolderAttachmentBudget: Int? {
+        guard composer.mode != .chat, workspaceState.developmentWorkspace != nil,
+            let provider = modelSelection.inferenceProvider as? any VyronDevelopmentMessageBudgetProviding
+        else { return nil }
+        let workingBytes = provider.developmentMessageBudget(for: modelSelection.selectedModel).workingBytes
+        return workingBytes > VyronScreenshotLimits.maximumConversationBudget ? workingBytes : nil
+    }
+
+    func attachmentConversationBudget(includesFolders: Bool) -> Int {
+        let expandedBudget = includesFolders ? expandedWorkFolderAttachmentBudget : nil
+        return expandedBudget ?? VyronScreenshotLimits.maximumConversationBudget
+    }
+
     func chooseFolderAttachment() {
         guard canAttachFolders else { return }
         let panel = NSOpenPanel()
@@ -106,7 +119,7 @@ extension AppModel {
                     + VyronFileAttachmentContext.make(files).utf8.count
                     + VyronConversationRequestContext.systemPrompt.utf8.count
                     + VyronConversationLimits.folderImportOverheadBytes
-                    < VyronScreenshotLimits.maximumConversationBudget
+                    < attachmentConversationBudget(includesFolders: !folders.isEmpty)
                 else {
                     if !files.isEmpty { throw VyronComposerFileImportError.contextTooLarge }
                     if !pdfs.isEmpty { throw VyronPDFAttachmentError.contextTooLarge }

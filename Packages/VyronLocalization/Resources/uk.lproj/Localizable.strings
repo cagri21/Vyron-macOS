@@ -196,5 +196,10 @@
 "projectApprovalCommandNeedsReview" = "Команда потребує вашої перевірки";
 "projectApprovalCommandNotPermitted" = "Ця команда заборонена в режимі проєкту.";
 "projectApprovalDefaultReviewReason" = "Перевірте цю команду проєкту перед її виконанням.";
+"projectApprovalGitCommandRequired" = "Укажіть локальну команду Git для вибраного проєкту.";
+"projectApprovalGitCommandUnavailable" = "Скористайтеся підтримуваною локальною командою Git. Режим Work не підтримує мережеві операції Git і зміну глобальних налаштувань Git.";
+"projectApprovalGitHardResetUnavailable" = "Режим Work не підтримує git reset --hard. Скористайтеся командою reset або restore з обмеженою областю дії.";
+"projectApprovalGitInspectionSideEffects" = "Вилучіть із команди перегляду Git параметри, які записують файли або запускають сторонні програми.";
+"projectApprovalGitInteractiveCommandUnavailable" = "Режим Work підтримує неінтерактивні операції Git без скриптів.";
 "projectApprovalResponseUndoBusy" = "Дочекайтеся завершення команди проєкту, перш ніж скасовувати ці правки.";
 "projectApprovalResponseUndoConflict" = "Цю відповідь не можна скасувати, бо файл змінився. Ваші правки збережено: %@";

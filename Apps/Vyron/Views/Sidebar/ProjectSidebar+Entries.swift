@@ -5,19 +5,53 @@ extension ProjectSidebar {
     var entries: [VyronSidebarEntry] {
         var rows: [VyronSidebarEntry] = []
         let organization = model.sidebarState.sidebarOrganization
+        let foldersByID = Dictionary(uniqueKeysWithValues: organization.folders.map { ($0.id, $0) })
+        let chatsByID = Dictionary(model.conversations.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
 
-        func appendProject(_ path: String, depth: Int, pinned: Bool, inheritedMatch: Bool = false) {
+        func appendChat(_ conversation: Conversation, in group: VyronSidebarGroup, depth: Int) {
+            let showsProject: Bool
+            if case .project(let project) = group {
+                showsProject = conversation.sidebarProjectPath.map {
+                    URL(fileURLWithPath: $0).standardizedFileURL.path != project.path
+                } ?? false
+            } else {
+                showsProject = true
+            }
+            rows.append(
+                VyronSidebarEntry(
+                    id: "chat:\(conversation.id)",
+                    kind: .chat(
+                        VyronSidebarChat(
+                            conversation: conversation,
+                            isPinned: group == .pinned,
+                            showsProject: showsProject
+                        )
+                    ),
+                    depth: depth,
+                    group: group
+                )
+            )
+        }
+
+        func appendProject(_ path: String, in group: VyronSidebarGroup, depth: Int, inheritedMatch: Bool) {
             let directMatch = inheritedMatch || matches(projectName(path)) || matches(path)
-            let chats = model.sidebarProjectChats(path)
+            let expanded = isSearching || organization.isProjectExpanded(path)
+            let chatGroup = VyronSidebarGroup.project(VyronSidebarProjectReference(path: path))
+            let chatRows = expanded ? model.sidebarRows(in: chatGroup) : []
+            let chats = chatRows.compactMap { row -> Conversation? in
+                guard case .item(.conversation(let id)) = row else { return nil }
+                return chatsByID[id]
+            }
             guard !isSearching || directMatch || chats.contains(where: conversationMatches) else { return }
             rows.append(
                 VyronSidebarEntry(
                     id: "project:\(path)",
-                    kind: .project(VyronSidebarProject(path: path, isPinned: pinned)),
-                    depth: depth
+                    kind: .project(VyronSidebarProject(path: path, isPinned: group == .pinned)),
+                    depth: depth,
+                    group: group
                 )
             )
-            guard isSearching || organization.isProjectExpanded(path) else { return }
+            guard expanded else { return }
 
             let matchingChats = chats.filter { !isSearching || directMatch || conversationMatches($0) }
             let showsAll = isSearching || expandedChatProjects.contains(path)
@@ -27,128 +61,89 @@ extension ProjectSidebar {
                 showsAll: showsAll
             )
             for conversation in visibleChats {
-                rows.append(
-                    VyronSidebarEntry(
-                        id: "chat:\(conversation.id)",
-                        kind: .chat(
-                            VyronSidebarChat(conversation: conversation, isPinned: false, showsProject: false)
-                        ),
-                        depth: depth + 1
-                    )
-                )
+                appendChat(conversation, in: chatGroup, depth: depth + 1)
             }
             if !isSearching, chats.count > VyronSidebarChatPreview.limit {
                 rows.append(
                     VyronSidebarEntry(
                         id: "overflow:\(path)",
                         kind: .overflow(VyronSidebarOverflow(projectPath: path, showsAll: showsAll)),
-                        depth: depth + 1
+                        depth: depth + 1,
+                        group: chatGroup
                     )
                 )
             }
         }
 
-        func appendFolder(
-            _ folder: SidebarFolder,
-            depth: Int,
-            inheritedMatch: Bool = false,
-            visited: Set<UUID> = []
-        ) {
-            guard !visited.contains(folder.id),
-                !isSearching || inheritedMatch || folderHasMatch(folder, visited: visited)
-            else { return }
-            rows.append(VyronSidebarEntry(id: "folder:\(folder.id)", kind: .folder(folder), depth: depth))
+        func appendFolder(_ folder: SidebarFolder, in group: VyronSidebarGroup, depth: Int, inheritedMatch: Bool) {
+            rows.append(
+                VyronSidebarEntry(id: "folder:\(folder.id)", kind: .folder(folder), depth: depth, group: group)
+            )
             guard isSearching || organization.isFolderExpanded(folder.id) else { return }
 
             let firstChild = rows.count
+            let folderGroup = VyronSidebarGroup.folder(VyronSidebarFolderReference(id: folder.id))
             let matchAll = inheritedMatch || matches(folder.name) || matches(folderBreadcrumb(folder.id))
-            let nextVisited = visited.union([folder.id])
-            for child in organization.folderChildren(of: folder.id) {
-                appendFolder(child, depth: depth + 1, inheritedMatch: matchAll, visited: nextVisited)
-            }
-            for path in model.sidebarProjects(in: folder.id) {
-                appendProject(path, depth: depth + 1, pinned: false, inheritedMatch: matchAll)
-            }
-            for conversation in model.sidebarChats(in: folder.id)
-            where !isSearching || matchAll || conversationMatches(conversation) {
+            appendGroup(folderGroup, depth: depth + 1, inheritedMatch: matchAll)
+            guard rows.count == firstChild else { return }
+            if isSearching {
+                if !matchAll { rows.removeLast() }
+            } else {
                 rows.append(
                     VyronSidebarEntry(
-                        id: "chat:\(conversation.id)",
-                        kind: .chat(
-                            VyronSidebarChat(conversation: conversation, isPinned: false, showsProject: true)
-                        ),
-                        depth: depth + 1
+                        id: "empty:\(folder.id)",
+                        kind: .hint(.emptyFolder),
+                        depth: depth + 1,
+                        group: folderGroup
                     )
-                )
-            }
-            if rows.count == firstChild && !isSearching {
-                rows.append(
-                    VyronSidebarEntry(id: "empty:\(folder.id)", kind: .hint(.emptyFolder), depth: depth + 1)
                 )
             }
         }
 
-        var pinnedRows: [VyronSidebarEntry] = []
-        for item in organization.pinnedItems {
-            let locationMatch = organization.folderID(for: item).map { matches(folderBreadcrumb($0)) } ?? false
-            switch item {
-            case .project(let path):
-                let before = rows.count
-                appendProject(path, depth: 0, pinned: true, inheritedMatch: locationMatch)
-                pinnedRows += rows.suffix(rows.count - before)
-                rows.removeLast(rows.count - before)
-            case .conversation(let id):
-                if let conversation = model.sidebarConversation(id),
-                    !isSearching || locationMatch || conversationMatches(conversation) {
-                    pinnedRows.append(
-                        VyronSidebarEntry(
-                            id: "chat:\(id)",
-                            kind: .chat(
-                                VyronSidebarChat(conversation: conversation, isPinned: true, showsProject: true)
-                            ),
-                            depth: 0
-                        )
-                    )
+        func appendGroup(_ group: VyronSidebarGroup, depth: Int, inheritedMatch: Bool) {
+            for row in model.sidebarRows(in: group) {
+                switch row {
+                case .folder(let reference):
+                    if let folder = foldersByID[reference.id] {
+                        appendFolder(folder, in: group, depth: depth, inheritedMatch: inheritedMatch)
+                    }
+                case .item(let item):
+                    let locationMatch = group == .pinned && organization.folderID(for: item)
+                        .map { matches(folderBreadcrumb($0)) } == true
+                    let matchesParent = inheritedMatch || locationMatch
+                    switch item {
+                    case .project(let path):
+                        appendProject(path, in: group, depth: depth, inheritedMatch: matchesParent)
+                    case .conversation(let id):
+                        if let chat = chatsByID[id], !isSearching || matchesParent || conversationMatches(chat) {
+                            appendChat(chat, in: group, depth: depth)
+                        }
+                    }
                 }
             }
         }
-        if !pinnedRows.isEmpty {
-            rows.append(VyronSidebarEntry(id: "section:pinned", kind: .section(.pinned), depth: 0))
-            rows += pinnedRows
-        }
 
-        let folderStart = rows.count
-        for folder in organization.folderChildren(of: nil) {
-            appendFolder(folder, depth: 0)
-        }
-        if rows.count > folderStart {
-            rows.insert(
-                VyronSidebarEntry(id: "section:folders", kind: .section(.folders), depth: 0),
-                at: folderStart
-            )
-        }
-
-        let projectStart = rows.count
-        for path in model.sidebarProjects(in: nil) {
-            appendProject(path, depth: 0, pinned: false)
-        }
-        if rows.count > projectStart {
-            rows.insert(
-                VyronSidebarEntry(id: "section:projects", kind: .section(.projects), depth: 0),
-                at: projectStart
-            )
-        } else if !isSearching && organization.allProjects.isEmpty {
-            rows.append(VyronSidebarEntry(id: "hint:projects", kind: .hint(.emptyProjects), depth: 0))
-        }
-
-        let chats = model.sidebarChats(in: nil).filter { !isSearching || conversationMatches($0) }
-        if !chats.isEmpty {
-            rows.append(VyronSidebarEntry(id: "section:chats", kind: .section(.chats), depth: 0))
-            rows += chats.map {
-                VyronSidebarEntry(
-                    id: "chat:\($0.id)",
-                    kind: .chat(VyronSidebarChat(conversation: $0, isPinned: false, showsProject: true)),
-                    depth: 0
+        for section in VyronSidebarSection.allCases {
+            let start = rows.count
+            appendGroup(section.group, depth: 0, inheritedMatch: false)
+            if rows.count > start {
+                rows.insert(
+                    VyronSidebarEntry(
+                        id: "section:\(section.rawValue)",
+                        kind: .section(section),
+                        depth: 0,
+                        group: section.group
+                    ),
+                    at: start
+                )
+            } else if section == .projects && !isSearching && organization.allProjects.isEmpty {
+                rows.append(
+                    VyronSidebarEntry(
+                        id: "hint:projects",
+                        kind: .hint(.emptyProjects),
+                        depth: 0,
+                        group: .rootProjects
+                    )
                 )
             }
         }
@@ -166,21 +161,6 @@ extension ProjectSidebar {
         matches(conversation.title)
             || conversation.sidebarProjectPath.map { matches($0) || matches(projectName($0)) } == true
             || conversation.workspacePath.map { matches($0) } == true
-    }
-
-    func folderHasMatch(_ folder: SidebarFolder, visited: Set<UUID> = []) -> Bool {
-        guard !visited.contains(folder.id) else { return false }
-        if matches(folder.name) || matches(folderBreadcrumb(folder.id)) { return true }
-        if model.sidebarProjects(in: folder.id).contains(where: { path in
-            matches(path) || matches(projectName(path))
-                || model.sidebarProjectChats(path).contains(where: conversationMatches)
-        }) {
-            return true
-        }
-        if model.sidebarChats(in: folder.id).contains(where: conversationMatches) { return true }
-        return model.sidebarState.sidebarOrganization.folderChildren(of: folder.id).contains {
-            folderHasMatch($0, visited: visited.union([folder.id]))
-        }
     }
 
     func projectName(_ path: String) -> String {

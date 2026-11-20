@@ -9,12 +9,10 @@ enum CommandPolicy {
         "osascript", "open", "security", "defaults", "sh", "bash", "zsh", "fish", "env", "eval", "kill", "killall",
         "pkill"
     ]
-    private static let gitReads: Set<String> = [
-        "status", "diff", "show", "log", "rev-parse", "ls-files", "ls-tree", "check-ignore", "describe"
-    ]
 
     static func arguments(_ command: String) throws -> [String] {
         guard !command.isEmpty, command.utf8.count <= 8_000 else { throw DevelopmentError("Use a command under 8 KB.") }
+        guard !command.utf8.contains(0) else { throw DevelopmentError(VyronProjectApprovalText.commandNotPermitted) }
         var arguments: [String] = [], token = "", quote: Character?, escaped = false, started = false
         for character in command {
             if escaped { token.append(character); escaped = false; started = true; continue }
@@ -25,7 +23,7 @@ enum CommandPolicy {
                 continue
             }
             if character == "'" || character == "\"" { quote = character; started = true; continue }
-            if character == "\n" || character == "\r" || character == "\0" || ";|&<>`".contains(character) {
+            if character == "\n" || character == "\r" || ";|&<>`".contains(character) {
                 throw DevelopmentError(
                     "Shell operators, redirects, pipelines and background commands are unsupported. Run one executable with arguments."
                 )
@@ -51,10 +49,8 @@ enum CommandPolicy {
         guard !denied.contains(name), !name.hasPrefix("git-remote-") else {
             throw DevelopmentError("Network, destructive and system-control commands are unavailable in project mode.")
         }
-        if name == "git", argv.count < 2 || !gitReads.contains(argv[1]) {
-            throw DevelopmentError(
-                "Project mode supports read-only Git inspection. Commits, resets, pushes and other Git mutations are unavailable."
-            )
+        if name == "git" {
+            try VyronGitCommandPolicy.validate(Array(argv.dropFirst()))
         }
         if ["npm", "pnpm", "yarn", "pip", "pip3", "uv", "brew", "gem", "cargo"].contains(name),
             argv.dropFirst().contains(where: {
@@ -91,7 +87,7 @@ enum CommandPolicy {
         if name == "swift", ["build", "test", "--version"].contains(action) { return nil }
         if name == "xcodebuild", !argv.contains("archive"), !argv.contains("-exportArchive") { return nil }
         if ["python", "python3"].contains(name), argv.count >= 3, argv[1] == "-m", argv[2] == "unittest" { return nil }
-        if name == "git", gitReads.contains(action) { return nil }
+        if name.lowercased() == "git", VyronGitCommandPolicy.isInspection(Array(argv.dropFirst())) { return nil }
         return VyronProjectApprovalText.commandMayChangeProjectFiles
     }
 
@@ -120,8 +116,10 @@ enum CommandPolicy {
         return canonical
     }
 
-    static func isTrustedDevelopmentTool(_ path: String) -> Bool {
-        [
+    static func isTrustedDevelopmentTool(_ path: String, requested program: String) -> Bool {
+        let name = URL(fileURLWithPath: path).lastPathComponent
+        guard name == URL(fileURLWithPath: program).lastPathComponent else { return false }
+        return [
             "/usr/bin/swift", "/usr/bin/xcodebuild", "/usr/bin/git", "/usr/bin/python3", "/usr/bin/python",
             "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift",
             "/Applications/Xcode.app/Contents/Developer/usr/bin/python3"
@@ -195,25 +193,34 @@ enum GuardedCommand {
             "-D", "CODEX=" + actualHome + "/.codex", "-D", "KEYCHAINS=" + actualHome + "/Library/Keychains", "-p",
             profile, executable
         ]
-        if URL(fileURLWithPath: executable).lastPathComponent == "git" {
+        let tool = URL(fileURLWithPath: executable).lastPathComponent.lowercased()
+        if tool == "git" {
             argv += [
                 "-c", "credential.helper=", "-c", "protocol.allow=never", "-c", "core.fsmonitor=false", "-c",
-                "core.hooksPath=/dev/null", "-c", "core.pager=cat"
+                "core.hooksPath=/dev/null", "-c", "core.pager=cat", "-c", "maintenance.auto=false", "-c", "gc.auto=0"
             ]
         }
         var effectiveArguments = arguments
-        if URL(fileURLWithPath: executable).lastPathComponent == "swift",
+        if tool == "git", ["diff", "log", "show"].contains(arguments.first ?? "") {
+            effectiveArguments.insert(contentsOf: ["--no-ext-diff", "--no-textconv"], at: 1)
+        }
+        if tool == "git", arguments.starts(with: ["reflog", "show"]) {
+            effectiveArguments.insert(contentsOf: ["--no-ext-diff", "--no-textconv"], at: 2)
+        }
+        if tool == "swift",
             ["build", "test"].contains(arguments.first ?? ""), !arguments.contains("--disable-sandbox") {
             // SwiftPM cannot install a nested Seatbelt profile. The enclosing
             // process still retains Vyron's network and filesystem restrictions.
             effectiveArguments.insert("--disable-sandbox", at: 1)
         }
-        if URL(fileURLWithPath: executable).lastPathComponent == "swift",
+        if tool == "swift",
             ["build", "test"].contains(arguments.first ?? ""), !arguments.contains("--build-system") {
             // The native engine runs locally without the Swift Build service IPC.
             effectiveArguments.insert(contentsOf: ["--build-system", "native"], at: 1)
         }
         argv += effectiveArguments
+        let useExistingMessage = tool == "git" && arguments.count == 2 && arguments[1] == "--continue"
+            && ["am", "cherry-pick", "merge", "rebase", "revert"].contains(arguments[0])
         let environment = [
             "PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin", "HOME=" + home.path,
             "TMPDIR=" + temp.path + "/", "TMP=" + temp.path, "TEMP=" + temp.path,
@@ -222,7 +229,9 @@ enum GuardedCommand {
             "PIP_NO_INDEX=1", "PIP_DISABLE_PIP_VERSION_CHECK=1", "NPM_CONFIG_OFFLINE=true", "COREPACK_ENABLE_NETWORK=0",
             "CARGO_NET_OFFLINE=true", "UV_OFFLINE=1",
             "GIT_TERMINAL_PROMPT=0", "GIT_CONFIG_NOSYSTEM=1", "GIT_CONFIG_GLOBAL=/dev/null",
-            "GIT_ASKPASS=/usr/bin/false", "GIT_SSH_COMMAND=/usr/bin/false"
+            "GIT_ASKPASS=/usr/bin/false", "GIT_SSH_COMMAND=/usr/bin/false", "GIT_OPTIONAL_LOCKS=0",
+            "GIT_EDITOR=" + (useExistingMessage ? "/usr/bin/true" : "/usr/bin/false"),
+            "GIT_SEQUENCE_EDITOR=/usr/bin/false"
         ]
         var descriptors: [Int32] = [0, 0]
         guard pipe(&descriptors) == 0 else { throw DevelopmentError("Could not create command output storage.") }

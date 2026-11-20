@@ -187,37 +187,34 @@ extension AppModel {
         composer.queuedMessageDrainTask = Task { @MainActor [weak self] in
             // Let the completed response settle before starting the next queued turn.
             await Task.yield()
-            guard let self, !Task.isCancelled, !self.foregroundRun.isGenerating,
+            guard let self, !Task.isCancelled else { return }
+            self.composer.queuedMessageDrainTask = nil
+            guard !self.foregroundRun.isGenerating,
                 self.selectedConversationID == conversationID, !self.composer.isEditingQueuedMessage,
                 let message = self.queuedMessages.first, self.canSteerQueuedMessage(message)
             else { return }
-            self.composer.queuedMessageDrainTask = nil
             self.sendQueuedMessage(message, conversationID: conversationID)
         }
     }
 
     private func sendQueuedMessage(_ message: VyronQueuedMessage, conversationID: UUID) {
         guard !foregroundRun.isGenerating, canSteerQueuedMessage(message), selectedConversationID == conversationID,
-            !composerAttachments.hasDrafts, !composerAttachments.isImporting,
-            let ci = conversations.firstIndex(where: { $0.id == conversationID }),
-            let position = conversations[ci].queuedMessages?.firstIndex(where: { $0.id == message.id })
+            !composerAttachments.hasDrafts, !composerAttachments.isImporting
         else { return }
-        let previousDraft = composer.draft
-        conversations[ci].queuedMessages?.remove(at: position)
         if isRedundantCompaction(message.content) {
+            guard let ci = conversations.firstIndex(where: { $0.id == conversationID }),
+                let position = conversations[ci].queuedMessages?.firstIndex(where: { $0.id == message.id })
+            else { return }
+            conversations[ci].queuedMessages?.remove(at: position)
             guard saveHistory() else {
                 conversations[ci].queuedMessages?.insert(message, at: position)
+                if errorMessage == nil { errorMessage = VyronStatusText.historyUnavailable }
                 return
             }
             finishQueuedMessageRun(automaticallyContinue: true)
             return
         }
-        composer.draft = message.content
-        send()
-        composer.draft = previousDraft
-        if !foregroundRun.isGenerating {
-            conversations[ci].queuedMessages?.insert(message, at: position)
-        }
-        saveHistory()
+        if !voice.isSendingTurn { voice.end() }
+        sendConversation(queuedMessage: message)
     }
 }

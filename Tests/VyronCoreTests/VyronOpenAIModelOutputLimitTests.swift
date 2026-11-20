@@ -14,7 +14,8 @@ final class VyronOpenAIModelOutputLimitTests: XCTestCase {
         var profile = VyronOpenAIConnectionPreset.makeProfile()
         let reasoningModels = [
             "gpt-6-astra", "gpt-6-sol", "gpt-6-luna", "gpt-6.1-sol", "gpt-6.1-terra",
-            "gpt-6.1-sol-2026-10-01", "gpt-5.2", "gpt-5.6-sol"
+            "gpt-6.1-sol-2026-10-01", "gpt-6.2-astra", "gpt-6.2-sol", "gpt-6.2-sol-2026-11-18",
+            "gpt-5.2", "gpt-5.6-sol"
         ]
         for model in reasoningModels {
             profile.selectedModel = model

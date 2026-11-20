@@ -150,7 +150,7 @@ final class VyronDevelopmentOptionalGitTests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(context.observe(commandResult("git diff --stat")))
         let guidance = try XCTUnwrap(context.guidance)
         XCTAssertTrue(guidance.contains("Git inspection is optional"))
-        XCTAssertTrue(guidance.contains("required edits, and appropriate local build or test tools"))
+        XCTAssertTrue(guidance.contains("appropriate local build or test tools"))
         XCTAssertTrue(guidance.contains("Do not initialize a repository"))
         XCTAssertNotNil(context.skipReason(for: "git diff --stat"))
         XCTAssertNil(context.skipReason(for: "swift --version"))
@@ -160,6 +160,18 @@ final class VyronDevelopmentOptionalGitTests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(freshRun.isUnavailable)
         XCTAssertNil(freshRun.guidance)
         XCTAssertNil(freshRun.skipReason(for: "git status"))
+    }
+
+    func testSuccessfulInitializationRestoresInspectionAfterMissingRepository() {
+        var context = VyronDevelopmentGitContext()
+        XCTAssertTrue(context.observe(commandResult("git status")))
+        XCTAssertFalse(context.observe(commandResult("git init", exitCode: 1)))
+        XCTAssertTrue(context.isUnavailable)
+        XCTAssertNil(context.skipReason(for: "git init"))
+        XCTAssertNil(context.skipReason(for: "git --version"))
+        XCTAssertFalse(context.observe(commandResult("git init", exitCode: 0, output: "Initialized empty repository")))
+        XCTAssertFalse(context.isUnavailable)
+        XCTAssertNil(context.skipReason(for: "git status"))
     }
 
     func testSuccessOtherGitFailuresTimeoutsAndSpoofedOutputDoNotDisableGit() {
@@ -197,7 +209,7 @@ final class VyronDevelopmentOptionalGitTests: XCTestCase, @unchecked Sendable {
             XCTAssertNotNil(context.skipReason(for: command), command)
         }
         let rejected = [
-            "git init", "git push", "git reset --hard", "git -C Other status", "git -c alias.inspect=status inspect",
+            "git push", "git reset --hard", "git -C Other status", "git -c alias.inspect=status inspect",
             "git --git-dir=Other status", "git --work-tree=Other status", "git status; /usr/bin/true", "git status | cat",
             "git status && /usr/bin/true", "git 'status", "git"
         ]
@@ -206,7 +218,10 @@ final class VyronDevelopmentOptionalGitTests: XCTestCase, @unchecked Sendable {
             XCTAssertNil(context.skipReason(for: command), command)
             XCTAssertThrowsError(try DevelopmentWorkspace.validateCommand(command), command)
         }
-        for command in ["swift --version", "/usr/bin/true", "git diff --no-index before.txt after.txt"] {
+        for command in [
+            "swift --version", "/usr/bin/true", "git diff --no-index before.txt after.txt",
+            "git init", "git add -- README.md", "git commit -m test", "git reset --soft HEAD~1"
+        ] {
             XCTAssertFalse(DevelopmentWorkspace.isGitInspectionCommand(command), command)
             XCTAssertNil(context.skipReason(for: command), command)
             XCTAssertNoThrow(try DevelopmentWorkspace.validateCommand(command), command)
