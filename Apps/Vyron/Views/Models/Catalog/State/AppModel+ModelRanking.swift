@@ -5,7 +5,9 @@ extension AppModel {
         let rankings =
             modelSelection.isBuiltinConnection
             ? AgentModelRouter.rankedCodingModels(
-                from: modelSelection.models,
+                from: modelSelection.models.filter {
+                    !modelFeatures.rejectsLocalNativeTools(for: $0.name, revision: modelSelection.connectionRevision)
+                },
                 selectedModel: modelSelection.selectedModel,
                 effort: composer.effort
             ) : []

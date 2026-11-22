@@ -21,7 +21,7 @@ enum VyronWorkspaceText {
         VyronResourceBundle.string("workspaceApprovalReviewReason", fallback: "Your approval setting requires a review before this project command runs.")
     }
     static var approvalScope: String {
-        VyronResourceBundle.string("workspaceApprovalScope", fallback: "Edits stay inside the selected project. Blocked-command rules and separate plugin and Mac approvals still apply.")
+        VyronResourceBundle.string("workspaceApprovalScope", fallback: "File tools stay inside the project. Full access commands can change other folders and online services. Plugin and Mac approvals remain separate.")
     }
     static var approveForMe: String {
         VyronResourceBundle.string("workspaceApproveForMe", fallback: "Approve for me")

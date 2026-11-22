@@ -182,7 +182,11 @@ extension OllamaClient: VyronDevelopmentInferenceProviding {
                     try Task.checkCancellation()
                     continue
                 }
-                if (message.toolCalls ?? []).isEmpty, hasUnfencedDevelopmentToolMarkup(message.content) {
+                let printedAction = VyronOllamaPrintedToolAction.detects(
+                    message.content, toolNames: Set(tools.map { $0.function.name })
+                )
+                if (message.toolCalls ?? []).isEmpty,
+                    printedAction || hasUnfencedDevelopmentToolMarkup(message.content) {
                     guard attempt == 0 else {
                         throw DevelopmentAgentError.invalidTool(
                             VyronModelDataText.repeatedToolMarkup
@@ -192,11 +196,17 @@ extension OllamaClient: VyronDevelopmentInferenceProviding {
                         developmentUsesFunctionXMLGrammar(selected.name)
                         ? " For Qwen3-Coder, the complete <function=...> block MUST be nested inside BOTH <tool_call> and </tool_call>; omitting the opening wrapper turns the function into ordinary text."
                         : " Use this selected model's own runtime tool-call format; do not copy another model family's XML grammar."
+                    let printedForm = printedAction
+                        ? "an action announcement with a fenced JSON tool request"
+                        : "a bare function block"
+                    let exampleGuidance = printedAction
+                        ? "Label illustrative examples clearly and do not announce them as execution."
+                        : "If you are explaining an illustrative example rather than requesting a tool, put that example inside a fenced code block."
                     requestMessages.append(
                         DevelopmentMessage(
                             role: "user",
                             content: """
-                    The previous response printed a bare function block in assistant text, but the API returned no native tool_calls. No actual tool call was executed. Continue the SAME original task and obey the exact function-call grammar in the runtime's Tools section, including every required outer tool-call delimiter.\(familyGrammar) Do not emit a bare inner function block. Only API tool_calls are executable; no printed text will be parsed into actions. All original scope, Plan-mode restrictions and command review requirements remain unchanged. If you are explaining an illustrative example rather than requesting a tool, put that example inside a fenced code block. Do not claim the printed request ran.
+                    The previous response printed \(printedForm) in assistant text, but the API returned no native tool_calls. No actual tool call was executed. Continue the SAME original task and obey the exact function-call grammar in the runtime's Tools section, including every required outer tool-call delimiter.\(familyGrammar) Do not print a tool request as a substitute for a native call. Only API tool_calls are executable; no printed text will be parsed into actions. All original scope, Plan-mode restrictions and command review requirements remain unchanged. \(exampleGuidance) Do not claim the printed request ran.
                     """
                         )
                     )

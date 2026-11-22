@@ -15,7 +15,7 @@ extension VyronWorkspaceText {
         VyronResourceBundle.string("workspaceFullAccess", fallback: "Full access")
     }
     static var fullAccessDescription: String {
-        VyronResourceBundle.string("workspaceFullAccessDescription", fallback: "Run all permitted project commands without asking.")
+        VyronResourceBundle.string("workspaceFullAccessDescription", fallback: "Run commands with your Mac’s file and network access, without asking.")
     }
     static var hideSidebar: String {
         VyronResourceBundle.string("workspaceHideSidebar", fallback: "Hide sidebar")

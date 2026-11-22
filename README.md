@@ -112,8 +112,9 @@ for discovery, downloads, model parameters, and provider-specific behavior.
   conversation and any project, image, or tool context supplied for the request.
   Public web lookup and configured MCP servers have their own network requests.
 - **Project execution.** Work file tools enforce project boundaries and path
-  checks. Guarded development commands run with restricted writes and network
-  access denied. Work can inspect Git history, stage files, and create local
+  checks. **Approve for me** and **Ask for approval** run commands with restricted writes
+  and network access denied. Explicit **Full access** uses the Mac user’s file,
+  network and existing CLI access for requested builds and releases. Work can inspect Git history, stage files, and create local
   commits using the selected command approval mode. Other actions, including
   supported file moves and external tool calls, follow their own review rules.
   [Local Git in Work](docs/user-guide.md#local-git)

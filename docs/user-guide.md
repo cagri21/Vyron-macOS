@@ -262,11 +262,14 @@ remain unavailable.
 The shield menu controls approval for interactive project commands. **Ask for
 approval** reviews every permitted command. **Approve for me** runs recognized
 build, test, and inspection commands automatically and asks about other allowed
-commands. **Full access** runs all permitted project commands without asking.
+commands. **Full access** runs commands with your Mac user’s normal filesystem, network,
+and existing CLI configuration, without asking. This supports requested packaging,
+uploads, and website deployments, including destinations outside the project.
 The default is **Approve for me**. Each response keeps the choice captured when
-it starts; the menu is disabled during active work. Scoped file edits, blocked
-commands, plugin reviews, Mac permissions, and scheduled-task approvals retain
-their existing rules.
+it starts; the menu is disabled during active work. File tools remain scoped to
+the project. Restricted access settings retain blocked command rules. Plugin reviews, Mac permissions, and scheduled-task approvals
+retain their existing rules. Full access applies only to the response started
+with that setting; it never makes Plan writable.
 
 ### Workspace controls
 
@@ -394,6 +397,14 @@ reports an error so you can retry or select a model manually.
 Image turns currently require an installed local model with advertised vision
 support; saved connected profiles do not retain per-model vision evidence.
 
+For local models outside the built-in coding catalog, Auto Local checks actual
+native tool transport before starting Work or project Plan. This check requests
+only a data response; it does not run a project command or application action.
+If an advertised tool capability fails that check, Auto Local assesses another
+eligible candidate, up to three candidates per response. The rejected model
+remains available for Chat and explicit selection. A new model weight digest
+requires a new transport proof; previous metadata checks are not reused as proof.
+
 Auto Local applies to main Chat, Work, and Plan turns. Side chats and scheduled
 tasks retain their existing captured model selection. Native computer-control
 tasks retain the built-in local control flow.
@@ -419,9 +430,10 @@ source edits from Work’s file tools.
 The **Terminal** pane shows actual command output and exit status. Drag its top
 divider up or down to expand or shrink the logs while keeping space for the
 conversation. Closing and reopening the pane retains its height for the current
-window. Project commands run offline with dependencies already available
-locally. The guard blocks privileged commands, shell pipelines, and background
-commands.
+window. Restricted project commands run offline with dependencies already available
+locally. Full access can use installed release tools, normal network access, and
+existing CLI authentication for the requested task. Commands use one executable
+with arguments; shell pipelines and background operators are not parsed.
 
 Stop cancels the current model request and command process group. Completed
 edits remain available for review; stopping does not roll them back. Recent
@@ -435,11 +447,12 @@ cherry-picks, reverts, patch operations, bisect, notes, and worktrees. Use the
 shield menu to choose how commands are reviewed. **Ask for approval** reviews
 each permitted command. **Approve for me** runs recognized inspections such as
 `git status` and `git diff` automatically and reviews Git writes. **Full access**
-runs permitted commands without prompting. The guard blocks Git network
-operations and destructive commands such as `git clean` and `git reset --hard`
-in every mode.
+uses normal Git configuration and network access without prompting. Git network
+operations and destructive commands remain blocked in restricted access settings.
+Only perform repository changes and remote publication requested by the user.
 
-The guard isolates Git from global and system configuration and disables hooks.
+Restricted execution isolates Git from global and system configuration and disables hooks.
+Full access preserves the user’s Git configuration and hooks.
 Set the repository's commit identity with `git config --local` and your chosen
 values for `user.name` and `user.email`. Supply commit and annotated tag
 messages with `-m` and use `--no-edit` when an intended merge can use Git's
@@ -1240,15 +1253,26 @@ secret paths, require a current read before edits, and preserve private backups.
 Exact edits preserve content outside the replacement. Truncated reads cannot
 silently replace a whole file.
 
-Commands run inside a macOS restriction that denies network access and limits
-writes to the project and private run storage. SwiftPM uses its native engine
+In **Approve for me** and **Ask for approval**, commands run inside a macOS
+restriction that denies network access and limits writes to the project and
+private run storage. SwiftPM uses its native engine
 inside that outer restriction; its unsupported nested sandbox is disabled for
 that command only. No global macOS protection is changed. The runner is intended
 for trusted development projects, rather than hostile-code isolation. Detached
 processes are unsupported. Reviewed scripts can change project files, so inspect
 Git status or source changes when appropriate.
 
-The existing Python Vyron skill and command runner remain separate and unchanged.
+**Full access** instead launches the installed executable with normal macOS user
+permissions and the app’s inherited environment. Configured release CLIs can use
+their existing authentication without exposing credentials to the model. This
+setting permits command writes outside the project and network operations for
+the user’s requested task. File tools keep their existing path and stale-edit
+checks. Both execution paths retain bounded output, command timeouts, and process
+group cancellation. Detached services remain outside reliable cleanup.
+
+The separate Python Vyron skill runner uses host execution by default; `--offline`
+selects its explicit restricted mode. Skill instructions do not change Chat or
+Plan into Work or change the app’s captured access setting.
 
 ## Supporting Mac and browser tools
 
@@ -1347,7 +1371,9 @@ releases. Project coding tools do not need this permission. Secure-field and
 Terminal typing are excluded from the Mac UI controller.
 
 The MCP manager supports compatible design servers, including Penpot.
-Autonomous Git pushes and deployment remain outside this development milestone.
+Requested Git pushes and deployments can use configured local CLIs from Work
+with **Full access**. Verify the destination and the published result. Native Mac
+controls and MCP connections retain their separate permissions.
 
 ## Screenshots and image analysis
 

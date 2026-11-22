@@ -1547,7 +1547,7 @@
 "workspaceAgentAccessDescription" = "Ajan · Bu projeyi okur ve düzenler · Yerel kontrolleri çalıştırır";
 "workspaceApprovalQuestion" = "Vyron işlemleri nasıl onaylansın?";
 "workspaceApprovalReviewReason" = "Onay ayarınız, bu proje komutu çalıştırılmadan önce inceleme gerektiriyor.";
-"workspaceApprovalScope" = "Düzenlemeler seçili projede kalır. Engellenen komut kuralları ile eklenti ve Mac işlemlerinin ayrı onayları geçerlidir.";
+"workspaceApprovalScope" = "Dosya araçları projede kalır. Tam erişim komutları diğer klasörleri ve çevrimiçi hizmetleri değiştirebilir. Eklenti ve Mac onayları ayrıdır.";
 "workspaceApproveForMe" = "Benim için onayla";
 "workspaceApproveForMeDescription" = "Güvenilir komutları otomatik çalıştır; izin verilen diğer komutlar için sor.";
 "workspaceAskForApproval" = "Onay iste";
@@ -1580,7 +1580,7 @@
 "workspaceFastSpeedUnavailable" = "Hızlı mod, desteklenen OpenAI modellerinde kullanılabilir.";
 "workspaceFiles" = "Dosyalar";
 "workspaceFullAccess" = "Tam erişim";
-"workspaceFullAccessDescription" = "İzin verilen tüm proje komutlarını sormadan çalıştır.";
+"workspaceFullAccessDescription" = "Komutları Mac’inizin dosya ve ağ erişimiyle, sormadan çalıştır.";
 "workspaceHideSidebar" = "Kenar çubuğunu gizle";
 "workspaceHighEffort" = "Yüksek";
 "workspaceHighEffortDescription" = "Karmaşık hata ayıklama, çok dosyalı değişiklikler ve üretim ortamı riskleri.";

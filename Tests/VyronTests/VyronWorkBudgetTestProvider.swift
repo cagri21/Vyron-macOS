@@ -1,8 +1,18 @@
 import Foundation
+import VyronModelDomain
 @testable import VyronCore
 
-actor VyronWorkBudgetTestProvider: ModelProvider {
+actor VyronWorkBudgetTestProvider: ModelProvider, VyronDevelopmentMessageBudgetProviding {
     private(set) var messages: [DevelopmentMessage] = []
+    nonisolated let budget: VyronDevelopmentMessageBudget
+
+    init(budget: VyronDevelopmentMessageBudget = .standard) {
+        self.budget = budget
+    }
+
+    nonisolated func developmentMessageBudget(for model: String) -> VyronDevelopmentMessageBudget {
+        budget
+    }
 
     func models() async throws -> [LocalModel] { [selected] }
 

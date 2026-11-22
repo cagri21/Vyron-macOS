@@ -24,74 +24,64 @@ extension AppModel {
             let assessor = AgentModelRouter.selectModel(from: configuration.models, effort: .quick) else {
             throw ModelProviderError.invalidSettings(VyronWorkspaceText.autoLocalUnavailable)
         }
-        let candidates = VyronAutoLocalRouter.eligibleCandidates(
+        var candidates = VyronAutoLocalRouter.eligibleCandidates(
             autoLocalCandidates(configuration, requiresTools: context.requiresTools), context: context
         )
         guard !candidates.isEmpty else {
             throw ModelProviderError.invalidSettings(VyronWorkspaceText.autoLocalNoSuitableModel)
         }
-        recordActivity(
-            VyronWorkspaceText.autoLocalAssessing,
-            detail: assessor.name,
-            conversationID: response.conversationID,
-            messageID: response.messageID
-        )
-        let request = VyronAutoLocalRequest(
-            assessor: assessor, candidates: candidates, context: context, effort: effort
-        )
-        let decision = try await services.assess(configuration.provider, request)
-        try checkAutoLocalRun(configuration, response: response)
-        guard let candidate = candidates.first(where: { $0.id == decision.candidateID }) else {
-            throw ModelProviderError.invalidResponse(VyronWorkspaceText.autoLocalInvalidAssessment)
-        }
-        let selectedEffort = decision.effectiveEffort(for: effort)
-        let provider: any ModelProvider
-        let location: String
-        let connectionID: UUID?
-        if candidate.location == .local {
-            let saved = modelSelection.builtinModelSettings
-            let settings = VyronAutoLocalThinkingSettings.applying(
-                to: saved, support: candidate.thinkingSupport, effort: selectedEffort
+        for _ in 0..<min(candidates.count, VyronAutoLocalExecutionPolicy.maximumVerifiedCandidates) {
+            recordActivity(
+                VyronWorkspaceText.autoLocalAssessing,
+                detail: assessor.name,
+                conversationID: response.conversationID,
+                messageID: response.messageID
             )
-            if settings == saved {
-                provider = configuration.provider
-            } else {
-                provider = try modelSelection.providers.builtin(settings)
-            }
-            location = VyronWorkspaceText.thisMac
-            connectionID = nil
-        } else {
-            guard let profile = configuration.profiles.first(where: { $0.id.uuidString == candidate.id }),
-                modelSelection.connectionProfiles.contains(profile) else {
-                throw ModelProviderError.invalidSettings(VyronStatusText.connectionUnavailable)
-            }
-            // Read only the chosen connection's credential, after local assessment has finished.
-            var executionProfile = profile
-            if profile.kind == .ollama || VyronDeepSeekRoute.matches(profile) {
-                executionProfile.settings = VyronAutoLocalThinkingSettings.applying(
-                    to: profile.settings, support: candidate.thinkingSupport, effort: selectedEffort
-                )
-            }
-            provider = try await services.makeProvider(executionProfile)
+            let request = VyronAutoLocalRequest(
+                assessor: assessor, candidates: candidates, context: context, effort: effort
+            )
+            let decision = try await services.assess(configuration.provider, request)
             try checkAutoLocalRun(configuration, response: response)
-            guard modelSelection.connectionProfiles.contains(profile) else { throw CancellationError() }
-            location = Self.autoLocalLocation(for: profile)
-            connectionID = profile.id
+            guard let candidate = candidates.first(where: { $0.id == decision.candidateID }) else {
+                throw ModelProviderError.invalidResponse(VyronWorkspaceText.autoLocalInvalidAssessment)
+            }
+            let selectedEffort = decision.effectiveEffort(for: effort)
+            let resolution = try await autoLocalExecution(
+                configuration, candidate: candidate, effort: selectedEffort, response: response
+            )
+            if context.requiresTools, let check = resolution.inference.provider as? any VyronNativeToolChecking {
+                recordActivity(
+                    VyronAppText.modelFeaturesChecking,
+                    detail: candidate.model.name,
+                    conversationID: response.conversationID,
+                    messageID: response.messageID
+                )
+                do {
+                    try await check.requireNativeToolSupport(for: candidate.model)
+                    try checkAutoLocalRun(configuration, response: response)
+                    recordAutoLocalToolResult(.verified, candidate: candidate, configuration: configuration)
+                } catch ModelProviderError.unsupportedTools {
+                    try checkAutoLocalRun(configuration, response: response)
+                    recordAutoLocalToolResult(.unsupported, candidate: candidate, configuration: configuration)
+                    candidates.removeAll { $0.id == candidate.id }
+                    if candidates.isEmpty { throw ModelProviderError.unsupportedTools }
+                    continue
+                }
+            }
+            try checkAutoLocalRun(configuration, response: response)
+            let connectionID = candidate.location == .local ? nil : UUID(uuidString: candidate.id)
+            foregroundRun.setBalanceConnection(connectionID, for: response)
+            recordActivity(
+                VyronWorkspaceText.autoLocal,
+                detail: VyronWorkspaceText.autoLocalSelected(
+                    candidate.model.name, VyronEffortPresentation.title(selectedEffort), resolution.location
+                ),
+                conversationID: response.conversationID,
+                messageID: response.messageID
+            )
+            return resolution
         }
-        try checkAutoLocalRun(configuration, response: response)
-        foregroundRun.setBalanceConnection(connectionID, for: response)
-        recordActivity(
-            VyronWorkspaceText.autoLocal,
-            detail: VyronWorkspaceText.autoLocalSelected(
-                candidate.model.name, VyronEffortPresentation.title(selectedEffort), location
-            ),
-            conversationID: response.conversationID,
-            messageID: response.messageID
-        )
-        return VyronAutoLocalResolution(
-            inference: .init(provider: provider, model: candidate.model.name, effort: selectedEffort),
-            location: location
-        )
+        throw ModelProviderError.unsupportedTools
     }
 
     func autoLocalCandidates(
@@ -99,8 +89,9 @@ extension AppModel {
         requiresTools: Bool
     ) -> [VyronAutoLocalCandidate] {
         let local = configuration.models.filter { model in
-            ModelCatalog.isAutomaticCandidate(model)
-                && (!requiresTools || ModelCatalog.codingIncompatibilityReason(for: model) == nil)
+            let rejected = modelFeatures.rejectsLocalNativeTools(for: model.name, revision: configuration.revision)
+            return ModelCatalog.isAutomaticCandidate(model)
+                && (!requiresTools || (!rejected && ModelCatalog.codingIncompatibilityReason(for: model) == nil))
         }.map { model in
             VyronAutoLocalCandidate(
                 id: model.name, model: model, location: .local,
@@ -127,7 +118,7 @@ extension AppModel {
         return local + connected
     }
 
-    private func checkAutoLocalRun(
+    func checkAutoLocalRun(
         _ configuration: VyronAutoLocalConfiguration,
         response: VyronResponseIdentity
     ) throws {
@@ -136,7 +127,7 @@ extension AppModel {
             modelSelection.connectionRevision == configuration.revision else { throw CancellationError() }
     }
 
-    private static func autoLocalLocation(for profile: ModelConnectionProfile) -> String {
+    static func autoLocalLocation(for profile: ModelConnectionProfile) -> String {
         let host = URL(string: profile.endpoint)?.host?.lowercased() ?? ""
         return ["localhost", "127.0.0.1", "::1", "[::1]"].contains(host)
             ? VyronStatusText.localServer : VyronStatusText.remoteServer

@@ -354,7 +354,7 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
             if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
             let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
             let messages = try VyronDevelopmentAgentWireFixture.messages(body)
-            let reply = messages.last?.role == "tool"
+            let reply = VyronDevelopmentAgentWireFixture.hasRecordedResult(for: "write_file", in: messages)
                 ? DevelopmentMessage(role: "assistant", content: "Created an activity fixture.")
                 : DevelopmentMessage(role: "assistant", toolCalls: [
                     DevelopmentToolCall(name: "list_files", arguments: [:]),
@@ -424,7 +424,7 @@ final class DevelopmentAgentTests: XCTestCase, @unchecked Sendable {
             if let metadata = try VyronDevelopmentAgentWireFixture.metadata(request) { return metadata }
             let body = try VyronDevelopmentAgentWireFixture.chatFields(request)
             let messages = try VyronDevelopmentAgentWireFixture.messages(body)
-            let reply = messages.last?.role == "tool"
+            let reply = VyronDevelopmentAgentWireFixture.hasRecordedResult(for: "run_command", in: messages)
                 ? DevelopmentMessage(role: "assistant", content: "The first command was declined and the second failed.")
                 : DevelopmentMessage(role: "assistant", toolCalls: [
                     DevelopmentToolCall(name: "run_command", arguments: ["command": .string("echo never-run")]),

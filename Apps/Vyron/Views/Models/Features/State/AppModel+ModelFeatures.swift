@@ -112,6 +112,9 @@ extension AppModel {
         )
         guard report[.agent].isEnabled else { return .unsupported }
         do {
+            if let native = provider as? any VyronNativeToolChecking {
+                try await native.requireNativeToolSupport(for: .init(name: selection.modelName, size: 0))
+            }
             _ = try await provider.developmentModel(
                 model: selection.modelName,
                 automaticModelSelection: false,

@@ -89,10 +89,10 @@ struct DevelopmentToolDefinition: Encodable {
         ),
         make(
             "run_command",
-            "Run a local project command under native command policy. May require user review. No networking or shell wrappers.",
+            "Run one executable with arguments under the captured Work access setting. Restricted access is offline; Full access can use the user's filesystem, network and configured CLIs. May require review.",
             [
                 "command": ("string", "Command and arguments, for example swift test."),
-                "timeout_seconds": ("integer", "Timeout from 5 to 180 seconds, default 120.")
+                "timeout_seconds": ("integer", "Timeout from 5 to 180 seconds, default 120. Full access supports up to 900 seconds for builds and release packaging.")
             ],
             ["command"]
         ),

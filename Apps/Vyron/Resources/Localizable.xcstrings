@@ -9942,19 +9942,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Run all permitted project commands without asking."
+            "value": "Run commands with your Mac’s file and network access, without asking."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "İzin verilen tüm proje komutlarını sormadan çalıştır."
+            "value": "Komutları Mac’inizin dosya ve ağ erişimiyle, sormadan çalıştır."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Виконувати всі дозволені команди проєкту без запитів."
+            "value": "Виконувати команди з доступом до файлів і мережі вашого Mac без запитів."
           }
         }
       }
@@ -9965,19 +9965,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Edits stay inside the selected project. Blocked-command rules and separate plugin and Mac approvals still apply."
+            "value": "File tools stay inside the project. Full access commands can change other folders and online services. Plugin and Mac approvals remain separate."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Düzenlemeler seçili projede kalır. Engellenen komut kuralları ile eklenti ve Mac işlemlerinin ayrı onayları geçerlidir."
+            "value": "Dosya araçları projede kalır. Tam erişim komutları diğer klasörleri ve çevrimiçi hizmetleri değiştirebilir. Eklenti ve Mac onayları ayrıdır."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Зміни залишаються в межах вибраного проєкту. Правила блокування команд та окремі схвалення дій плагінів і Mac зберігаються."
+            "value": "Файлові інструменти діють у проєкті. Команди повного доступу можуть змінювати інші папки й онлайн-сервіси. Плагіни та Mac мають окремі схвалення."
           }
         }
       }

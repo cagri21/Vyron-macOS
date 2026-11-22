@@ -12,12 +12,15 @@ public enum VyronOfficeProtectedProcess {
         return try await withTaskCancellationHandler {
             try await Task.detached {
                 try GuardedCommand.run(
-                    command: "Local Office processing",
-                    executable: request.executable.path,
-                    arguments: request.arguments,
-                    root: request.directory,
-                    storage: request.directory.appendingPathComponent("process", isDirectory: true),
-                    timeout: VyronOfficeLimits.timeout,
+                    VyronCommandInvocation(
+                        request: VyronCommandRequest(command: "Local Office processing", timeout: VyronOfficeLimits.timeout),
+                        executable: request.executable.path,
+                        arguments: request.arguments,
+                        directories: VyronCommandDirectories(
+                            project: request.directory,
+                            storage: request.directory.appendingPathComponent("process", isDirectory: true)
+                        )
+                    ),
                     state: state,
                     onOutput: { _ in }
                 )

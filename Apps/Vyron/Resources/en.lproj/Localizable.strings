@@ -1547,7 +1547,7 @@
 "workspaceAgentAccessDescription" = "Agent · Reads and edits this project · Runs local checks";
 "workspaceApprovalQuestion" = "How should Vyron actions be approved?";
 "workspaceApprovalReviewReason" = "Your approval setting requires a review before this project command runs.";
-"workspaceApprovalScope" = "Edits stay inside the selected project. Blocked-command rules and separate plugin and Mac approvals still apply.";
+"workspaceApprovalScope" = "File tools stay inside the project. Full access commands can change other folders and online services. Plugin and Mac approvals remain separate.";
 "workspaceApproveForMe" = "Approve for me";
 "workspaceApproveForMeDescription" = "Run trusted commands automatically; ask for other allowed commands.";
 "workspaceAskForApproval" = "Ask for approval";
@@ -1580,7 +1580,7 @@
 "workspaceFastSpeedUnavailable" = "Fast is available with supported OpenAI models.";
 "workspaceFiles" = "Files";
 "workspaceFullAccess" = "Full access";
-"workspaceFullAccessDescription" = "Run all permitted project commands without asking.";
+"workspaceFullAccessDescription" = "Run commands with your Mac’s file and network access, without asking.";
 "workspaceHideSidebar" = "Hide sidebar";
 "workspaceHighEffort" = "High";
 "workspaceHighEffortDescription" = "Complex debugging, multi-file changes, and production risks.";

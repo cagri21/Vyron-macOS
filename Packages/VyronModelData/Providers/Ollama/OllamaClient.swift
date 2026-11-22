@@ -10,6 +10,7 @@ public actor OllamaClient: ModelProvider, VyronEffortChatProviding, VyronModelTh
     let apiKey: String?
     let imageTextPreparation: VyronImageTextPreparation
     private var thinkingSupportByModel: [String: VyronModelThinkingSupport] = [:]
+    var verifiedNativeToolModels: Set<String> = []
     private static let maximumCachedThinkingModels = 64
 
     public init(baseURL: URL = URL(string: "http://127.0.0.1:11434")!) {

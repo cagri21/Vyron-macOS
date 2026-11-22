@@ -124,12 +124,12 @@ final class VyronProjectApprovalModeTests: XCTestCase {
         try requireSuccessfulProtectedCommand(XCTUnwrap(result.commands.first))
     }
 
-    func testFullAccessDoesNotBypassForbiddenCommandValidation() async throws {
+    func testRestrictedModesKeepForbiddenCommandValidation() async throws {
         let events = VyronSteeringTestLog<DevelopmentEvent>()
         let agent = try DevelopmentAgent(
             client: provider(["curl https://example.invalid", "rm Unsafe.txt", "git push"]), workspace: workspace()
         )
-        try await agent.configureCommandApproval(.fullAccess)
+        try await agent.configureCommandApproval(.approveForMe)
 
         let result = try await agent.run(
             goal: "Inspect proposed commands without changing the execution boundary.", model: "fixture-coder",
@@ -142,6 +142,28 @@ final class VyronProjectApprovalModeTests: XCTestCase {
         XCTAssertTrue(result.commands.isEmpty)
         XCTAssertFalse(events.values.contains { $0.kind == .commandStarted })
         XCTAssertEqual(events.values.filter { $0.kind == .toolFinished && $0.failure != nil }.count, 3)
+    }
+
+    func testFullAccessAgentRunsARequestedPackagingScriptOutsideTheProject() async throws {
+        let project = try workspace()
+        let destination = FileManager.default.temporaryDirectory.appendingPathComponent("VyronRelease-\(UUID().uuidString)")
+        addTeardownBlock { try FileManager.default.removeItem(at: destination) }
+        let script = "#!/bin/zsh\nprint -r -- 'new release fixture' > '\(destination.path)'\n"
+        try script.write(to: project.rootURL.appendingPathComponent("package.sh"), atomically: true, encoding: .utf8)
+        let agent = DevelopmentAgent(client: provider(["zsh package.sh"]), workspace: project)
+        try await agent.configureCommandApproval(.fullAccess)
+
+        let result = try await agent.run(
+            goal: "Prepare the release fixture at the requested destination.", model: "fixture-coder",
+            onEvent: { _ in }, approveCommand: { _ in
+                XCTFail("Full access was selected before starting this response.")
+                return false
+            }
+        )
+
+        XCTAssertEqual(result.commands.count, 1)
+        XCTAssertTrue(try XCTUnwrap(result.commands.first).succeeded)
+        XCTAssertEqual(try String(contentsOf: destination, encoding: .utf8), "new release fixture\n")
     }
 
     func testFullAccessPreservesReadOnlyPlanMode() async throws {

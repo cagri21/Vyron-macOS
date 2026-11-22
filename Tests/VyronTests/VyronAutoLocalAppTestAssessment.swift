@@ -8,8 +8,10 @@ actor VyronAutoLocalAppTestAssessment {
     private var held = false
     private var waiter: CheckedContinuation<Void, Never>?
     private var failure: ModelProviderError?
+    private var selections: [String] = []
 
     func select(_ id: String) { destination = id }
+    func selectSequence(_ ids: [String]) { selections = ids }
     func hold() { held = true }
     func fail(_ error: ModelProviderError?) { failure = error }
     func recordBuild(_ id: UUID) { providerBuilds.append(id) }
@@ -25,6 +27,7 @@ actor VyronAutoLocalAppTestAssessment {
         // Deliberately return after cancellation to exercise the app's stale response guard.
         if held { await withCheckedContinuation { waiter = $0 } }
         if let failure { throw failure }
-        return VyronAutoLocalDecision(candidateID: destination, complexity: .complex, thinkingLevel: .high)
+        let selected = selections.isEmpty ? destination : selections.removeFirst()
+        return VyronAutoLocalDecision(candidateID: selected, complexity: .complex, thinkingLevel: .high)
     }
 }

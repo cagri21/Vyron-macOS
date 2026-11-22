@@ -626,12 +626,18 @@ public actor DevelopmentWorkspace {
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: journalURL.path)
     }
 
-    public nonisolated static func approvalRequirement(command: String) -> String? {
-        CommandPolicy.approvalRequirement(command: command)
+    public nonisolated static func approvalRequirement(
+        command: String,
+        access: VyronCommandAccess = .restricted
+    ) -> String? {
+        CommandPolicy.approvalRequirement(command: command, access: access)
     }
 
-    public nonisolated static func validateCommand(_ command: String) throws {
-        try CommandPolicy.validate(CommandPolicy.arguments(command))
+    public nonisolated static func validateCommand(
+        _ command: String,
+        access: VyronCommandAccess = .restricted
+    ) throws {
+        try CommandPolicy.validate(CommandPolicy.arguments(command), access: access)
     }
 
     public func runCommand(
@@ -640,22 +646,35 @@ public actor DevelopmentWorkspace {
         approved: Bool = false,
         onOutput: @escaping @Sendable (String) -> Void
     ) async throws -> CommandResult {
+        try await runCommand(VyronCommandRequest(command: command, timeout: timeout, approved: approved), onOutput: onOutput)
+    }
+
+    public func runCommand(
+        _ request: VyronCommandRequest,
+        onOutput: @escaping @Sendable (String) -> Void
+    ) async throws -> CommandResult {
         try Task.checkCancellation()
         guard !commandRunning else { throw DevelopmentError("Wait for the current project command to finish.") }
-        let argv = try CommandPolicy.arguments(command)
-        try CommandPolicy.validate(argv)
-        if let reason = Self.approvalRequirement(command: command), !approved { throw DevelopmentError(reason) }
-        guard timeout.isFinite, timeout > 0, timeout <= 900 else {
+        let argv = try CommandPolicy.arguments(request.command)
+        try CommandPolicy.validate(argv, access: request.access)
+        if request.access == .fullAccess, !request.approved {
+            throw DevelopmentError(VyronProjectApprovalText.defaultReviewReason)
+        }
+        if let reason = Self.approvalRequirement(command: request.command, access: request.access), !request.approved {
+            throw DevelopmentError(reason)
+        }
+        guard request.timeout.isFinite, request.timeout > 0, request.timeout <= 900 else {
             throw DevelopmentError("Command timeout must be between 0 and 900 seconds.")
         }
-        guard FileManager.default.isExecutableFile(atPath: "/usr/bin/sandbox-exec") else {
+        if request.access == .restricted, !FileManager.default.isExecutableFile(atPath: "/usr/bin/sandbox-exec") {
             throw DevelopmentError("macOS execution protection is unavailable. No command was run.")
         }
-        let executable = try CommandPolicy.executable(argv[0], arguments: Array(argv.dropFirst()), root: rootURL)
-        if !approved, !CommandPolicy.isTrustedDevelopmentTool(executable, requested: argv[0]) {
+        let executable = try CommandPolicy.executable(
+            argv[0], arguments: Array(argv.dropFirst()), root: rootURL, access: request.access
+        )
+        if !request.approved, !CommandPolicy.isTrustedDevelopmentTool(executable, requested: argv[0]) {
             throw DevelopmentError("Review commands that use a custom executable before running them.")
         }
-        let root = rootURL
         let run = storage.appendingPathComponent("commands/" + UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(
             at: run,
@@ -664,16 +683,17 @@ public actor DevelopmentWorkspace {
         )
         commandRunning = true
         defer { commandRunning = false }
+        let invocation = VyronCommandInvocation(
+            request: request,
+            executable: executable,
+            arguments: Array(argv.dropFirst()),
+            directories: VyronCommandDirectories(project: rootURL, storage: run)
+        )
         let state = CommandState()
         return try await withTaskCancellationHandler {
             try await Task.detached {
                 try GuardedCommand.run(
-                    command: command,
-                    executable: executable,
-                    arguments: Array(argv.dropFirst()),
-                    root: root,
-                    storage: run,
-                    timeout: timeout,
+                    invocation,
                     state: state,
                     onOutput: onOutput
                 )

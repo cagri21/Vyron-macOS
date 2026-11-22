@@ -1,7 +1,7 @@
 import VyronCore
 import VyronModelDomain
 
-actor VyronAutoLocalAppTestProvider: ModelProvider, VyronEffortChatProviding {
+actor VyronAutoLocalAppTestProvider: ModelProvider, VyronEffortChatProviding, VyronNativeToolChecking {
     private(set) var chatModels: [String] = []
     private(set) var efforts: [AgentEffort] = []
     private(set) var developmentModels: [String] = []
@@ -9,6 +9,25 @@ actor VyronAutoLocalAppTestProvider: ModelProvider, VyronEffortChatProviding {
     private(set) var developmentModes: [DevelopmentMode] = []
     private(set) var externalToolNames: [[String]] = []
     private(set) var automaticSelections: [Bool] = []
+    private(set) var nativeChecks: [String] = []
+    private var unsupportedNativeModels: Set<String> = []
+    private var nativeCheckIsHeld = false
+    private var nativeCheckWaiter: CheckedContinuation<Void, Never>?
+
+    func rejectNativeTools(for models: Set<String>) { unsupportedNativeModels = models }
+    func holdNativeChecks() { nativeCheckIsHeld = true }
+
+    func releaseNativeChecks() {
+        nativeCheckIsHeld = false
+        nativeCheckWaiter?.resume()
+        nativeCheckWaiter = nil
+    }
+
+    func requireNativeToolSupport(for model: LocalModel) async throws {
+        nativeChecks.append(model.name)
+        if nativeCheckIsHeld { await withCheckedContinuation { nativeCheckWaiter = $0 } }
+        if unsupportedNativeModels.contains(model.name) { throw ModelProviderError.unsupportedTools }
+    }
 
     func models() async throws -> [LocalModel] { [] }
 

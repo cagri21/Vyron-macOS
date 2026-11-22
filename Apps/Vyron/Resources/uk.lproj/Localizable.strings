@@ -1547,7 +1547,7 @@
 "workspaceAgentAccessDescription" = "Агент · Читає й редагує цей проєкт · Виконує локальні перевірки";
 "workspaceApprovalQuestion" = "Як схвалювати дії Vyron?";
 "workspaceApprovalReviewReason" = "Ваше налаштування схвалення вимагає перевірки перед виконанням цієї команди проєкту.";
-"workspaceApprovalScope" = "Зміни залишаються в межах вибраного проєкту. Правила блокування команд та окремі схвалення дій плагінів і Mac зберігаються.";
+"workspaceApprovalScope" = "Файлові інструменти діють у проєкті. Команди повного доступу можуть змінювати інші папки й онлайн-сервіси. Плагіни та Mac мають окремі схвалення.";
 "workspaceApproveForMe" = "Схвалювати за мене";
 "workspaceApproveForMeDescription" = "Виконувати довірені команди автоматично; запитувати про інші дозволені команди.";
 "workspaceAskForApproval" = "Запитувати схвалення";
@@ -1580,7 +1580,7 @@
 "workspaceFastSpeedUnavailable" = "Швидкий режим доступний для підтримуваних моделей OpenAI.";
 "workspaceFiles" = "Файли";
 "workspaceFullAccess" = "Повний доступ";
-"workspaceFullAccessDescription" = "Виконувати всі дозволені команди проєкту без запитів.";
+"workspaceFullAccessDescription" = "Виконувати команди з доступом до файлів і мережі вашого Mac без запитів.";
 "workspaceHideSidebar" = "Приховати бічну панель";
 "workspaceHighEffort" = "Високий";
 "workspaceHighEffortDescription" = "Складне налагодження, зміни в кількох файлах і ризики у виробничому середовищі.";

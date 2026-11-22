@@ -36,6 +36,15 @@ enum VyronDevelopmentAgentWireFixture {
         )
     }
 
+    static func hasRecordedResult(for tool: String, in messages: [DevelopmentMessage]) -> Bool {
+        messages.contains {
+            $0.toolName == tool || (
+                VyronDevelopmentExchangeCompactor.isCompactedReference($0)
+                    && $0.content.contains(tool + " recorded result:")
+            )
+        }
+    }
+
     private static func body(_ request: URLRequest) throws -> Data {
         if let data = request.httpBody { return data }
         let stream = try XCTUnwrap(request.httpBodyStream)

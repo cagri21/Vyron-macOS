@@ -45,6 +45,13 @@ final class VyronModelFeatureState: ObservableObject {
         toolChecks.append(VyronModelToolCheck(selection: selection, result: result))
     }
 
+    func rejectsLocalNativeTools(for model: String, revision: UUID) -> Bool {
+        toolChecks.contains {
+            $0.selection.connection == nil && $0.selection.modelName == model
+                && $0.selection.revision == revision && $0.result == .unsupported
+        }
+    }
+
     func record(_ support: VyronModelThinkingSupport, for selection: VyronModelFeatureSelection) {
         thinkingChecks.removeAll { $0.selection == selection }
         thinkingChecks.append(VyronModelThinkingCheck(selection: selection, support: support))

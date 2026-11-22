@@ -1,7 +1,7 @@
 import VyronLocalization
 
-/// Chooses when a permitted project command needs review.
-/// Command validation and the local execution restrictions apply in every mode.
+/// Chooses command review and execution capabilities for an interactive Work response.
+/// Plan remains read-only in every access setting.
 public enum VyronProjectApprovalMode: String, Codable, CaseIterable, Sendable {
     case askForApproval
     case approveForMe
