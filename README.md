@@ -5,8 +5,11 @@ or connect to a provider of your choice. In a project, Vyron can inspect source
 code, propose a plan, make scoped changes, and run local checks. The workspace
 shows the edits, command output, and approval requests alongside the conversation.
 
-**v0.1.0** is Vyron’s first public source release. It is an early preview for
-macOS 14 and later, built with Swift 6, SwiftUI, and Swift Package Manager.
+**v0.1.2** is the latest preview for macOS 14 and later, built with Swift 6,
+SwiftUI, and Swift Package Manager.
+
+[Download v0.1.2 for Apple silicon](https://github.com/cagri21/Vyron-macOS/releases/download/v0.1.2/Vyron-0.1.2-macOS-arm64.dmg).
+The DMG is ad-hoc signed and is not notarized by Apple.
 
 [Build from source](#build-from-source) · [First run](#first-run) ·
 [Model connections](#model-connections) · [User guide](docs/user-guide.md) ·
